@@ -34,8 +34,8 @@ func init() {
 	cfg, err = config.ParseYamlFile("config.yaml")
 	errCheck(err)
 
-	log.Ln("[init] Checking bot access token...")
-	bot.AccessToken, err = cfg.String("telegram.token")
+	log.Ln("[init] Checking bot access token in configuration file...")
+	_, err = cfg.String("telegram.token")
 	errCheck(err)
 
 	if *flagWebhook {

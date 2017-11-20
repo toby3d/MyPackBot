@@ -13,7 +13,7 @@ func main() {
 	log.Ln("[main] Let'g Get It Started...")
 	var err error
 	log.Ln("[main] Initializing new bot via checking access_token...")
-	bot, err = telegram.NewBot(bot.AccessToken)
+	bot, err = telegram.NewBot(cfg.UString("telegram.token"))
 	errCheck(err)
 
 	log.Ln("[main] Initializing channel for updates...")

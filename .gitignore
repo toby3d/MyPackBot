@@ -17,5 +17,7 @@
 # Golang project vendor packages which should be ignored
 vendor/
 
-# Production configuration must not be in public repository
+# Production files must not be in public repository
 config.yaml
+cert.key
+cert.pem

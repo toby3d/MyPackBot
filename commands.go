@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
@@ -9,29 +10,79 @@ import (
 
 func commands(msg *telegram.Message) error {
 	log.Ln("[commands] Check command message")
+	var err error
 	switch strings.ToLower(msg.Command()) {
 	case "start":
 		log.Ln("[commands] Received a /start command")
 		// TODO: Reply by greetings message and add user to DB
-		return nil
+		_, _, err = dbChangeUserState(msg.From.ID, stateNone)
+		errCheck(err)
+
+		reply := telegram.NewMessage(
+			msg.Chat.ID, // chat
+			fmt.Sprint("Hello, ", msg.From.FirstName, "!"), // text
+		)
+		_, err = bot.SendMessage(reply)
 	case "help":
 		log.Ln("[commands] Received a /help command")
-		// TODO: Reply by help instructions
-		return nil
+		_, _, err = dbChangeUserState(msg.From.ID, stateNone)
+		errCheck(err)
+
+		reply := telegram.NewMessage(
+			msg.Chat.ID, // chat
+			fmt.Sprintln( // text
+				"/start",
+				"/help",
+				"/addSticker",
+				"/delSticker",
+				"/cancel",
+			),
+		)
+		_, err = bot.SendMessage(reply)
 	case "addsticker":
 		log.Ln("[commands] Received a /addsticker command")
-		// TODO: Change current state to "addSticker" for adding sticker
-		return nil
+		_, _, err = dbChangeUserState(msg.From.ID, stateAdding)
+		errCheck(err)
+
+		reply := telegram.NewMessage(
+			msg.Chat.ID, // chat
+			"Send me any sticker for adding them in your pack.", // text
+		)
+		_, err = bot.SendMessage(reply)
 	case "delsticker":
 		log.Ln("[commands] Received a /delsticker command")
-		// TODO: Change current state to "delSticker" for deleting sticker
-		return nil
+		_, _, err = dbChangeUserState(msg.From.ID, stateDeleting)
+		errCheck(err)
+
+		reply := telegram.NewMessage(
+			msg.Chat.ID, // chat
+			"Send me sticker from your pack for remove them.", // text
+		)
+		_, err = bot.SendMessage(reply)
 	case "cancel":
 		log.Ln("[commands] Received a /cancel command")
-		// TODO: Change current state to default for aborting /addSticker or
-		// /delSticker commands
-		return nil
+		prev, _, err := dbChangeUserState(msg.From.ID, stateNone)
+		errCheck(err)
+
+		text := "What are you doing?!"
+		switch prev {
+		case stateAdding:
+			prev = "You canceled adding a sticker to the set."
+		case stateDeleting:
+			prev = "You canceled the removal of the sticker from the set."
+		case stateNone:
+			prev = "Nothing to cancel."
+		}
+
+		reply := telegram.NewMessage(
+			msg.Chat.ID, // chat
+			text,        // text
+		)
+		_, err = bot.SendMessage(reply)
 	default:
-		return nil // Do nothing because unsupported command
+		log.Ln("[commands] Received unsupported command")
+		// Do nothing because unsupported command
 	}
+
+	return err
 }

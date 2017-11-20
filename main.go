@@ -31,8 +31,12 @@ func main() {
 			log.Ln("[main] Get ChosenInlineResult update")
 			// TODO: Save info in Yandex.AppMetrika
 		case update.InlineQuery != nil:
+			if len(update.InlineQuery.Query) > 255 {
+				continue
+			}
+
 			log.Ln("[main] Get InlineQuery update")
-			// TODO: Search stickers via inline
+			inlineQuery(update.InlineQuery)
 		case update.Message != nil:
 			log.Ln("[main] Get Message update")
 			// TODO: Added support of commands, grab and save sticker in DB

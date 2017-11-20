@@ -7,16 +7,23 @@ import (
 
 // message function check Message update on commands, sended stickers or other
 // user stuff
-func messages(msg *telegram.Message) error {
-	if msg.From.ID == bot.Self.ID ||
-		msg.ForwardFrom.ID == bot.Self.ID {
+func messages(msg *telegram.Message) {
+	if msg.From.ID == bot.Self.ID {
 		log.Ln("[messages] Received a message from myself, ignore this update")
-		return nil
+		return
+	}
+
+	if msg.ForwardFrom != nil {
+		if msg.ForwardFrom.ID == bot.Self.ID {
+			log.Ln("[messages] Received a forward from myself, ignore this update")
+			return
+		}
 	}
 
 	if msg.IsCommand() {
 		log.Ln("[message] Received a command message")
-		return commands(msg)
+		commands(msg)
+		return
 	}
 
 	if msg.Sticker != nil {
@@ -30,15 +37,33 @@ func messages(msg *telegram.Message) error {
 				"Use /addSticker or /delSticker command first.", // text
 			)
 			_, err = bot.SendMessage(reply)
-		case stateAdding:
-			err = dbAddSticker(msg.From.ID, msg.Sticker.FileID, msg.Sticker.Emoji)
 			errCheck(err)
+		case stateAdding:
+			exists, err := dbAddSticker(msg.From.ID, msg.Sticker.FileID, msg.Sticker.Emoji)
+			errCheck(err)
+
+			if exists {
+				reply := telegram.NewMessage(
+					msg.Chat.ID,      // chat
+					"Already added!", // text
+				)
+				_, err = bot.SendMessage(reply)
+				errCheck(err)
+
+				_, err = dbChangeUserState(msg.From.ID, stateNone)
+				errCheck(err)
+				return
+			}
 
 			reply := telegram.NewMessage(
 				msg.Chat.ID, // chat
 				"Added!",    // text
 			)
 			_, err = bot.SendMessage(reply)
+			errCheck(err)
+
+			_, err = dbChangeUserState(msg.From.ID, stateNone)
+			errCheck(err)
 		case stateDeleting:
 			err = dbDeleteSticker(msg.From.ID, msg.Sticker.FileID)
 			errCheck(err)
@@ -48,14 +73,16 @@ func messages(msg *telegram.Message) error {
 				"Removed!",  // text
 			)
 			_, err = bot.SendMessage(reply)
-		default:
-			_, _, err := dbChangeUserState(msg.From.ID, stateNone)
 			errCheck(err)
-			return messages(msg)
-		}
-		// TODO: Upload new or delete exist sticker in pack
-		return err
-	}
 
-	return nil // Do nothing because unsupported actions
+			_, err = dbChangeUserState(msg.From.ID, stateNone)
+			errCheck(err)
+		default:
+			_, err := dbChangeUserState(msg.From.ID, stateNone)
+			errCheck(err)
+
+			messages(msg)
+			return
+		}
+	}
 }

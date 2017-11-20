@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
@@ -22,22 +23,29 @@ func dbInit() {
 	db, err = buntdb.Open("bot.db")
 	errCheck(err)
 
+	err = db.CreateIndex(
+		"user_stickers",    // name
+		"user:*:sticker:*", // pattern
+		buntdb.IndexString, // options
+	)
+	errCheck(err)
+
 	select {}
 }
 
-func dbChangeUserState(userID int, state string) (string, bool, error) {
+func dbChangeUserState(userID int, state string) (string, error) {
 	var prevState string
-	var changed bool
 	err := db.Update(func(tx *buntdb.Tx) error {
 		var err error
-		prevState, changed, err = tx.Set(
+		prevState, _, err = tx.Set(
 			fmt.Sprint("user:", userID, ":state"), // key
 			state, // val
 			nil,   // options
 		)
 		return err
 	})
-	return prevState, changed, err
+
+	return prevState, err
 }
 
 func dbGetUserState(userID int) (string, error) {
@@ -49,69 +57,75 @@ func dbGetUserState(userID int) (string, error) {
 		)
 		return err
 	})
+
+	switch err {
+	case buntdb.ErrNotFound:
+		state, err = dbChangeUserState(userID, stateNone)
+	}
+
 	return state, err
 }
 
-func dbAddSticker(userID int, fileID, emoji string) error {
-	if err := db.Update(func(tx *buntdb.Tx) error {
-		_, _, err := tx.Set(
+func dbAddSticker(userID int, fileID, emoji string) (bool, error) {
+	var exists bool
+	err := db.Update(func(tx *buntdb.Tx) error {
+		var err error
+		_, exists, err = tx.Set(
 			fmt.Sprint("user:", userID, ":sticker:", fileID), // key
 			emoji, // value
 			nil,   // options
 		)
-		return err
-	}); err != nil {
-		return err
-	}
 
-	err := dbUpdateUserStickersIndex(userID)
-	return err
+		if err == buntdb.ErrIndexExists {
+			exists = true
+			return nil
+		}
+
+		return err
+	})
+
+	return exists, err
 }
 
 func dbDeleteSticker(userID int, fileID string) error {
-	if err := db.Update(func(tx *buntdb.Tx) error {
+	return db.Update(func(tx *buntdb.Tx) error {
 		_, err := tx.Delete(
 			fmt.Sprint("user:", userID, ":sticker:", fileID), // key
 		)
 		return err
-	}); err != nil {
-		return err
-	}
-
-	err := dbUpdateUserStickersIndex(userID)
-	return err
-}
-
-func dbUpdateUserStickersIndex(userID int) error {
-	return db.CreateIndex(
-		fmt.Sprint("stickers", userID),            // name
-		fmt.Sprint("user:", userID, ":sticker:*"), // pattern
-		buntdb.IndexString,                        // options
-	)
+	})
 }
 
 func dbGetUserStickers(userID int, emoji string) ([]string, error) {
 	var stickers []string
 	err := db.View(func(tx *buntdb.Tx) error {
 		return tx.Ascend(
-			fmt.Sprint("stickers", userID), // index
+			"user_stickers", // index
 			func(key, val string) bool { // iterator
-				fileID := strings.TrimPrefix(
-					key, // source
-					fmt.Sprint("user:", userID, ":sticker:"), // prefix
-				)
+				log.Ln(key, "=", val)
+
+				subKeys := strings.Split(key, ":")
+				if subKeys[1] != strconv.Itoa(userID) {
+					return true
+				}
 
 				if emoji != "" {
+					log.Ln("["+emoji+"]", "?=", "["+val+"]")
 					if val != emoji {
 						return true
 					}
 				}
 
-				stickers = append(stickers, fileID)
+				stickers = append(stickers, subKeys[3])
 				return true
 			},
 		)
 	})
+
+	switch err {
+	case buntdb.ErrNotFound:
+		return nil, nil
+	}
 
 	return stickers, err
 }

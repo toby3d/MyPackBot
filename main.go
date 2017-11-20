@@ -36,8 +36,7 @@ func main() {
 		case update.Message != nil:
 			log.Ln("[main] Get Message update")
 			// TODO: Added support of commands, grab and save sticker in DB
-			err = messages(update.Message)
-			errCheck(err)
+			messages(update.Message)
 		default:
 			log.Ln("[main] Get unsupported update")
 			// Ignore any other updates

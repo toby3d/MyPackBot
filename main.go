@@ -12,6 +12,10 @@ var bot *telegram.Bot
 func main() {
 	log.Ln("[main] Let'g Get It Started...")
 	var err error
+
+	go dbInit()
+	defer db.Close()
+
 	log.Ln("[main] Initializing new bot via checking access_token...")
 	bot, err = telegram.NewBot(cfg.UString("telegram.token"))
 	errCheck(err)

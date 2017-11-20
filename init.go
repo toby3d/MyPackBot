@@ -8,9 +8,6 @@ import (
 )
 
 var (
-	// Simple wariables
-	tgHookSet, tgHookListen, tgHookServe string
-
 	// Variables with types from imports
 	cfg *config.Config
 
@@ -41,15 +38,15 @@ func init() {
 	if *flagWebhook {
 		log.Ln("[init] Enabled webhook mode, check configuration strings...")
 		log.Ln("[init] Checking webhook set string...")
-		tgHookSet, err = cfg.String("telegram.webhook.set")
+		_, err = cfg.String("telegram.webhook.set")
 		errCheck(err)
 
 		log.Ln("[init] Checking webhook listen string...")
-		tgHookListen, err = cfg.String("telegram.webhook.listen")
+		_, err = cfg.String("telegram.webhook.listen")
 		errCheck(err)
 
 		log.Ln("[init] Checking webhook listen string...")
-		tgHookServe, err = cfg.String("telegram.webhook.serve")
+		_, err = cfg.String("telegram.webhook.serve")
 		errCheck(err)
 	}
 }

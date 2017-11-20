@@ -35,6 +35,10 @@ func getUpdatesChannel() (telegram.UpdatesChannel, error) {
 		}), nil
 	}
 
+	tgHookSet := cfg.UString("telegram.webhook.set")
+	tgHookListen := cfg.UString("telegram.webhook.listen")
+	tgHookServe := cfg.UString("telegram.webhook.serve")
+
 	log.Ln(
 		"[getUpdatesChannel] Trying set webhook on address:",
 		fmt.Sprint(tgHookSet, tgHookListen, bot.AccessToken),

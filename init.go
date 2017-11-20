@@ -8,11 +8,18 @@ import (
 )
 
 var (
+	// Simple wariables
 	tgHookSet, tgHookListen, tgHookServe string
 
+	// Variables with types from imports
 	cfg *config.Config
 
-	flagWebhook = flag.Bool("webhook", false, "enable work via webhooks (required valid certificates)")
+	// Setted variables
+	flagWebhook = flag.Bool(
+		"webhook",
+		false,
+		"enable work via webhooks (required valid certificates)",
+	)
 )
 
 // init prepare configuration and other things for successful start of main

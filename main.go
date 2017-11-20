@@ -5,6 +5,7 @@ import (
 	"github.com/toby3d/go-telegram"     // My Telegram bindings
 )
 
+// bot is general structure of the bot
 var bot *telegram.Bot
 
 // main function is a general function for work of this bot

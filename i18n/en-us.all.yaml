@@ -1,0 +1,46 @@
+add_cancel:
+  other: You cancelled the process of adding a new sticker to your pack.
+add_error:
+  other: Error adding a sticker to the pack. Try again later.
+add_exists:
+  other: This sticker is already in your pack.
+add_reply:
+  other: Send an existing sticker from any other pack to add it to yourself.
+add_success:
+  other: The sticker was successfully added to your pack!
+cancel_nothing:
+  other: Nothing to cancel.
+error_cancel_nothing:
+  other: Nothing to cancel.
+error_command_first:
+  other: |-
+    I do not know what to do with this sticker.
+    Please run /add or /remove command first.
+help_message:
+  other: |-
+    /add - add a sticker to your pack
+    /remove - remove a sticker from your pack
+    /cancel - cancel the current operation
+
+    To view and send stickers from your pack, just type @{{.Username}} in any chat.
+inline_empty:
+  other: Your pack is empty
+inline_nothing:
+  other: Not found stickers for {{.Query}}
+remove_already:
+  other: I do not know this sticker. Maybe it was already removed from your pack.
+remove_cancel:
+  other: You cancelled the process of removing a sticker from your pack.
+remove_error:
+  other: Error removing a sticker from the pack. Try again later.
+remove_exists:
+  other: I do not know this sticker. Maybe it was already removed from your pack.
+remove_reply:
+  other: Send an existing sticker from your pack for removing it.
+remove_success:
+  other: The sticker was successfully removed from your pack!
+start_message:
+  other: |-
+    Hello, I'm the @{{.Username}}!
+    I can create your personal pack with stickers from others packs.
+    Without limits-per-pack. Without installing. In any chat. For free.

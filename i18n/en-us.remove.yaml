@@ -1,0 +1,10 @@
+remove_cancel:
+  other: You cancelled the process of removing a sticker from your pack.
+remove_error:
+  other: Error removing a sticker from the pack. Try again later.
+remove_already:
+  other: I do not know this sticker. Maybe it was already removed from your pack.
+remove_reply:
+  other: Send an existing sticker from your pack for removing it.
+remove_success:
+  other: The sticker was successfully removed from your pack!

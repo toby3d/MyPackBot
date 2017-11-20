@@ -1,0 +1,10 @@
+add_cancel:
+  other: You cancelled the process of adding a new sticker to your pack.
+add_error:
+  other: Error adding a sticker to the pack. Try again later.
+add_exists:
+  other: This sticker is already in your pack.
+add_reply:
+  other: Send an existing sticker from any other pack to add it to yourself.
+add_success:
+  other: The sticker was successfully added to your pack!

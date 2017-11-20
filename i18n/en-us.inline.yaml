@@ -1,0 +1,4 @@
+inline_empty:
+  other: Your pack is empty
+inline_nothing:
+  other: Not found stickers for {{.Query}}

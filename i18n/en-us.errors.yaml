@@ -1,0 +1,6 @@
+error_cancel_nothing:
+  other: Nothing to cancel.
+error_command_first:
+  other: |
+    I do not know what to do with this sticker.
+    Please run /add or /remove command first.

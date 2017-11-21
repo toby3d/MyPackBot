@@ -3,9 +3,12 @@ package main
 import (
 	"flag"
 
-	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	"github.com/olebedev/config"        // Easy configuration file parsing
+	log "github.com/kirillDanshin/dlog"  // Insert logs only in debug builds
+	"github.com/nicksnyder/go-i18n/i18n" // Internationalization and localization
+	"github.com/olebedev/config"         // Easy configuration file parsing
 )
+
+const langDefault = "en-us"
 
 var (
 	// Variables with types from imports
@@ -25,6 +28,9 @@ func init() {
 	log.Ln("[init] Initializing...")
 	log.Ln("[init] Parse flags...")
 	flag.Parse()
+
+	log.Ln("[init] Load english localization...")
+	i18n.MustLoadTranslationFile("./i18n/en-us.all.yaml")
 
 	var err error
 	log.Ln("[init] Loading configuration file...")

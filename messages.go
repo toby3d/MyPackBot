@@ -1,8 +1,9 @@
 package main
 
 import (
-	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	"github.com/toby3d/go-telegram"     // My Telegram bindings
+	log "github.com/kirillDanshin/dlog"  // Insert logs only in debug builds
+	"github.com/nicksnyder/go-i18n/i18n" // Internationalization and localization
+	"github.com/toby3d/go-telegram"      // My Telegram bindings
 )
 
 // message function check Message update on commands, sended stickers or other
@@ -26,6 +27,12 @@ func messages(msg *telegram.Message) {
 		return
 	}
 
+	T, err := i18n.Tfunc(msg.From.LanguageCode)
+	if err != nil {
+		T, err = i18n.Tfunc(langDefault)
+		errCheck(err)
+	}
+
 	if msg.Sticker != nil {
 		state, err := dbGetUserState(msg.From.ID)
 		errCheck(err)
@@ -33,8 +40,8 @@ func messages(msg *telegram.Message) {
 		switch state {
 		case stateNone:
 			reply := telegram.NewMessage(
-				msg.Chat.ID, // chat
-				"Use /addSticker or /delSticker command first.", // text
+				msg.Chat.ID,              // chat
+				T("error_command_first"), // text
 			)
 			_, err = bot.SendMessage(reply)
 			errCheck(err)
@@ -44,8 +51,8 @@ func messages(msg *telegram.Message) {
 
 			if exists {
 				reply := telegram.NewMessage(
-					msg.Chat.ID,      // chat
-					"Already added!", // text
+					msg.Chat.ID,     // chat
+					T("add_exists"), // text
 				)
 				_, err = bot.SendMessage(reply)
 				errCheck(err)
@@ -56,8 +63,8 @@ func messages(msg *telegram.Message) {
 			}
 
 			reply := telegram.NewMessage(
-				msg.Chat.ID, // chat
-				"Added!",    // text
+				msg.Chat.ID,      // chat
+				T("add_success"), // text
 			)
 			_, err = bot.SendMessage(reply)
 			errCheck(err)
@@ -68,9 +75,14 @@ func messages(msg *telegram.Message) {
 			err = dbDeleteSticker(msg.From.ID, msg.Sticker.FileID)
 			errCheck(err)
 
+			text := T("remove_success")
+			if notFound {
+				text = T("remove_already")
+			}
+
 			reply := telegram.NewMessage(
 				msg.Chat.ID, // chat
-				"Removed!",  // text
+				text,        // text
 			)
 			_, err = bot.SendMessage(reply)
 			errCheck(err)

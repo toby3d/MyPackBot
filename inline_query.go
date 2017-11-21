@@ -3,17 +3,21 @@ package main
 import (
 	"fmt"
 
-	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	"github.com/toby3d/go-telegram"     // My Telegram bindings
+	log "github.com/kirillDanshin/dlog"  // Insert logs only in debug builds
+	"github.com/nicksnyder/go-i18n/i18n" // Internationalization and localization
+	"github.com/toby3d/go-telegram"      // My Telegram bindings
 )
 
 func inlineQuery(inline *telegram.InlineQuery) {
+	T, err := i18n.Tfunc(inline.From.LanguageCode)
+	if err != nil {
+		T, err = i18n.Tfunc(langDefault)
+		errCheck(err)
+	}
 	answer := telegram.AnswerInlineQueryParameters{
 		InlineQueryID:                 inline.ID,
 		CacheTime:                     1,
 		IsPersonal:                    true,
-		SwitchPrivateMessageText:      "No stickers, let's add some one!",
-		SwitchPrivateMessageParameter: "addSticker",
 	}
 
 	stickers, err := dbGetUserStickers(inline.From.ID, inline.Query)
@@ -28,11 +32,18 @@ func inlineQuery(inline *telegram.InlineQuery) {
 					fmt.Sprint("sticker", stickers[i]), // resultID
 					stickers[i],                        // fileID
 				),
+		answer.SwitchPrivateMessageText = T("inline_empty")
+		answer.SwitchPrivateMessageParameter = "add"
+		answer.SwitchPrivateMessageText = T(
+			"inline_nothing",
+			map[string]interface{}{
+				"Query": inline.Query,
+			},
+		)
+		answer.SwitchPrivateMessageParameter = "help"
 			)
 		}
 
-		answer.SwitchPrivateMessageText = "Add one more sticker!"
-		answer.SwitchPrivateMessageParameter = "addSticker"
 		answer.Results = results
 	}
 

@@ -1,15 +1,21 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 
-	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	"github.com/toby3d/go-telegram"     // My Telegram bindings
+	log "github.com/kirillDanshin/dlog"  // Insert logs only in debug builds
+	"github.com/nicksnyder/go-i18n/i18n" // Internationalization and localization
+	"github.com/toby3d/go-telegram"      // My Telegram bindings
 )
 
 func commands(msg *telegram.Message) {
 	log.Ln("[commands] Check command message")
+	T, err := i18n.Tfunc(msg.From.LanguageCode)
+	if err != nil {
+		T, err = i18n.Tfunc(langDefault)
+		errCheck(err)
+	}
+
 	switch strings.ToLower(msg.Command()) {
 	case "start":
 		log.Ln("[commands] Received a /start command")
@@ -19,7 +25,9 @@ func commands(msg *telegram.Message) {
 
 		reply := telegram.NewMessage(
 			msg.Chat.ID, // chat
-			fmt.Sprint("Hello, ", msg.From.FirstName, "!"), // text
+			T("start_message", map[string]interface{}{
+				"Username": bot.Self.Username,
+			}), // text
 		)
 		_, err = bot.SendMessage(reply)
 		errCheck(err)
@@ -30,35 +38,31 @@ func commands(msg *telegram.Message) {
 
 		reply := telegram.NewMessage(
 			msg.Chat.ID, // chat
-			fmt.Sprintln( // text
-				"/start",
-				"/help",
-				"/addSticker",
-				"/delSticker",
-				"/cancel",
-			),
+			T("help_message", map[string]interface{}{
+				"Username": bot.Self.Username,
+			}), // text
 		)
 		_, err = bot.SendMessage(reply)
 		errCheck(err)
-	case "addsticker":
-		log.Ln("[commands] Received a /addsticker command")
+	case "add":
+		log.Ln("[commands] Received a /add command")
 		_, err := dbChangeUserState(msg.From.ID, stateAdding)
 		errCheck(err)
 
 		reply := telegram.NewMessage(
-			msg.Chat.ID, // chat
-			"Send me any sticker for adding them in your pack.", // text
+			msg.Chat.ID,    // chat
+			T("add_reply"), // text
 		)
 		_, err = bot.SendMessage(reply)
 		errCheck(err)
-	case "delsticker":
-		log.Ln("[commands] Received a /delsticker command")
+	case "remove":
+		log.Ln("[commands] Received a /remove command")
 		_, err := dbChangeUserState(msg.From.ID, stateDeleting)
 		errCheck(err)
 
 		reply := telegram.NewMessage(
-			msg.Chat.ID, // chat
-			"Send me sticker from your pack for remove them.", // text
+			msg.Chat.ID,       // chat
+			T("remove_reply"), // text
 		)
 		_, err = bot.SendMessage(reply)
 		errCheck(err)
@@ -67,14 +71,12 @@ func commands(msg *telegram.Message) {
 		prev, err := dbChangeUserState(msg.From.ID, stateNone)
 		errCheck(err)
 
-		text := "What are you doing?!"
+		text := T("error_cancel_nothing")
 		switch prev {
 		case stateAdding:
-			prev = "You canceled adding a sticker to the set."
+			prev = T("add_cancel")
 		case stateDeleting:
-			prev = "You canceled the removal of the sticker from the set."
-		case stateNone:
-			prev = "Nothing to cancel."
+			prev = T("remove_cancel")
 		}
 
 		reply := telegram.NewMessage(

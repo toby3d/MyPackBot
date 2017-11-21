@@ -10,42 +10,50 @@ var bot *telegram.Bot
 
 // main function is a general function for work of this bot
 func main() {
-	log.Ln("[main] Let'g Get It Started...")
+	log.Ln("Let'g Get It Started...")
 	var err error
 
 	go dbInit()
 	defer db.Close()
 
-	log.Ln("[main] Initializing new bot via checking access_token...")
+	log.Ln("Initializing new bot via checking access_token...")
 	bot, err = telegram.NewBot(cfg.UString("telegram.token"))
 	errCheck(err)
 
-	log.Ln("[main] Initializing channel for updates...")
+	log.Ln("Initializing channel for updates...")
 	updates, err := getUpdatesChannel()
 	errCheck(err)
 
-	log.Ln("[main] Let's check updates channel!")
+	log.Ln("Let's check updates channel!")
 	for update := range updates {
 		switch {
 		case update.ChosenInlineResult != nil:
-			log.Ln("[main] Get ChosenInlineResult update")
-			// TODO: Save info in Yandex.AppMetrika
+			log.Ln("Get ChosenInlineResult update")
+			// TODO: Save metrika about chosen results
 		case update.InlineQuery != nil:
-			if len(update.InlineQuery.Query) > 255 {
+			// Just don't check same updates
+			if len(update.InlineQuery.Query) > 4 {
 				continue
 			}
 
-			log.Ln("[main] Get InlineQuery update")
 			inlineQuery(update.InlineQuery)
 		case update.Message != nil:
-			log.Ln("[main] Get Message update")
-			// TODO: Added support of commands, grab and save sticker in DB
+			if update.Message.From.ID == bot.Self.ID {
+				log.Ln("Received a message from myself, ignore this update")
+				return
+			}
+
+			if update.Message.ForwardFrom != nil {
+				if update.Message.ForwardFrom.ID == bot.Self.ID {
+					log.Ln("Received a forward from myself, ignore this update")
+					return
+				}
+			}
+
 			messages(update.Message)
 		default:
-			log.Ln("[main] Get unsupported update")
-			// Ignore any other updates
+			log.Ln("Get unsupported update")
 		}
-
 		continue
 	}
 }

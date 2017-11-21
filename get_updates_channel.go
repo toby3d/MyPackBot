@@ -19,14 +19,14 @@ var allowedUpdates = []string{
 
 // getUpdatesChannel return webhook or long polling channel with bot updates
 func getUpdatesChannel() (telegram.UpdatesChannel, error) {
-	log.Ln("[getUpdatesChannel] Preparing channel for updates...")
+	log.Ln("Preparing channel for updates...")
 
-	log.Ln("[getUpdatesChannel] Deleting webhook if exists")
+	log.Ln("Deleting webhook if exists")
 	_, err := bot.DeleteWebhook()
 	errCheck(err)
 
 	if !*flagWebhook {
-		log.Ln("[getUpdatesChannel] Use LongPolling updates")
+		log.Ln("Use LongPolling updates")
 		return bot.NewLongPollingChannel(&telegram.GetUpdatesParameters{
 			Offset:         0,
 			Limit:          100,
@@ -40,18 +40,18 @@ func getUpdatesChannel() (telegram.UpdatesChannel, error) {
 	tgHookServe := cfg.UString("telegram.webhook.serve")
 
 	log.Ln(
-		"[getUpdatesChannel] Trying set webhook on address:",
+		"Trying set webhook on address:",
 		fmt.Sprint(tgHookSet, tgHookListen, bot.AccessToken),
 	)
 
-	log.Ln("[getUpdatesChannel] Creating new webhook...")
+	log.Ln("Creating new webhook...")
 	webhook := telegram.NewWebhook(
 		fmt.Sprint(tgHookSet, tgHookListen, bot.AccessToken),
 		"cert.pem",
 	)
 	webhook.AllowedUpdates = allowedUpdates
 
-	log.Ln("[getUpdatesChannel] Setting new webhook...")
+	log.Ln("Setting new webhook...")
 	_, err = bot.SetWebhook(webhook)
 	if err != nil {
 		return nil, err
@@ -59,14 +59,14 @@ func getUpdatesChannel() (telegram.UpdatesChannel, error) {
 
 	channel := make(chan telegram.Update, 100)
 	go func() {
-		log.Ln("[getUpdatesChannel] Listen and serve TLS...")
+		log.Ln("Listen and serve TLS...")
 		err := http.ListenAndServeTLS(
 			tgHookServe,
 			"cert.pem",
 			"cert.key",
 			func(ctx *http.RequestCtx) {
 				log.Ln(
-					"[getUpdatesChannel] Catch request on path:",
+					"Catch request on path:",
 					string(ctx.Path()),
 				)
 				if strings.HasPrefix(
@@ -74,7 +74,7 @@ func getUpdatesChannel() (telegram.UpdatesChannel, error) {
 					fmt.Sprint(tgHookListen, bot.AccessToken),
 				) {
 					log.Ln(
-						"[getUpdatesChannel] Catch supported request:",
+						"Catch supported request:",
 						string(ctx.Request.Body()),
 					)
 
@@ -82,7 +82,7 @@ func getUpdatesChannel() (telegram.UpdatesChannel, error) {
 					err := json.Unmarshal(ctx.Request.Body(), &update)
 					errCheck(err)
 
-					log.Ln("[getUpdatesChannel] Unmarshled next:")
+					log.Ln("Unmarshled next:")
 					log.D(update)
 
 					channel <- update

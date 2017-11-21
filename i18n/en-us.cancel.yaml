@@ -1,0 +1,8 @@
+cancel_add:
+  other: You cancelled the process of adding a new sticker to your pack.
+cancel_remove:
+  other: You cancelled the process of removing a sticker from your pack.
+cancel_reset:
+  other: You cancelled the process of reseting your stickers pack.
+cancel_error:
+  other: Nothing to cancel.

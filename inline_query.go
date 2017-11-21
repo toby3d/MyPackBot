@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strconv"
 
 	log "github.com/kirillDanshin/dlog"  // Insert logs only in debug builds
@@ -10,7 +9,7 @@ import (
 )
 
 func inlineQuery(inline *telegram.InlineQuery) {
-	log.Ln("[inlineQuery] Let's preparing answer...")
+	log.Ln("Let's preparing answer...")
 	T, err := i18n.Tfunc(inline.From.LanguageCode)
 	if err != nil {
 		T, err = i18n.Tfunc(langDefault)
@@ -36,17 +35,15 @@ func inlineQuery(inline *telegram.InlineQuery) {
 	switch {
 	case offset <= 0 && len(stickers) == 0 && inline.Query == "":
 		// If query is empty and get 0 stickers
-		answer.SwitchPrivateMessageText = T("inline_empty")
+		answer.SwitchPrivateMessageText = T("button_inline_empty")
 		answer.SwitchPrivateMessageParameter = "add"
 	case offset <= 0 && len(stickers) == 0 && inline.Query != "":
 		// If search stickers by emoji return 0 results
 		answer.SwitchPrivateMessageText = T(
-			"inline_nothing",
-			map[string]interface{}{
-				"Query": inline.Query,
-			},
+			"button_inline_nothing",
+			map[string]interface{}{"Query": inline.Query},
 		)
-		answer.SwitchPrivateMessageParameter = "help"
+		answer.SwitchPrivateMessageParameter = "add"
 	case offset >= 0 && len(stickers) == 50,
 		offset >= 0 && len(stickers) < 50:
 		offset++
@@ -55,12 +52,13 @@ func inlineQuery(inline *telegram.InlineQuery) {
 		var results = make([]interface{}, len(stickers))
 		for i, sticker := range stickers {
 			results[i] = telegram.NewInlineQueryResultCachedSticker(
-				fmt.Sprint("sticker", sticker), // resultID
+				sticker, // resultID
 				sticker, // fileID
-
 			)
 		}
 
+		answer.SwitchPrivateMessageText = T("button_inline_add")
+		answer.SwitchPrivateMessageParameter = "add"
 		answer.Results = results
 	}
 

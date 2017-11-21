@@ -1,5 +1,0 @@
-start_message:
-  other: |
-    Hello, I'm the @{{.Username}}!
-    I can create your personal pack with stickers from others packs.
-    Without limits-per-pack. Without installing. In any chat. For free.

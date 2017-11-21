@@ -9,20 +9,15 @@ import (
 	"github.com/tidwall/buntdb"         // Redis-like database
 )
 
-const (
-	stateNone     = "none"
-	stateAdding   = "add"
-	stateDeleting = "remove"
-)
-
 var db *buntdb.DB
 
 func dbInit() {
-	log.Ln("[dbInit] Open database file...")
+	log.Ln("Open database file...")
 	var err error
 	db, err = buntdb.Open("bot.db")
 	errCheck(err)
 
+	log.Ln("Creating user_stickers index...")
 	err = db.CreateIndex(
 		"user_stickers",    // name
 		"user:*:sticker:*", // pattern
@@ -33,40 +28,40 @@ func dbInit() {
 	select {}
 }
 
-func dbChangeUserState(userID int, state string) (string, error) {
-	var prevState string
-	err := db.Update(func(tx *buntdb.Tx) error {
-		var err error
-		prevState, _, err = tx.Set(
+func dbChangeUserState(userID int, state string) error {
+	log.Ln("Trying to change", userID, "state to", state)
+	return db.Update(func(tx *buntdb.Tx) error {
+		_, _, err := tx.Set(
 			fmt.Sprint("user:", userID, ":state"), // key
 			state, // val
 			nil,   // options
 		)
 		return err
 	})
-
-	return prevState, err
 }
 
 func dbGetUserState(userID int) (string, error) {
+	log.Ln("Trying to get", userID, "state")
 	var state string
 	err := db.View(func(tx *buntdb.Tx) error {
 		var err error
-		state, err = tx.Get(
-			fmt.Sprint("user:", userID, ":state"), // key
-		)
+		state, err = tx.Get(fmt.Sprint("user:", userID, ":state"))
 		return err
 	})
 
 	switch err {
 	case buntdb.ErrNotFound:
-		state, err = dbChangeUserState(userID, stateNone)
+		log.Ln(userID, "not found, create new one")
+		if err := dbChangeUserState(userID, stateNone); err != nil {
+			return state, err
+		}
 	}
 
 	return state, err
 }
 
 func dbAddSticker(userID int, fileID, emoji string) (bool, error) {
+	log.Ln("Trying to add", fileID, "sticker from", userID, "user")
 	var exists bool
 	err := db.Update(func(tx *buntdb.Tx) error {
 		var err error
@@ -88,24 +83,55 @@ func dbAddSticker(userID int, fileID, emoji string) (bool, error) {
 }
 
 func dbDeleteSticker(userID int, fileID string) (bool, error) {
+	log.Ln("Trying to remove", fileID, "sticker from", userID, "user")
 	err := db.Update(func(tx *buntdb.Tx) error {
-		_, err := tx.Delete(
-			fmt.Sprint("user:", userID, ":sticker:", fileID), // key
-		)
+		_, err := tx.Delete(fmt.Sprint("user:", userID, ":sticker:", fileID))
 		return err
 	})
 
 	switch err {
 	case buntdb.ErrNotFound:
+		log.Ln(userID, "not found, create new one")
 		return true, nil
 	}
 
 	return false, err
 }
 
+func dbResetUserStickers(userID int) error {
+	log.Ln("Trying reset all stickers of", userID, "user")
+	return db.Update(func(tx *buntdb.Tx) error {
+		var keys []string
+
+		err := tx.Ascend(
+			"user_stickers", // index
+			func(key, val string) bool { // iterator
+				subKeys := strings.Split(key, ":")
+				if subKeys[1] == strconv.Itoa(userID) {
+					keys = append(keys, key)
+				}
+				return true
+			},
+		)
+		if err != nil {
+			return err
+		}
+
+		for i := range keys {
+			_, err = tx.Delete(keys[i])
+			if err != nil {
+				break
+			}
+		}
+
+		return err
+	})
+}
+
 func dbGetUserStickers(userID, offset int, emoji string) ([]string, error) {
-	var stickers []string
+	log.Ln("Trying to get", offset, "page of", userID, "stickers")
 	count := 0
+	var stickers []string
 	err := db.View(func(tx *buntdb.Tx) error {
 		return tx.Ascend(
 			"user_stickers", // index
@@ -118,22 +144,24 @@ func dbGetUserStickers(userID, offset int, emoji string) ([]string, error) {
 				count++
 
 				if len(stickers) >= 50 {
+					log.Ln("We get 50 results for", offset, "page, abort")
 					return false
 				}
 
 				if emoji != "" {
-					log.Ln("["+emoji+"]", "?=", "["+val+"]")
 					if val != emoji {
+						log.Ln("Ignore", subKeys[3], "sticker by emoji")
 						return true
 					}
 				}
 
 				if offset >= 1 &&
 					count <= ((offset-1)*50) {
+					log.Ln("Ignore sticker from previous", (offset - 1), "page")
 					return true
 				}
 
-				log.Ln("[", count, "]", key, "=", val)
+				log.Ln("Added", subKeys[3], "to results")
 				stickers = append(stickers, subKeys[3])
 				return true
 			},
@@ -142,6 +170,7 @@ func dbGetUserStickers(userID, offset int, emoji string) ([]string, error) {
 
 	switch err {
 	case buntdb.ErrNotFound:
+		log.Ln("Not found stickers")
 		return nil, nil
 	}
 

@@ -8,7 +8,14 @@ import (
 	"github.com/olebedev/config"         // Easy configuration file parsing
 )
 
-const langDefault = "en-us"
+const (
+	langDefault = "en-us"
+
+	stateNone   = "none"
+	stateAdd    = "add"
+	stateRemove = "remove"
+	stateReset  = "reset"
+)
 
 var (
 	// Variables with types from imports
@@ -25,33 +32,33 @@ var (
 // init prepare configuration and other things for successful start of main
 // function.
 func init() {
-	log.Ln("[init] Initializing...")
-	log.Ln("[init] Parse flags...")
+	log.Ln("Initializing...")
+	log.Ln("Parse flags...")
 	flag.Parse()
 
-	log.Ln("[init] Load english localization...")
+	log.Ln("Load english localization...")
 	i18n.MustLoadTranslationFile("./i18n/en-us.all.yaml")
 
 	var err error
-	log.Ln("[init] Loading configuration file...")
+	log.Ln("Loading configuration file...")
 	cfg, err = config.ParseYamlFile("config.yaml")
 	errCheck(err)
 
-	log.Ln("[init] Checking bot access token in configuration file...")
+	log.Ln("Checking bot access token in configuration file...")
 	_, err = cfg.String("telegram.token")
 	errCheck(err)
 
 	if *flagWebhook {
-		log.Ln("[init] Enabled webhook mode, check configuration strings...")
-		log.Ln("[init] Checking webhook set string...")
+		log.Ln("Enabled webhook mode, check configuration strings...")
+		log.Ln("Checking webhook set string...")
 		_, err = cfg.String("telegram.webhook.set")
 		errCheck(err)
 
-		log.Ln("[init] Checking webhook listen string...")
+		log.Ln("Checking webhook listen string...")
 		_, err = cfg.String("telegram.webhook.listen")
 		errCheck(err)
 
-		log.Ln("[init] Checking webhook listen string...")
+		log.Ln("Checking webhook listen string...")
 		_, err = cfg.String("telegram.webhook.serve")
 		errCheck(err)
 	}

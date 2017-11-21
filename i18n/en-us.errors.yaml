@@ -1,6 +1,14 @@
-error_cancel_nothing:
-  other: Nothing to cancel.
-error_command_first:
+error_already_add:
+  other: This sticker is already in your pack.
+error_already_remove:
+  other: Maybe this sticker is already removed from your pack.
+error_already_reset:
+  other: There is nothing to reset, pack is already empty.
+error_reset_phrase:
+  other: Invalid phrase of resetting. This action has been canceled.
+error_empty_remove:
+  other: There is nothing to remove, pack is empty.
+error_unknown:
   other: |
     I do not know what to do with this sticker.
     Please run /add or /remove command first.

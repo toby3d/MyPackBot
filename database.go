@@ -12,7 +12,7 @@ import (
 const (
 	stateNone     = "none"
 	stateAdding   = "add"
-	stateDeleting = "del"
+	stateDeleting = "remove"
 )
 
 var db *buntdb.DB
@@ -87,26 +87,38 @@ func dbAddSticker(userID int, fileID, emoji string) (bool, error) {
 	return exists, err
 }
 
-func dbDeleteSticker(userID int, fileID string) error {
-	return db.Update(func(tx *buntdb.Tx) error {
+func dbDeleteSticker(userID int, fileID string) (bool, error) {
+	err := db.Update(func(tx *buntdb.Tx) error {
 		_, err := tx.Delete(
 			fmt.Sprint("user:", userID, ":sticker:", fileID), // key
 		)
 		return err
 	})
+
+	switch err {
+	case buntdb.ErrNotFound:
+		return true, nil
+	}
+
+	return false, err
 }
 
-func dbGetUserStickers(userID int, emoji string) ([]string, error) {
+func dbGetUserStickers(userID, offset int, emoji string) ([]string, error) {
 	var stickers []string
+	count := 0
 	err := db.View(func(tx *buntdb.Tx) error {
 		return tx.Ascend(
 			"user_stickers", // index
 			func(key, val string) bool { // iterator
-				log.Ln(key, "=", val)
-
 				subKeys := strings.Split(key, ":")
 				if subKeys[1] != strconv.Itoa(userID) {
 					return true
+				}
+
+				count++
+
+				if len(stickers) >= 50 {
+					return false
 				}
 
 				if emoji != "" {
@@ -116,6 +128,12 @@ func dbGetUserStickers(userID int, emoji string) ([]string, error) {
 					}
 				}
 
+				if offset >= 1 &&
+					count <= ((offset-1)*50) {
+					return true
+				}
+
+				log.Ln("[", count, "]", key, "=", val)
 				stickers = append(stickers, subKeys[3])
 				return true
 			},

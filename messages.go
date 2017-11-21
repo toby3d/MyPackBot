@@ -37,6 +37,8 @@ func messages(msg *telegram.Message) {
 		state, err := dbGetUserState(msg.From.ID)
 		errCheck(err)
 
+		log.D(msg.Sticker)
+
 		switch state {
 		case stateNone:
 			reply := telegram.NewMessage(
@@ -72,7 +74,7 @@ func messages(msg *telegram.Message) {
 			_, err = dbChangeUserState(msg.From.ID, stateNone)
 			errCheck(err)
 		case stateDeleting:
-			err = dbDeleteSticker(msg.From.ID, msg.Sticker.FileID)
+			notFound, err := dbDeleteSticker(msg.From.ID, msg.Sticker.FileID)
 			errCheck(err)
 
 			text := T("remove_success")

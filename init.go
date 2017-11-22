@@ -8,14 +8,7 @@ import (
 	"github.com/olebedev/config"         // Easy configuration file parsing
 )
 
-const (
-	langDefault = "en-us"
-
-	stateNone   = "none"
-	stateAdd    = "add"
-	stateRemove = "remove"
-	stateReset  = "reset"
-)
+const langDefault = "en-us"
 
 var (
 	// Variables with types from imports

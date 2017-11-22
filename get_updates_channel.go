@@ -18,7 +18,7 @@ var allowedUpdates = []string{
 }
 
 // getUpdatesChannel return webhook or long polling channel with bot updates
-func getUpdatesChannel() (telegram.UpdatesChannel, error) {
+func getUpdatesChannel() telegram.UpdatesChannel {
 	log.Ln("Preparing channel for updates...")
 
 	log.Ln("Deleting webhook if exists")
@@ -32,7 +32,7 @@ func getUpdatesChannel() (telegram.UpdatesChannel, error) {
 			Limit:          100,
 			Timeout:        60,
 			AllowedUpdates: allowedUpdates,
-		}), nil
+		})
 	}
 
 	tgHookSet := cfg.UString("telegram.webhook.set")
@@ -46,51 +46,46 @@ func getUpdatesChannel() (telegram.UpdatesChannel, error) {
 
 	log.Ln("Creating new webhook...")
 	webhook := telegram.NewWebhook(
-		fmt.Sprint(tgHookSet, tgHookListen, bot.AccessToken),
-		"cert.pem",
+		fmt.Sprint(tgHookSet, tgHookListen, bot.AccessToken), nil,
 	)
 	webhook.AllowedUpdates = allowedUpdates
 
 	log.Ln("Setting new webhook...")
 	_, err = bot.SetWebhook(webhook)
-	if err != nil {
-		return nil, err
-	}
+	errCheck(err)
 
 	channel := make(chan telegram.Update, 100)
 	go func() {
-		log.Ln("Listen and serve TLS...")
-		err := http.ListenAndServeTLS(
+		log.Ln("Listen and serve...")
+		err := http.ListenAndServe(
 			tgHookServe,
-			"cert.pem",
-			"cert.key",
 			func(ctx *http.RequestCtx) {
-				log.Ln(
-					"Catch request on path:",
-					string(ctx.Path()),
-				)
-				if strings.HasPrefix(
-					string(ctx.Path()),
-					fmt.Sprint(tgHookListen, bot.AccessToken),
+				log.Ln("Catch request on path:", string(ctx.Path()))
+				if !strings.HasPrefix(
+					string(ctx.Path()), fmt.Sprint(tgHookListen, bot.AccessToken),
 				) {
-					log.Ln(
-						"Catch supported request:",
-						string(ctx.Request.Body()),
-					)
-
-					var update telegram.Update
-					err := json.Unmarshal(ctx.Request.Body(), &update)
-					errCheck(err)
-
-					log.Ln("Unmarshled next:")
-					log.D(update)
-
-					channel <- update
+					return
 				}
+
+				log.Ln("Catch supported request:")
+				log.Ln(string(ctx.Request.Body()))
+
+				if ctx.Request.Body() == nil {
+					return
+				}
+
+				var update telegram.Update
+				err := json.Unmarshal(ctx.Request.Body(), &update)
+				errCheck(err)
+
+				log.Ln("Unmarshled next:")
+				log.D(update)
+
+				channel <- update
 			},
 		)
 		errCheck(err)
 	}()
 
-	return channel, nil
+	return channel
 }

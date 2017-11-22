@@ -14,18 +14,13 @@ func main() {
 	var err error
 
 	go dbInit()
-	defer db.Close()
 
 	log.Ln("Initializing new bot via checking access_token...")
 	bot, err = telegram.NewBot(cfg.UString("telegram.token"))
 	errCheck(err)
 
-	log.Ln("Initializing channel for updates...")
-	updates, err := getUpdatesChannel()
-	errCheck(err)
-
 	log.Ln("Let's check updates channel!")
-	for update := range updates {
+	for update := range getUpdatesChannel() {
 		switch {
 		case update.ChosenInlineResult != nil:
 			log.Ln("Get ChosenInlineResult update")
@@ -56,4 +51,6 @@ func main() {
 		}
 		continue
 	}
+
+	db.Close()
 }

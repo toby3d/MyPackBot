@@ -25,10 +25,12 @@ func commandCancel(msg *telegram.Message) {
 
 	text := T("cancel_error")
 	switch state {
-	case stateAdd:
-		text = T("cancel_add")
-	case stateRemove:
-		text = T("cancel_remove")
+	case stateAddSticker:
+		text = T("cancel_add_sticker")
+	case stateAddPack:
+		text = T("cancel_add_pack")
+	case stateDelete:
+		text = T("cancel_del")
 	case stateReset:
 		text = T("cancel_reset")
 	}

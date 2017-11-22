@@ -1,6 +1,8 @@
-success_add:
+success_add_sticker:
   other: The sticker was successfully added to your pack!
-success_remove:
+success_add_pack:
+  other: The sticker pack `{{.SetTitle}}` was successfully added to yours!
+success_del:
   other: The sticker was successfully removed from your pack!
 success_reset:
   other: The contents of your pack are completely reset!..

@@ -10,6 +10,12 @@ button_share:
   other: Use your stickers pack!
 cancel_add:
   other: You cancelled the process of adding a new sticker to your pack.
+cancel_add_pack:
+  other: You cancelled the process of adding a new pack to yours.
+cancel_add_sticker:
+  other: You cancelled the process of adding a new sticker to your pack.
+cancel_del:
+  other: You cancelled the process of removing a sticker from your pack.
 cancel_error:
   other: Nothing to cancel.
 cancel_remove:
@@ -18,10 +24,20 @@ cancel_reset:
   other: You cancelled the process of reseting your stickers pack.
 error_already_add:
   other: This sticker is already in your pack.
+error_already_add_pack:
+  other: All stickers from `{{.SetTitle}}` pack is already in yours.
+error_already_add_sticker:
+  other: This sticker is already in your pack.
+error_already_del:
+  other: Maybe this sticker is already removed from your pack.
 error_already_remove:
   other: Maybe this sticker is already removed from your pack.
 error_already_reset:
   other: There is nothing to reset, pack is already empty.
+error_empty_add_pack:
+  other: You try to add a sticker that exists outside the packs. Use /addSticker instead.
+error_empty_del:
+  other: There is nothing to remove, pack is empty.
 error_empty_remove:
   other: There is nothing to remove, pack is empty.
 error_reset_phrase:
@@ -29,7 +45,7 @@ error_reset_phrase:
 error_unknown:
   other: |-
     I do not know what to do with this sticker.
-    Please run /add or /remove command first.
+    Please run /addSticker, /addPack or /del command first.
 meta_reset_1:
   other: Wait. Who are you?
 meta_reset_2:
@@ -38,10 +54,17 @@ meta_reset_3:
   other: What am I doing here?
 reply_add:
   other: Send an existing sticker from any other pack to add it to yourself.
+reply_add_pack:
+  other: Send an existing sticker from any other pack to add the entire pack to yourself.
+reply_add_sticker:
+  other: Send an existing sticker from any other pack to add it to yourself.
+reply_del:
+  other: Send an existing sticker from your pack for removing it.
 reply_help:
   other: |-
-    /add - add a sticker to your pack
-    /remove - remove a sticker from your pack
+    /addSticker - add a single sticker to your pack
+    /addPack - add a full other pack to your pack
+    /del - remove a single sticker from your pack
     /reset - remove all stickers from your pack
     /cancel - cancel the current operation
 
@@ -61,6 +84,12 @@ reply_start:
     Without limits and installing. In any chat. For free.
 success_add:
   other: The sticker was successfully added to your pack!
+success_add_pack:
+  other: The sticker pack `{{.SetTitle}}` was successfully added to yours!
+success_add_sticker:
+  other: The sticker was successfully added to your pack!
+success_del:
+  other: The sticker was successfully removed from your pack!
 success_remove:
   other: The sticker was successfully removed from your pack!
 success_reset:

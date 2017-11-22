@@ -16,8 +16,8 @@ func commandStart(msg *telegram.Message) {
 
 	log.Ln("Received a /start command")
 	if msg.HasArgument() {
-		if strings.ToLower(msg.CommandArgument()) == "add" {
-			commandAdd(msg)
+		if strings.ToLower(msg.CommandArgument()) == cmdAddSticker {
+			commandAdd(msg, false)
 			return
 		}
 	}

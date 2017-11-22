@@ -6,19 +6,31 @@ import (
 	"github.com/toby3d/go-telegram" // My Telegram bindings
 )
 
+const (
+	cmdAddPack    = "addPack"
+	cmdAddSticker = "addSticker"
+	cmdCancel     = "cancel"
+	cmdHelp       = "help"
+	cmdDelete     = "del"
+	cmdReset      = "reset"
+	cmdStart      = "start"
+)
+
 func commands(msg *telegram.Message) {
 	switch strings.ToLower(msg.Command()) {
-	case "start":
+	case strings.ToLower(cmdStart):
 		commandStart(msg)
-	case "help":
+	case strings.ToLower(cmdHelp):
 		commandHelp(msg)
-	case "add":
-		commandAdd(msg)
-	case "remove":
-		commandRemove(msg)
-	case "reset":
+	case strings.ToLower(cmdAddSticker):
+		commandAdd(msg, false)
+	case strings.ToLower(cmdAddPack):
+		commandAdd(msg, true)
+	case strings.ToLower(cmdDelete):
+		commandDelete(msg)
+	case strings.ToLower(cmdReset):
 		commandReset(msg)
-	case "cancel":
+	case strings.ToLower(cmdCancel):
 		commandCancel(msg)
 	}
 }

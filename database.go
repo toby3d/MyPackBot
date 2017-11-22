@@ -9,6 +9,14 @@ import (
 	"github.com/tidwall/buntdb"         // Redis-like database
 )
 
+const (
+	stateNone       = "none"
+	stateAddSticker = "addSticker"
+	stateAddPack    = "addPack"
+	stateDelete     = "del"
+	stateReset      = "reset"
+)
+
 var db *buntdb.DB
 
 func dbInit() {

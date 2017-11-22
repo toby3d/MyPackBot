@@ -6,7 +6,7 @@ import (
 	"github.com/toby3d/go-telegram"      // My Telegram bindings
 )
 
-func commandRemove(msg *telegram.Message) {
+func commandDelete(msg *telegram.Message) {
 	log.Ln("Received a /remove command")
 	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
 
@@ -28,7 +28,7 @@ func commandRemove(msg *telegram.Message) {
 		return
 	}
 
-	err = dbChangeUserState(msg.From.ID, stateRemove)
+	err = dbChangeUserState(msg.From.ID, stateDelete)
 	errCheck(err)
 
 	markup := telegram.NewInlineKeyboardMarkup(
@@ -48,11 +48,8 @@ func commandRemove(msg *telegram.Message) {
 	errCheck(err)
 }
 
-func actionRemove(msg *telegram.Message) {
+func actionDelete(msg *telegram.Message) {
 	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
-
-	err := dbChangeUserState(msg.From.ID, stateNone)
-	errCheck(err)
 
 	log.Ln("Check", msg.From.LanguageCode, "localization")
 	T, err := i18n.Tfunc(msg.From.LanguageCode)

@@ -1,0 +1,6 @@
+mypackbot:
+    build: .
+    container_name: MyPackBot
+    restart: on-failure
+    ports:
+    - "8443:8443"

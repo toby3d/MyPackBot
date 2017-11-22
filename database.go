@@ -22,7 +22,7 @@ var db *buntdb.DB
 func dbInit() {
 	log.Ln("Open database file...")
 	var err error
-	db, err = buntdb.Open("bot.db")
+	db, err = buntdb.Open("stickers.db")
 	errCheck(err)
 
 	log.Ln("Creating user_stickers index...")

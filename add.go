@@ -69,6 +69,16 @@ func actionAdd(msg *telegram.Message, pack bool) {
 			reply.Text = T("error_already_add_pack", map[string]interface{}{
 				"SetTitle": set.Title,
 			})
+		} else {
+			markup := telegram.NewInlineKeyboardMarkup(
+				telegram.NewInlineKeyboardRow(
+					telegram.NewInlineKeyboardButtonSwitch(
+						T("button_share"),
+						" ",
+					),
+				),
+			)
+			reply.ReplyMarkup = &markup
 		}
 	default:
 		exists, err := dbAddSticker(msg.From.ID, msg.Sticker.FileID, msg.Sticker.Emoji)

@@ -9,7 +9,6 @@ import (
 // user stuff
 func messages(msg *telegram.Message) {
 	if msg.IsCommand() {
-		log.Ln("Received a command message")
 		commands(msg)
 		return
 	}

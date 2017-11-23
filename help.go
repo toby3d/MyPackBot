@@ -6,7 +6,6 @@ import (
 )
 
 func commandHelp(msg *telegram.Message) {
-	log.Ln("Received a /help command")
 	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
 
 	err := dbChangeUserState(msg.From.ID, stateNone)

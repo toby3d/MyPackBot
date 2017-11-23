@@ -13,7 +13,6 @@ func commandStart(msg *telegram.Message) {
 	err := dbChangeUserState(msg.From.ID, stateNone)
 	errCheck(err)
 
-	log.Ln("Received a /start command")
 	if msg.HasArgument() {
 		if strings.ToLower(msg.CommandArgument()) == cmdAddSticker {
 			commandAdd(msg, false)

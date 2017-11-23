@@ -15,14 +15,12 @@ func commandAdd(msg *telegram.Message, pack bool) {
 	reply := telegram.NewMessage(msg.Chat.ID, T("reply_add_sticker"))
 	reply.ParseMode = telegram.ModeMarkdown
 
-	log.Ln("Change", msg.From.ID, "state to", stateAddSticker)
 	err = dbChangeUserState(msg.From.ID, stateAddSticker)
 	errCheck(err)
 
 	if pack {
 		reply.Text = T("reply_add_pack")
 
-		log.Ln("Change", msg.From.ID, "state to", stateAddPack)
 		err = dbChangeUserState(msg.From.ID, stateAddPack)
 		errCheck(err)
 	}
@@ -33,7 +31,6 @@ func commandAdd(msg *telegram.Message, pack bool) {
 }
 
 func actionAdd(msg *telegram.Message, pack bool) {
-	log.Ln("Received a /add action")
 	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
 
 	T, err := switchLocale(msg.From.LanguageCode)

@@ -11,7 +11,6 @@ import (
 const keyPhrase = "Yes, I am totally sure."
 
 func commandReset(msg *telegram.Message) {
-	log.Ln("Received a /reset command")
 	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
 
 	T, err := switchLocale(msg.From.LanguageCode)

@@ -6,7 +6,6 @@ import (
 )
 
 func commandCancel(msg *telegram.Message) {
-	log.Ln("Received a /cancel command")
 	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
 
 	T, err := switchLocale(msg.From.LanguageCode)

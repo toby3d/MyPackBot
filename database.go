@@ -152,24 +152,18 @@ func dbGetUserStickers(userID, offset int, emoji string) ([]string, error) {
 				count++
 
 				if len(stickers) >= 50 {
-					log.Ln("We get 50 results for", offset, "page, abort")
 					return false
 				}
 
-				if emoji != "" {
-					if val != emoji {
-						log.Ln("Ignore", subKeys[3], "sticker by emoji")
-						return true
-					}
+				if emoji != "" && val != emoji {
+					return true
+
 				}
 
-				if offset >= 1 &&
-					count <= ((offset-1)*50) {
-					log.Ln("Ignore sticker from previous", (offset - 1), "page")
+				if offset >= 1 && count <= ((offset-1)*50) {
 					return true
 				}
 
-				log.Ln("Added", subKeys[3], "to results")
 				stickers = append(stickers, subKeys[3])
 				return true
 			},

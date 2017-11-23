@@ -2,12 +2,9 @@ package main
 
 import (
 	"fmt"
-	"strings"
 
-	log "github.com/kirillDanshin/dlog"     // Insert logs only in debug builds
-	json "github.com/pquerna/ffjson/ffjson" // Fastest JSON unmarshalling
-	"github.com/toby3d/go-telegram"         // My Telegram bindings
-	http "github.com/valyala/fasthttp"      // Fastest http-requests
+	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
+	"github.com/toby3d/go-telegram"     // My Telegram bindings
 )
 
 // allowedUpdates is a value for parameter of updates configuration
@@ -48,44 +45,10 @@ func getUpdatesChannel() telegram.UpdatesChannel {
 	webhook := telegram.NewWebhook(
 		fmt.Sprint(tgHookSet, tgHookListen, bot.AccessToken), nil,
 	)
+	webhook.MaxConnections = 100
 	webhook.AllowedUpdates = allowedUpdates
 
-	log.Ln("Setting new webhook...")
-	_, err = bot.SetWebhook(webhook)
-	errCheck(err)
-
-	channel := make(chan telegram.Update, 100)
-	go func() {
-		log.Ln("Listen and serve...")
-		err := http.ListenAndServe(
-			tgHookServe,
-			func(ctx *http.RequestCtx) {
-				log.Ln("Catch request on path:", string(ctx.Path()))
-				if !strings.HasPrefix(
-					string(ctx.Path()), fmt.Sprint(tgHookListen, bot.AccessToken),
-				) {
-					return
-				}
-
-				log.Ln("Catch supported request:")
-				log.Ln(string(ctx.Request.Body()))
-
-				if ctx.Request.Body() == nil {
-					return
-				}
-
-				var update telegram.Update
-				err := json.Unmarshal(ctx.Request.Body(), &update)
-				errCheck(err)
-
-				log.Ln("Unmarshled next:")
-				log.D(update)
-
-				channel <- update
-			},
-		)
-		errCheck(err)
-	}()
-
-	return channel
+	return bot.NewWebhookChannel(
+		webhook, "", "", tgHookSet, tgHookListen, tgHookServe,
+	)
 }

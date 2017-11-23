@@ -1,8 +1,6 @@
 package main
 
 import (
-	"strings"
-
 	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
 	"github.com/toby3d/go-telegram"     // My Telegram bindings
 )
@@ -14,7 +12,8 @@ func commandStart(msg *telegram.Message) {
 	errCheck(err)
 
 	if msg.HasArgument() {
-		if strings.ToLower(msg.CommandArgument()) == cmdAddSticker {
+		log.Ln("Received a", msg.Command(), "command with", msg.CommandArgument(), "argument")
+		if msg.CommandArgument() == cmdAddSticker {
 			commandAdd(msg, false)
 			return
 		}

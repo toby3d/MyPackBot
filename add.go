@@ -87,6 +87,10 @@ func actionAdd(msg *telegram.Message, pack bool) {
 			reply.Text = T("error_already_add_sticker")
 		}
 
+		if msg.Sticker.Emoji == "" {
+			msg.Sticker.Emoji = " "
+		}
+
 		markup := telegram.NewInlineKeyboardMarkup(
 			telegram.NewInlineKeyboardRow(
 				telegram.NewInlineKeyboardButtonSwitch(

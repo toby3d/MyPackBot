@@ -1,9 +1,6 @@
 package main
 
-import (
-	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	"github.com/toby3d/go-telegram"     // My Telegram bindings
-)
+import "github.com/toby3d/go-telegram" // My Telegram bindings
 
 func commandCancel(msg *telegram.Message) {
 	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)

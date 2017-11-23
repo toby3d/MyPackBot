@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	"github.com/toby3d/go-telegram"     // My Telegram bindings
+	"github.com/toby3d/go-telegram" // My Telegram bindings
 )
 
 const keyPhrase = "Yes, I am totally sure."

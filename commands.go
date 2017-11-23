@@ -3,7 +3,8 @@ package main
 import (
 	"strings"
 
-	"github.com/toby3d/go-telegram" // My Telegram bindings
+	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
+	"github.com/toby3d/go-telegram"     // My Telegram bindings
 )
 
 const (

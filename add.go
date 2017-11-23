@@ -1,9 +1,8 @@
 package main
 
 import (
-	log "github.com/kirillDanshin/dlog"  // Insert logs only in debug builds
-	"github.com/nicksnyder/go-i18n/i18n" // Internationalization and localization
-	"github.com/toby3d/go-telegram"      // My Telegram bindings
+	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
+	"github.com/toby3d/go-telegram"     // My Telegram bindings
 )
 
 func commandAdd(msg *telegram.Message, pack bool) {

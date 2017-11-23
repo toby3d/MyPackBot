@@ -32,14 +32,14 @@ func inlineQuery(inline *telegram.InlineQuery) {
 	case offset <= 0 && len(stickers) == 0 && inline.Query == "":
 		// If query is empty and get 0 stickers
 		answer.SwitchPrivateMessageText = T("button_inline_empty")
-		answer.SwitchPrivateMessageParameter = "add"
+		answer.SwitchPrivateMessageParameter = cmdAddSticker
 	case offset <= 0 && len(stickers) == 0 && inline.Query != "":
 		// If search stickers by emoji return 0 results
 		answer.SwitchPrivateMessageText = T(
 			"button_inline_nothing",
 			map[string]interface{}{"Query": inline.Query},
 		)
-		answer.SwitchPrivateMessageParameter = "add"
+		answer.SwitchPrivateMessageParameter = cmdAddSticker
 	case offset >= 0 && len(stickers) == 50,
 		offset >= 0 && len(stickers) < 50:
 		offset++
@@ -54,7 +54,7 @@ func inlineQuery(inline *telegram.InlineQuery) {
 		}
 
 		answer.SwitchPrivateMessageText = T("button_inline_add")
-		answer.SwitchPrivateMessageParameter = "add"
+		answer.SwitchPrivateMessageParameter = cmdAddSticker
 		answer.Results = results
 	}
 

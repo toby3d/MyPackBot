@@ -20,6 +20,9 @@ func commandReset(msg *telegram.Message) {
 	errCheck(err)
 
 	if len(stickers) <= 0 {
+		err = dbChangeUserState(msg.From.ID, stateNone)
+		errCheck(err)
+
 		reply := telegram.NewMessage(msg.Chat.ID, T("error_already_reset"))
 		reply.ParseMode = telegram.ModeMarkdown
 

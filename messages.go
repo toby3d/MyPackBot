@@ -1,9 +1,8 @@
 package main
 
 import (
-	log "github.com/kirillDanshin/dlog"  // Insert logs only in debug builds
-	"github.com/nicksnyder/go-i18n/i18n" // Internationalization and localization
-	"github.com/toby3d/go-telegram"      // My Telegram bindings
+	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
+	"github.com/toby3d/go-telegram"     // My Telegram bindings
 )
 
 // message function check Message update on commands, sended stickers or other
@@ -22,12 +21,8 @@ func messages(msg *telegram.Message) {
 	case stateNone:
 		bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
 
-		log.Ln("Check", msg.From.LanguageCode, "localization")
-		T, err := i18n.Tfunc(msg.From.LanguageCode)
-		if err != nil {
-			T, err = i18n.Tfunc(langDefault)
-			errCheck(err)
-		}
+		T, err := switchLocale(msg.From.LanguageCode)
+		errCheck(err)
 
 		reply := telegram.NewMessage(msg.Chat.ID, T("error_unknown"))
 		reply.ParseMode = telegram.ModeMarkdown

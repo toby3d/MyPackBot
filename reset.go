@@ -4,22 +4,16 @@ import (
 	"fmt"
 	"time"
 
-	log "github.com/kirillDanshin/dlog"  // Insert logs only in debug builds
-	"github.com/nicksnyder/go-i18n/i18n" // Internationalization and localization
-	"github.com/toby3d/go-telegram"      // My Telegram bindings
+	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
+	"github.com/toby3d/go-telegram"     // My Telegram bindings
 )
 
 func commandReset(msg *telegram.Message) {
 	log.Ln("Received a /reset command")
 	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
 
-	log.Ln("Check", msg.From.LanguageCode, "localization")
-	T, err := i18n.Tfunc(msg.From.LanguageCode)
-	if err != nil {
-		log.Ln("Unsupported language, change to 'en-us' by default")
-		T, err = i18n.Tfunc(langDefault)
-		errCheck(err)
-	}
+	T, err := switchLocale(msg.From.LanguageCode)
+	errCheck(err)
 
 	stickers, err := dbGetUserStickers(msg.From.ID, 0, "")
 	errCheck(err)
@@ -49,13 +43,8 @@ func actionReset(msg *telegram.Message) {
 	err := dbChangeUserState(msg.From.ID, stateNone)
 	errCheck(err)
 
-	log.Ln("Check", msg.From.LanguageCode, "localization")
-	T, err := i18n.Tfunc(msg.From.LanguageCode)
-	if err != nil {
-		log.Ln("Unsupported language, change to 'en-us' by default")
-		T, err = i18n.Tfunc(langDefault)
-		errCheck(err)
-	}
+	T, err := switchLocale(msg.From.LanguageCode)
+	errCheck(err)
 
 	if msg.Text != keyPhrase {
 		reply := telegram.NewMessage(msg.Chat.ID, T("error_reset_phrase"))

@@ -3,18 +3,14 @@ package main
 import (
 	"strconv"
 
-	log "github.com/kirillDanshin/dlog"  // Insert logs only in debug builds
-	"github.com/nicksnyder/go-i18n/i18n" // Internationalization and localization
-	"github.com/toby3d/go-telegram"      // My Telegram bindings
+	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
+	"github.com/toby3d/go-telegram"     // My Telegram bindings
 )
 
 func inlineQuery(inline *telegram.InlineQuery) {
 	log.Ln("Let's preparing answer...")
-	T, err := i18n.Tfunc(inline.From.LanguageCode)
-	if err != nil {
-		T, err = i18n.Tfunc(langDefault)
-		errCheck(err)
-	}
+	T, err := switchLocale(inline.From.LanguageCode)
+	errCheck(err)
 
 	if inline.Offset == "" {
 		inline.Offset = "-1"

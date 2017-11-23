@@ -3,9 +3,8 @@ package main
 import (
 	"strings"
 
-	log "github.com/kirillDanshin/dlog"  // Insert logs only in debug builds
-	"github.com/nicksnyder/go-i18n/i18n" // Internationalization and localization
-	"github.com/toby3d/go-telegram"      // My Telegram bindings
+	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
+	"github.com/toby3d/go-telegram"     // My Telegram bindings
 )
 
 func commandStart(msg *telegram.Message) {
@@ -22,13 +21,8 @@ func commandStart(msg *telegram.Message) {
 		}
 	}
 
-	log.Ln("Check", msg.From.LanguageCode, "localization")
-	T, err := i18n.Tfunc(msg.From.LanguageCode)
-	if err != nil {
-		log.Ln("Unsupported language, change to 'en-us' by default")
-		T, err = i18n.Tfunc(langDefault)
-		errCheck(err)
-	}
+	T, err := switchLocale(msg.From.LanguageCode)
+	errCheck(err)
 
 	reply := telegram.NewMessage(
 		msg.Chat.ID, T("reply_start", map[string]interface{}{

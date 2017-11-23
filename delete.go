@@ -1,22 +1,16 @@
 package main
 
 import (
-	log "github.com/kirillDanshin/dlog"  // Insert logs only in debug builds
-	"github.com/nicksnyder/go-i18n/i18n" // Internationalization and localization
-	"github.com/toby3d/go-telegram"      // My Telegram bindings
+	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
+	"github.com/toby3d/go-telegram"     // My Telegram bindings
 )
 
 func commandDelete(msg *telegram.Message) {
 	log.Ln("Received a /remove command")
 	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
 
-	log.Ln("Check", msg.From.LanguageCode, "localization")
-	T, err := i18n.Tfunc(msg.From.LanguageCode)
-	if err != nil {
-		log.Ln("Unsupported language, change to 'en-us' by default")
-		T, err = i18n.Tfunc(langDefault)
-		errCheck(err)
-	}
+	T, err := switchLocale(msg.From.LanguageCode)
+	errCheck(err)
 
 	stickers, err := dbGetUserStickers(msg.From.ID, 0, "")
 	errCheck(err)
@@ -51,13 +45,8 @@ func commandDelete(msg *telegram.Message) {
 func actionDelete(msg *telegram.Message) {
 	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
 
-	log.Ln("Check", msg.From.LanguageCode, "localization")
-	T, err := i18n.Tfunc(msg.From.LanguageCode)
-	if err != nil {
-		log.Ln("Unsupported language, change to 'en-us' by default")
-		T, err = i18n.Tfunc(langDefault)
-		errCheck(err)
-	}
+	T, err := switchLocale(msg.From.LanguageCode)
+	errCheck(err)
 
 	notExist, err := dbDeleteSticker(msg.From.ID, msg.Sticker.FileID)
 	errCheck(err)

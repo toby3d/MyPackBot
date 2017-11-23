@@ -7,14 +7,10 @@ import (
 )
 
 func commandAdd(msg *telegram.Message, pack bool) {
-	log.Ln("Received a /add command")
-	log.Ln("Check", msg.From.LanguageCode, "localization")
-	T, err := i18n.Tfunc(msg.From.LanguageCode)
-	if err != nil {
-		log.Ln("Unsupported language, change to 'en-us' by default")
-		T, err = i18n.Tfunc(langDefault)
-		errCheck(err)
-	}
+	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
+
+	T, err := switchLocale(msg.From.LanguageCode)
+	errCheck(err)
 
 	reply := telegram.NewMessage(msg.Chat.ID, T("reply_add_sticker"))
 	reply.ParseMode = telegram.ModeMarkdown
@@ -40,13 +36,8 @@ func actionAdd(msg *telegram.Message, pack bool) {
 	log.Ln("Received a /add action")
 	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
 
-	log.Ln("Check", msg.From.LanguageCode, "localization")
-	T, err := i18n.Tfunc(msg.From.LanguageCode)
-	if err != nil {
-		log.Ln("Unsupported language, change to 'en-us' by default")
-		T, err = i18n.Tfunc(langDefault)
-		errCheck(err)
-	}
+	T, err := switchLocale(msg.From.LanguageCode)
+	errCheck(err)
 
 	reply := telegram.NewMessage(msg.Chat.ID, T("success_add_sticker"))
 	reply.ParseMode = telegram.ModeMarkdown

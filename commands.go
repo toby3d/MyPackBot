@@ -18,6 +18,7 @@ const (
 )
 
 func commands(msg *telegram.Message) {
+	log.Ln("Received a", msg.Command(), "command")
 	switch strings.ToLower(msg.Command()) {
 	case strings.ToLower(cmdStart):
 		commandStart(msg)

@@ -25,7 +25,7 @@ cancel_reset:
 error_already_add:
   other: This sticker is already in your pack.
 error_already_add_pack:
-  other: All stickers from `{{.SetTitle}}` pack is already in yours.
+  other: All stickers from *{{.SetTitle}}* pack is already in yours.
 error_already_add_sticker:
   other: This sticker is already in your pack.
 error_already_del:
@@ -35,7 +35,8 @@ error_already_remove:
 error_already_reset:
   other: There is nothing to reset, pack is already empty.
 error_empty_add_pack:
-  other: You try to add a sticker that exists outside the packs. Use /addSticker instead.
+  other: You try to add a sticker that exists outside the packs. Use /{{.AddStickerCommand}}
+    instead.
 error_empty_del:
   other: There is nothing to remove, pack is empty.
 error_empty_remove:
@@ -45,7 +46,7 @@ error_reset_phrase:
 error_unknown:
   other: |-
     I do not know what to do with this sticker.
-    Please run /addSticker, /addPack or /del command first.
+    Please run /{{.AddStickerCommand}}, /{{.AddPackCommand}} or /{{.DeleteCommand}} command first.
 meta_reset_1:
   other: Wait. Who are you?
 meta_reset_2:
@@ -55,18 +56,19 @@ meta_reset_3:
 reply_add:
   other: Send an existing sticker from any other pack to add it to yourself.
 reply_add_pack:
-  other: Send an existing sticker from any other pack to add the entire pack to yourself.
+  other: Send an existing stickers from any other packs to add the entire packs to
+    yourself.
 reply_add_sticker:
-  other: Send an existing sticker from any other pack to add it to yourself.
+  other: Send an existing stickers from any other packs to add it to yourself.
 reply_del:
-  other: Send an existing sticker from your pack for removing it.
+  other: Send an existing stickers from your pack for removing it.
 reply_help:
   other: |-
-    /addSticker - add a single sticker to your pack
-    /addPack - add a full other pack to your pack
-    /del - remove a single sticker from your pack
-    /reset - remove all stickers from your pack
-    /cancel - cancel the current operation
+    /{{.AddStickerCommand}} - add a single sticker to your pack
+    /{{.AddPackCommand}} - add a full other pack to your pack
+    /{{.DeleteCommand}} - remove a single sticker from your pack
+    /{{.ResetCommand}} - remove all stickers from your pack
+    /{{.CancelCommand}} - cancel the current operation
 
     To view and send stickers from your pack, just type `@{{.Username}}` (and space) in any chat.
 reply_remove:
@@ -75,8 +77,8 @@ reply_reset:
   other: |
     This operation will remove *all* stickers from your pack and *this can't be undone*.
 
-    Send `Yes, I am totally sure.` to confirm what you really want to reset my brain (oh god why).
-    Or use /cancel for abort current operation.
+    Send `{{.KeyPhrase}}` to confirm what you really want to reset my brain (oh god why).
+    Or use /{{.CancelCommand}} for abort current operation.
 reply_start:
   other: |
     Hello, I'm the @{{.Username}}!
@@ -85,7 +87,7 @@ reply_start:
 success_add:
   other: The sticker was successfully added to your pack!
 success_add_pack:
-  other: The sticker pack `{{.SetTitle}}` was successfully added to yours!
+  other: The sticker pack *{{.SetTitle}}* was successfully added to yours!
 success_add_sticker:
   other: The sticker was successfully added to your pack!
 success_del:

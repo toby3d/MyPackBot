@@ -24,7 +24,13 @@ func messages(msg *telegram.Message) {
 		T, err := switchLocale(msg.From.LanguageCode)
 		errCheck(err)
 
-		reply := telegram.NewMessage(msg.Chat.ID, T("error_unknown"))
+		reply := telegram.NewMessage(
+			msg.Chat.ID,
+			T("error_unknown", map[string]interface{}{
+				"AddStickerCommand": cmdAddSticker,
+				"AddPackCommand":    cmdAddPack,
+				"DeleteCommand":     cmdDelete,
+			}))
 		reply.ParseMode = telegram.ModeMarkdown
 
 		_, err = bot.SendMessage(reply)

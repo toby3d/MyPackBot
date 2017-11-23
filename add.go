@@ -43,17 +43,15 @@ func actionAdd(msg *telegram.Message, pack bool) {
 	reply.ParseMode = telegram.ModeMarkdown
 
 	switch {
-	case pack &&
-		msg.Sticker.SetName == "":
-		reply.Text = T("error_empty_add_pack")
-	case pack &&
-		msg.Sticker.SetName != "":
-
+	case pack && msg.Sticker.SetName == "":
+		reply.Text = T("error_empty_add_pack", map[string]interface{}{
+			"AddStickerCommand": cmdAddSticker,
+		})
+	case pack && msg.Sticker.SetName != "":
 		set, err := bot.GetStickerSet(msg.Sticker.SetName)
 		errCheck(err)
 
 		log.Ln("SetTitle:", set.Title)
-
 		reply.Text = T("success_add_pack", map[string]interface{}{
 			"SetTitle": set.Title,
 		})

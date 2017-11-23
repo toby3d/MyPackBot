@@ -26,7 +26,12 @@ func commandHelp(msg *telegram.Message) {
 
 	reply := telegram.NewMessage(
 		msg.Chat.ID, T("reply_help", map[string]interface{}{
-			"Username": bot.Self.Username,
+			"AddStickerCommand": cmdAddSticker,
+			"AddPackCommand":    cmdAddPack,
+			"DeleteCommand":     cmdDelete,
+			"ResetCommand":      cmdReset,
+			"CancelCommand":     cmdCancel,
+			"Username":          bot.Self.Username,
 		}),
 	)
 	reply.ParseMode = telegram.ModeMarkdown

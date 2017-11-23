@@ -8,6 +8,8 @@ import (
 	"github.com/toby3d/go-telegram"     // My Telegram bindings
 )
 
+const keyPhrase = "Yes, I am totally sure."
+
 func commandReset(msg *telegram.Message) {
 	log.Ln("Received a /reset command")
 	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
@@ -30,7 +32,12 @@ func commandReset(msg *telegram.Message) {
 	err = dbChangeUserState(msg.From.ID, stateReset)
 	errCheck(err)
 
-	reply := telegram.NewMessage(msg.Chat.ID, T("reply_reset"))
+	reply := telegram.NewMessage(
+		msg.Chat.ID,
+		T("reply_reset", map[string]interface{}{
+			"KeyPhrase":     keyPhrase,
+			"CancelCommand": cmdCancel,
+		}))
 	reply.ParseMode = telegram.ModeMarkdown
 
 	_, err = bot.SendMessage(reply)

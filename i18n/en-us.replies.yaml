@@ -4,23 +4,23 @@ reply_start:
     I can create your personal pack with stickers from others packs.
     Without limits and installing. In any chat. For free.
 reply_add_sticker:
-  other: Send an existing sticker from any other pack to add it to yourself.
+  other: Send an existing stickers from any other packs to add it to yourself.
 reply_add_pack:
-  other: Send an existing sticker from any other pack to add the entire pack to yourself.
+  other: Send an existing stickers from any other packs to add the entire packs to yourself.
 reply_del:
-  other: Send an existing sticker from your pack for removing it.
+  other: Send an existing stickers from your pack for removing it.
 reply_reset:
   other: |
     This operation will remove *all* stickers from your pack and *this can't be undone*.
 
-    Send `Yes, I am totally sure.` to confirm what you really want to reset my brain (oh god why).
-    Or use /cancel for abort current operation.
+    Send `{{.KeyPhrase}}` to confirm what you really want to reset my brain (oh god why).
+    Or use /{{.CancelCommand}} for abort current operation.
 reply_help:
   other: |
-    /addSticker - add a single sticker to your pack
-    /addPack - add a full other pack to your pack
-    /del - remove a single sticker from your pack
-    /reset - remove all stickers from your pack
-    /cancel - cancel the current operation
+    /{{.AddStickerCommand}} - add a single sticker to your pack
+    /{{.AddPackCommand}} - add a full other pack to your pack
+    /{{.DeleteCommand}} - remove a single sticker from your pack
+    /{{.ResetCommand}} - remove all stickers from your pack
+    /{{.CancelCommand}} - cancel the current operation
 
     To view and send stickers from your pack, just type `@{{.Username}}` (and space) in any chat.

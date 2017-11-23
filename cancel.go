@@ -5,8 +5,6 @@ import (
 	"github.com/toby3d/go-telegram"     // My Telegram bindings
 )
 
-const keyPhrase = "Yes, I am totally sure."
-
 func commandCancel(msg *telegram.Message) {
 	log.Ln("Received a /cancel command")
 	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
@@ -17,7 +15,7 @@ func commandCancel(msg *telegram.Message) {
 	state, err := dbGetUserState(msg.From.ID)
 	errCheck(err)
 
-	text := T("cancel_error")
+	var text string
 	switch state {
 	case stateAddSticker:
 		text = T("cancel_add_sticker")
@@ -27,6 +25,8 @@ func commandCancel(msg *telegram.Message) {
 		text = T("cancel_del")
 	case stateReset:
 		text = T("cancel_reset")
+	default:
+		text = T("cancel_error")
 	}
 
 	err = dbChangeUserState(msg.From.ID, stateNone)

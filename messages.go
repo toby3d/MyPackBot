@@ -35,26 +35,32 @@ func messages(msg *telegram.Message) {
 		_, err = bot.SendMessage(reply)
 		errCheck(err)
 	case stateAddSticker:
-		if msg.Sticker != nil {
-			log.D(msg.Sticker)
-			log.D(msg.Sticker.Emoji)
-
-			actionAdd(msg, false)
+		if msg.Sticker == nil {
+			return
 		}
+
+		log.D(msg.Sticker)
+		log.D(msg.Sticker.Emoji)
+
+		actionAdd(msg, false)
 	case stateAddPack:
-		if msg.Sticker != nil {
-			log.D(msg.Sticker)
-			log.D(msg.Sticker.Emoji)
-
-			actionAdd(msg, true)
+		if msg.Sticker == nil {
+			return
 		}
+
+		log.D(msg.Sticker)
+		log.D(msg.Sticker.Emoji)
+
+		actionAdd(msg, true)
 	case stateDelete:
-		if msg.Sticker != nil {
-			log.D(msg.Sticker)
-			log.D(msg.Sticker.Emoji)
-
-			actionDelete(msg)
+		if msg.Sticker == nil {
+			return
 		}
+
+		log.D(msg.Sticker)
+		log.D(msg.Sticker.Emoji)
+
+		actionDelete(msg)
 	case stateReset:
 		actionReset(msg)
 	default:

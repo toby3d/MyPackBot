@@ -48,8 +48,7 @@ func inlineQuery(inline *telegram.InlineQuery) {
 		var results = make([]interface{}, len(stickers))
 		for i, sticker := range stickers {
 			results[i] = telegram.NewInlineQueryResultCachedSticker(
-				sticker, // resultID
-				sticker, // fileID
+				sticker, sticker,
 			)
 		}
 

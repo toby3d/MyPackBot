@@ -1,6 +1,6 @@
 telegram:
   token: 123456789:ABCd1efGhjKLM23O4pqR5stuvwx678yz90
   webhook:
-    set: https://www.google.com:8443/
-    listen: /
-    serve: 0.0.0.0:8443
+    set: https://www.google.com
+    listen: /bot
+    serve: 0.0.0.0:2368

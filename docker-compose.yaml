@@ -1,6 +1,13 @@
-mypackbot:
-    build: .
-    container_name: MyPackBot
-    restart: on-failure
+version: "3"
+services:
+  bot:
+    container_name: mypackbot
+    image: golang:latest
     ports:
-    - "8443:8443"
+      - 8443:2368
+    volumes:
+      - ./MyPackBot:/go/MyPackBot
+      - ./i18n/:/go/i18n/
+      - ./config.yaml:/go/config.yaml
+      - ./stickers.db:/go/stickers.db
+    entrypoint: ["/go/MyPackBot", "-webhook"]

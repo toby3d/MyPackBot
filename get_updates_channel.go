@@ -32,23 +32,21 @@ func getUpdatesChannel() telegram.UpdatesChannel {
 		})
 	}
 
-	tgHookSet := cfg.UString("telegram.webhook.set")
-	tgHookListen := cfg.UString("telegram.webhook.listen")
-	tgHookServe := cfg.UString("telegram.webhook.serve")
+	set := cfg.UString("telegram.webhook.set")
+	listen := cfg.UString("telegram.webhook.listen")
+	serve := cfg.UString("telegram.webhook.serve")
 
 	log.Ln(
 		"Trying set webhook on address:",
-		fmt.Sprint(tgHookSet, tgHookListen, bot.AccessToken),
+		fmt.Sprint(set, listen, bot.AccessToken),
 	)
 
 	log.Ln("Creating new webhook...")
 	webhook := telegram.NewWebhook(
-		fmt.Sprint(tgHookSet, tgHookListen, bot.AccessToken), nil,
+		fmt.Sprint(set, listen, bot.AccessToken), nil,
 	)
 	webhook.MaxConnections = 100
 	webhook.AllowedUpdates = allowedUpdates
 
-	return bot.NewWebhookChannel(
-		webhook, "", "", tgHookSet, tgHookListen, tgHookServe,
-	)
+	return bot.NewWebhookChannel(webhook, "", "", set, listen, serve)
 }

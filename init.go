@@ -2,6 +2,9 @@ package main
 
 import (
 	"flag"
+	"os"
+	"path/filepath"
+	"strings"
 
 	log "github.com/kirillDanshin/dlog"  // Insert logs only in debug builds
 	"github.com/nicksnyder/go-i18n/i18n" // Internationalization and localization
@@ -27,10 +30,14 @@ func init() {
 	log.Ln("Parse flags...")
 	flag.Parse()
 
-	log.Ln("Load english localization...")
-	i18n.MustLoadTranslationFile("./i18n/en-us.all.yaml")
+	err := filepath.Walk("./i18n/", func(path string, info os.FileInfo, err error) error {
+		if strings.HasSuffix(path, ".all.yaml") {
+			i18n.MustLoadTranslationFile(path)
+		}
+		return nil
+	})
+	errCheck(err)
 
-	var err error
 	log.Ln("Loading configuration file...")
 	cfg, err = config.ParseYamlFile("config.yaml")
 	errCheck(err)

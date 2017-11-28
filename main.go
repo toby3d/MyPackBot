@@ -2,7 +2,8 @@ package main
 
 import (
 	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	"github.com/toby3d/go-telegram"     // My Telegram bindings
+	"github.com/toby3d/botan"
+	"github.com/toby3d/go-telegram" // My Telegram bindings
 )
 
 // bot is general structure of the bot
@@ -31,12 +32,28 @@ func main() {
 		switch {
 		case update.ChosenInlineResult != nil:
 			log.Ln("Get ChosenInlineResult update")
-			// TODO: Save metrika about chosen results
+			appMetrika.TrackAsync(
+				"Chosen inline result",
+				update.ChosenInlineResult.From.ID,
+				*update.ChosenInlineResult,
+				func(answer *botan.Answer, err error) {
+					log.Ln("Asynchonous:", answer.Status)
+					metrika <- true
+				},
+			)
 		case update.InlineQuery != nil:
 			// Just don't check same updates
 			if len(update.InlineQuery.Query) > 4 {
 				continue
 			}
+
+			appMetrika.TrackAsync(
+				"Inline query", update.InlineQuery.From.ID, *update.InlineQuery,
+				func(answer *botan.Answer, err error) {
+					log.Ln("Asynchonous:", answer.Status)
+					metrika <- true
+				},
+			)
 
 			inlineQuery(update.InlineQuery)
 		case update.Message != nil:

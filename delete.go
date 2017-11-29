@@ -8,7 +8,7 @@ func commandDelete(msg *telegram.Message) {
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 
-	stickers, err := dbGetUserStickers(msg.From.ID, 0, "")
+	stickers, err := dbGetUserStickers(msg.From.ID, "")
 	errCheck(err)
 
 	if len(stickers) <= 0 {

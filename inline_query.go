@@ -25,7 +25,7 @@ func inlineQuery(inline *telegram.InlineQuery) {
 		IsPersonal:    true,
 	}
 
-	stickers, err := dbGetUserStickers(inline.From.ID, offset, inline.Query)
+	stickers, err := dbGetUserStickers(inline.From.ID, inline.Query)
 	errCheck(err)
 
 	switch {

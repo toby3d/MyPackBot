@@ -32,14 +32,10 @@ func main() {
 		switch {
 		case update.ChosenInlineResult != nil:
 			log.Ln("Get ChosenInlineResult update")
-			appMetrika.TrackAsync(
+			appMetrika.Track(
 				"Chosen inline result",
 				update.ChosenInlineResult.From.ID,
 				*update.ChosenInlineResult,
-				func(answer *botan.Answer, err error) {
-					log.Ln("Asynchonous:", answer.Status)
-					metrika <- true
-				},
 			)
 		case update.InlineQuery != nil:
 			// Just don't check same updates

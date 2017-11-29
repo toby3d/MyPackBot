@@ -17,13 +17,13 @@ var allowedUpdates = []string{
 // getUpdatesChannel return webhook or long polling channel with bot updates
 func getUpdatesChannel() telegram.UpdatesChannel {
 	log.Ln("Preparing channel for updates...")
-
-	log.Ln("Deleting webhook if exists")
-	_, err := bot.DeleteWebhook()
-	errCheck(err)
-
 	if !*flagWebhook {
 		log.Ln("Use LongPolling updates")
+
+		log.Ln("Deleting webhook if exists")
+		_, err := bot.DeleteWebhook()
+		errCheck(err)
+
 		return bot.NewLongPollingChannel(&telegram.GetUpdatesParameters{
 			Offset:         0,
 			Limit:          100,

@@ -15,13 +15,6 @@ func main() {
 	var err error
 
 	go dbInit()
-	defer func() {
-		err := db.Close()
-		errCheck(err)
-
-		_, err = bot.DeleteWebhook()
-		errCheck(err)
-	}()
 
 	log.Ln("Initializing new bot via checking access_token...")
 	bot, err = telegram.NewBot(cfg.UString("telegram.token"))
@@ -72,4 +65,6 @@ func main() {
 		continue
 	}
 
+	err = db.Close()
+	errCheck(err)
 }

@@ -1,6 +1,6 @@
 reply_start:
   other: |
-    Hello, I'm the @{{.Username}}!
+    Hello, I'm the [@{{.Username}}](tg://user?id={{.ID}})!
     I can create your personal pack with stickers from others packs.
     Without limits and installing. In any chat. For free.
 reply_add_sticker:

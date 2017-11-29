@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+
 	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
 	"github.com/toby3d/go-telegram"     // My Telegram bindings
 )
@@ -13,7 +15,7 @@ func commandStart(msg *telegram.Message) {
 
 	if msg.HasArgument() {
 		log.Ln("Received a", msg.Command(), "command with", msg.CommandArgument(), "argument")
-		if msg.CommandArgument() == cmdAddSticker {
+		if strings.ToLower(msg.CommandArgument()) == strings.ToLower(cmdAddSticker) {
 			commandAdd(msg, false)
 			return
 		}
@@ -25,6 +27,7 @@ func commandStart(msg *telegram.Message) {
 	reply := telegram.NewMessage(
 		msg.Chat.ID, T("reply_start", map[string]interface{}{
 			"Username": bot.Self.Username,
+			"ID":       bot.Self.ID,
 		}),
 	)
 	reply.ParseMode = telegram.ModeMarkdown

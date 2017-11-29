@@ -45,6 +45,8 @@ func main() {
 			)
 
 			inlineQuery(update.InlineQuery)
+
+			<-metrika
 		case update.Message != nil:
 			if update.Message.From.ID == bot.Self.ID {
 				log.Ln("Received a message from myself, ignore this update")

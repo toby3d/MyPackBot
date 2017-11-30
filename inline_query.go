@@ -26,6 +26,7 @@ func inlineQuery(inline *telegram.InlineQuery) {
 
 	answer := &telegram.AnswerInlineQueryParameters{
 		InlineQueryID: inline.ID,
+		CacheTime:     1,
 		IsPersonal:    true,
 	}
 

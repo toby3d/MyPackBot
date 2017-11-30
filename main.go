@@ -32,7 +32,8 @@ func main() {
 			)
 		case update.InlineQuery != nil:
 			// Just don't check same updates
-			if len(update.InlineQuery.Query) > 4 {
+			log.D(update.InlineQuery.Query)
+			if len(update.InlineQuery.Query) > 25 {
 				continue
 			}
 

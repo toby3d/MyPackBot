@@ -3,7 +3,8 @@ button_inline_empty:
 button_inline_nothing:
   other: Not found stickers for {{.Query}}, add one?
 button_inline_add:
-  other: Add more stickers
+  one: You have {{.Count}} sticker. Add one more?
+  other: You have {{.Count}} stickers. Add one more?
 button_remove:
   other: Select sticker for remove
 button_share:

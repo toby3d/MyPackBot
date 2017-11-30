@@ -30,10 +30,10 @@ func inlineQuery(inline *telegram.InlineQuery) {
 		IsPersonal:    true,
 	}
 
-	stickers, err := dbGetUserStickers(inline.From.ID, inline.Query)
+	stickers, emojis, err := dbGetUserStickers(inline.From.ID)
 	errCheck(err)
 
-	total := len(stickers)
+	packSize := len(stickers)
 
 	if inline.Query != "" {
 		var buffer []string
@@ -106,7 +106,12 @@ func inlineQuery(inline *telegram.InlineQuery) {
 			)
 		}
 
-		answer.SwitchPrivateMessageText = T("button_inline_add")
+		answer.SwitchPrivateMessageText = T(
+			"button_inline_add",
+			packSize,
+			map[string]interface{}{
+				"Count": packSize,
+			})
 		answer.SwitchPrivateMessageParameter = cmdAddSticker
 		answer.Results = results
 	}

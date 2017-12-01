@@ -1,0 +1,99 @@
+button_inline_add:
+  one: You have {{.Count}} sticker. Add one more?
+  other: You have {{.Count}} stickers. Add one more?
+button_inline_empty:
+  other: Your pack is empty
+button_inline_nothing:
+  other: Not found stickers for {{.Query}}, add one?
+button_remove:
+  other: Select sticker for remove
+button_share:
+  other: Use your stickers pack!
+cancel_add:
+  other: You cancelled the process of adding a new sticker to your pack.
+cancel_add_pack:
+  other: You cancelled the process of adding a new pack to yours.
+cancel_add_sticker:
+  other: You cancelled the process of adding a new sticker to your pack.
+cancel_del:
+  other: You cancelled the process of removing a sticker from your pack.
+cancel_error:
+  other: Nothing to cancel.
+cancel_remove:
+  other: You cancelled the process of removing a sticker from your pack.
+cancel_reset:
+  other: You cancelled the process of reseting your stickers pack.
+error_already_add:
+  other: This sticker is already in your pack.
+error_already_add_pack:
+  other: All stickers from *{{.SetTitle}}* pack is already in yours.
+error_already_add_sticker:
+  other: This sticker is already in your pack.
+error_already_del:
+  other: Maybe this sticker is already removed from your pack.
+error_already_remove:
+  other: Maybe this sticker is already removed from your pack.
+error_already_reset:
+  other: There is nothing to reset, pack is already empty.
+error_empty_add_pack:
+  other: You try to add a sticker that exists outside the packs. Use /{{.AddStickerCommand}}
+    instead.
+error_empty_del:
+  other: There is nothing to remove, pack is empty.
+error_empty_remove:
+  other: There is nothing to remove, pack is empty.
+error_reset_phrase:
+  other: Invalid phrase of resetting. This action has been canceled.
+error_unknown:
+  other: |-
+    I do not know what to do with this sticker.
+    Please run /{{.AddStickerCommand}}, /{{.AddPackCommand}} or /{{.DeleteCommand}} command first.
+meta_reset_1:
+  other: Wait. Who are you?
+meta_reset_2:
+  other: What are you doing here?
+meta_reset_3:
+  other: What am I doing here?
+reply_add:
+  other: Send an existing sticker from any other pack to add it to yourself.
+reply_add_pack:
+  other: Send an existing stickers from any other packs to add the entire packs to
+    yourself.
+reply_add_sticker:
+  other: Send an existing stickers from any other packs to add it to yourself.
+reply_del:
+  other: Send an existing stickers from your pack for removing it.
+reply_help:
+  other: |-
+    /{{.AddStickerCommand}} - add a single sticker to your pack
+    /{{.AddPackCommand}} - add a full other pack to your pack
+    /{{.DeleteCommand}} - remove a single sticker from your pack
+    /{{.ResetCommand}} - remove all stickers from your pack
+    /{{.CancelCommand}} - cancel the current operation
+
+    To view and send stickers from your pack, just type `@{{.Username}}` (and space) in any chat.
+reply_remove:
+  other: Send an existing sticker from your pack for removing it.
+reply_reset:
+  other: |
+    This operation will remove *all* stickers from your pack and *this can't be undone*.
+
+    Send `{{.KeyPhrase}}` to confirm what you really want to reset my brain (oh god why).
+    Or use /{{.CancelCommand}} for abort current operation.
+reply_start:
+  other: |
+    Hello, I'm the [@{{.Username}}](tg://user?id={{.ID}})!
+    I can create your personal pack with stickers from others packs.
+    Without limits and installing. In any chat. For free.
+success_add:
+  other: The sticker was successfully added to your pack!
+success_add_pack:
+  other: The sticker pack *{{.SetTitle}}* was successfully added to yours!
+success_add_sticker:
+  other: The sticker was successfully added to your pack!
+success_del:
+  other: The sticker was successfully removed from your pack!
+success_remove:
+  other: The sticker was successfully removed from your pack!
+success_reset:
+  other: The contents of your pack are completely reset!..

@@ -1,0 +1,8 @@
+telegram:
+  token: 123456789:ABCd1efGhjKLM23O4pqR5stuvwx678yz90
+  webhook:
+    set: https://www.google.com
+    listen: /bot
+    serve: 0.0.0.0:2368
+
+botan: 12345a67-8b9c-01d2-e345-67fg8901hj23

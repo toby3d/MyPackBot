@@ -1,6 +1,8 @@
 header {
 	background-color: #56b0ef !important;
 	color: #ffffff !important;
+	min-height: 100vh;
+	border-radius: 0 !important;
 }
 
 header .ts.image {
@@ -21,6 +23,22 @@ main {
 footer {
 	margin-top: 2.5rem !important;
 	margin-bottom: 0px !important;
+}
+
+.valign-wrapper {
+	display: -webkit-box;
+	display: -webkit-flex;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-align: center;
+	-webkit-align-items: center;
+	-ms-flex-align: center;
+	align-items: center !important;
+}
+
+.valign {
+	margin-left: auto !important;
+	margin-right: auto !important;
 }
 
 .bold {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"strconv"
+	"strings"
 
 	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
 	"github.com/toby3d/go-telegram"     // My Telegram bindings
@@ -9,7 +10,17 @@ import (
 
 const perPage = 50
 
+var r = strings.NewReplacer(
+	"🏻", "",
+	"🏼", "",
+	"🏽", "",
+	"🏾", "",
+	"🏿", "",
+)
+
 func inlineQuery(inline *telegram.InlineQuery) {
+	inline.Query = r.Replace(inline.Query)
+
 	log.Ln("Let's preparing answer...")
 	T, err := switchLocale(inline.From.LanguageCode)
 	errCheck(err)

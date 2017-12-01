@@ -1,0 +1,32 @@
+header {
+	background-color: #56b0ef !important;
+	color: #ffffff !important;
+}
+
+header .ts.image {
+	position: inherit !important;
+}
+
+body {
+	display: flex;
+	min-height: 100vh;
+	flex-direction: column;
+}
+
+main {
+	margin-top: 2rem;
+	flex: 1 0 auto;
+}
+
+footer {
+	margin-top: 2.5rem !important;
+	margin-bottom: 0px !important;
+}
+
+.bold {
+	font-weight: bold !important;
+}
+
+.ts.inverted.link.button {
+	color: #ffffff;
+}

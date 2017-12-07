@@ -44,7 +44,7 @@ func getUpdatesChannel() telegram.UpdatesChannel {
 	webhook := telegram.NewWebhook(
 		fmt.Sprint(set, listen, bot.AccessToken), nil,
 	)
-	webhook.MaxConnections = 100
+	webhook.MaxConnections = 40
 	webhook.AllowedUpdates = allowedUpdates
 
 	return bot.NewWebhookChannel(

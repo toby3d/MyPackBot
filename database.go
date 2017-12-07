@@ -136,9 +136,12 @@ func dbResetUserStickers(userID int) error {
 	})
 }
 
-func dbGetUserStickers(userID int) ([]string, []string, error) {
+func dbGetUserStickers(userID, offset int, query string) ([]string, int, error) {
 	log.Ln("Trying to get", userID, "stickers")
-	var stickers, emojis []string
+	var total, count int
+	var stickers []string
+	offset = offset * 50
+
 	err := db.View(func(tx *buntdb.Tx) error {
 		return tx.Ascend(
 			"user_stickers", // index
@@ -148,8 +151,23 @@ func dbGetUserStickers(userID int) ([]string, []string, error) {
 					return true
 				}
 
+				total++
+
+				if count >= 51 {
+					return true
+				}
+
+				if total < offset {
+					return true
+				}
+
+				if query != "" &&
+					query != val {
+					return true
+				}
+
+				count++
 				stickers = append(stickers, subKeys[3])
-				emojis = append(emojis, val)
 				return true
 			},
 		)
@@ -158,10 +176,10 @@ func dbGetUserStickers(userID int) ([]string, []string, error) {
 	switch {
 	case err == buntdb.ErrNotFound:
 		log.Ln("Not found stickers")
-		return nil, nil, nil
+		return nil, total, nil
 	case err != nil:
-		return nil, nil, err
+		return nil, total, err
 	}
 
-	return stickers, emojis, nil
+	return stickers, total, nil
 }

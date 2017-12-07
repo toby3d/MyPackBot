@@ -31,81 +31,42 @@ func inlineQuery(inline *telegram.InlineQuery) {
 	}
 	offset, err := strconv.Atoi(inline.Offset)
 	errCheck(err)
-	if offset == -1 {
-		offset++
-	}
+	offset++
 
-	answer := &telegram.AnswerInlineQueryParameters{
-		InlineQueryID: inline.ID,
-		CacheTime:     1,
-		IsPersonal:    true,
-	}
+	log.Ln("CURRENT OFFSET:", inline.Offset)
+	answer := &telegram.AnswerInlineQueryParameters{}
+	answer.InlineQueryID = inline.ID
+	answer.CacheTime = 1
+	answer.IsPersonal = true
 
-	stickers, emojis, err := dbGetUserStickers(inline.From.ID)
+	stickers, packSize, err := dbGetUserStickers(inline.From.ID, offset, inline.Query)
 	errCheck(err)
 
-	packSize := len(stickers)
-
-	if inline.Query != "" {
-		var buffer []string
-		for i := range stickers {
-			if emojis[i] != inline.Query {
-				continue
-			}
-
-			buffer = append(buffer, stickers[i])
-		}
-		stickers = buffer
-	}
-
 	totalStickers := len(stickers)
-	totalPages := totalStickers / perPage
 	if totalStickers == 0 {
-		if inline.Query != "" {
-			// If search stickers by emoji return 0 results
-			answer.SwitchPrivateMessageText = T(
-				"button_inline_nothing",
-				map[string]interface{}{"Query": inline.Query},
-			)
-			answer.SwitchPrivateMessageParameter = cmdAddSticker
+		if offset == 0 {
+			if inline.Query != "" {
+				// If search stickers by emoji return 0 results
+				answer.SwitchPrivateMessageText = T(
+					"button_inline_nothing",
+					map[string]interface{}{"Query": inline.Query},
+				)
+				answer.SwitchPrivateMessageParameter = cmdAddSticker
+			} else {
+				// If query is empty and get 0 stickers
+				answer.SwitchPrivateMessageText = T("button_inline_empty")
+				answer.SwitchPrivateMessageParameter = cmdAddSticker
+			}
 		} else {
-			// If query is empty and get 0 stickers
-			answer.SwitchPrivateMessageText = T("button_inline_empty")
-			answer.SwitchPrivateMessageParameter = cmdAddSticker
+			return
 		}
 	} else {
-		log.Ln("LESS THAN:", offset < totalPages)
-		if offset < totalPages {
-			from := offset * perPage
-			if offset > 0 {
-				from--
-			}
-			to := from + perPage
-
-			log.Ln("from:", from)
-			log.Ln("to:", to)
-
-			stickers = stickers[from:to]
-
-			offset++
+		log.Ln("STICKERS FROM REQUEST:", totalStickers)
+		if totalStickers > 50 {
 			answer.NextOffset = strconv.Itoa(offset)
-		} else {
-			from := offset * perPage
-			if offset > 0 {
-				from--
-			}
-			to := from
-			log.Ln("MINUS:", totalStickers%perPage)
-			if totalStickers%perPage != 0 {
-				log.Ln("FUCK")
-				to += totalStickers % perPage
-			} else {
-				to += perPage
-			}
+			log.Ln("NEXT OFFSET:", answer.NextOffset)
 
-			log.Ln("from:", from)
-			log.Ln("to:", to)
-			stickers = stickers[from:to]
+			stickers = stickers[:totalStickers-1]
 		}
 
 		log.Ln("Stickers after checks:", len(stickers))
@@ -122,11 +83,16 @@ func inlineQuery(inline *telegram.InlineQuery) {
 			packSize,
 			map[string]interface{}{
 				"Count": packSize,
-			})
+			},
+		)
 		answer.SwitchPrivateMessageParameter = cmdAddSticker
 		answer.Results = results
 	}
 
-	_, err = bot.AnswerInlineQuery(answer)
-	errCheck(err)
+	log.Ln("CacheTime:", answer.CacheTime)
+
+	_, err := bot.AnswerInlineQuery(answer)
+	if err != nil {
+		log.Ln(err.Error())
+	}
 }

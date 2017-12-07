@@ -2,8 +2,7 @@ package main
 
 import (
 	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	"github.com/toby3d/botan"
-	"github.com/toby3d/go-telegram" // My Telegram bindings
+	"github.com/toby3d/go-telegram"     // My Telegram bindings
 )
 
 // bot is general structure of the bot
@@ -23,13 +22,6 @@ func main() {
 	log.Ln("Let's check updates channel!")
 	for update := range getUpdatesChannel() {
 		switch {
-		case update.ChosenInlineResult != nil:
-			log.Ln("Get ChosenInlineResult update")
-			appMetrika.Track(
-				"Chosen inline result",
-				update.ChosenInlineResult.From.ID,
-				*update.ChosenInlineResult,
-			)
 		case update.InlineQuery != nil:
 			// Just don't check same updates
 			log.D(update.InlineQuery.Query)
@@ -37,17 +29,7 @@ func main() {
 				continue
 			}
 
-			appMetrika.TrackAsync(
-				"Inline query", update.InlineQuery.From.ID, *update.InlineQuery,
-				func(answer *botan.Answer, err error) {
-					log.Ln("Asynchonous:", answer.Status)
-					metrika <- true
-				},
-			)
-
 			inlineQuery(update.InlineQuery)
-
-			<-metrika
 		case update.Message != nil:
 			if update.Message.From.ID == bot.Self.ID {
 				log.Ln("Received a message from myself, ignore this update")

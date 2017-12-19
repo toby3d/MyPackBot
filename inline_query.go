@@ -34,7 +34,7 @@ func inlineQuery(inline *telegram.InlineQuery) {
 	log.Ln("CURRENT OFFSET:", inline.Offset)
 	answer := &telegram.AnswerInlineQueryParameters{}
 	answer.InlineQueryID = inline.ID
-	answer.CacheTime = 300
+	answer.CacheTime = 1
 	answer.IsPersonal = true
 
 	stickers, packSize, err := dbGetUserStickers(inline.From.ID, offset, inline.Query)

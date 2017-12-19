@@ -34,6 +34,7 @@ func messages(msg *telegram.Message) {
 
 		_, err = bot.SendMessage(reply)
 		errCheck(err)
+		return
 	case stateAddSticker:
 		if msg.Sticker == nil {
 			return
@@ -43,6 +44,7 @@ func messages(msg *telegram.Message) {
 		log.D(msg.Sticker.Emoji)
 
 		actionAdd(msg, false)
+		return
 	case stateAddPack:
 		if msg.Sticker == nil {
 			return
@@ -52,6 +54,7 @@ func messages(msg *telegram.Message) {
 		log.D(msg.Sticker.Emoji)
 
 		actionAdd(msg, true)
+		return
 	case stateDelete:
 		if msg.Sticker == nil {
 			return
@@ -61,12 +64,14 @@ func messages(msg *telegram.Message) {
 		log.D(msg.Sticker.Emoji)
 
 		actionDelete(msg)
+		return
 	case stateReset:
 		actionReset(msg)
-	default:
-		err = dbChangeUserState(msg.From.ID, stateNone)
-		errCheck(err)
-
-		messages(msg)
+		return
 	}
+
+	err = dbChangeUserState(msg.From.ID, stateNone)
+	errCheck(err)
+
+	messages(msg)
 }

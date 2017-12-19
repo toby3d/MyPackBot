@@ -8,8 +8,6 @@ import (
 	"github.com/toby3d/go-telegram"     // My Telegram bindings
 )
 
-const perPage = 50
-
 var r = strings.NewReplacer(
 	"🏻", "",
 	"🏼", "",
@@ -91,7 +89,7 @@ func inlineQuery(inline *telegram.InlineQuery) {
 
 	log.Ln("CacheTime:", answer.CacheTime)
 
-	_, err := bot.AnswerInlineQuery(answer)
+	_, err = bot.AnswerInlineQuery(answer)
 	if err != nil {
 		log.Ln(err.Error())
 	}

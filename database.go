@@ -46,6 +46,14 @@ func dbInit() {
 	)
 	errCheck(err)
 
+	err = db.Update(func(tx *buntdb.Tx) error {
+		return tx.AscendKeys("user:*:sticker:*", func(key, val string) bool {
+			tx.Delete(key)
+			return true
+		})
+	})
+	errCheck(err)
+
 	select {}
 }
 

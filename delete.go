@@ -47,7 +47,11 @@ func actionDelete(msg *telegram.Message) {
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 
-	notExist, err := dbDeleteSticker(msg.From.ID, msg.Sticker.FileID)
+	notExist, err := dbDeleteSticker(
+		msg.From.ID,
+		msg.Sticker.SetName,
+		msg.Sticker.FileID,
+	)
 	errCheck(err)
 
 	reply := telegram.NewMessage(msg.Chat.ID, T("success_remove"))

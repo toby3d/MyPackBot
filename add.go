@@ -54,7 +54,12 @@ func actionAdd(msg *telegram.Message, pack bool) {
 
 		allExists := true
 		for _, sticker := range set.Stickers {
-			exists, err := dbAddSticker(msg.From.ID, sticker.FileID, sticker.Emoji)
+			exists, err := dbAddSticker(
+				msg.From.ID,
+				sticker.SetName,
+				sticker.FileID,
+				sticker.Emoji,
+			)
 			errCheck(err)
 
 			if !exists {
@@ -80,7 +85,12 @@ func actionAdd(msg *telegram.Message, pack bool) {
 			reply.ReplyMarkup = &markup
 		}
 	default:
-		exists, err := dbAddSticker(msg.From.ID, msg.Sticker.FileID, msg.Sticker.Emoji)
+		exists, err := dbAddSticker(
+			msg.From.ID,
+			msg.Sticker.SetName,
+			msg.Sticker.FileID,
+			msg.Sticker.Emoji,
+		)
 		errCheck(err)
 
 		if exists {

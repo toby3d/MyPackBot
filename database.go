@@ -17,6 +17,9 @@ const (
 	stateReset      = "reset"
 
 	setUploaded = "uploaded"
+
+	patternUsers    = "users"
+	patternUserSets = "user_sets"
 )
 
 var db *buntdb.DB
@@ -27,15 +30,47 @@ func dbInit() {
 	db, err = buntdb.Open("stickers.db")
 	errCheck(err)
 
-	log.Ln("Creating user_stickers index...")
+	log.Ln("Creating users index...")
 	err = db.CreateIndex(
-		"user_stickers",    // name
-		"user:*:sticker:*", // pattern
+		patternUsers,       // name
+		"user:*",           // pattern
+		buntdb.IndexString, // options
+	)
+	errCheck(err)
+
+	log.Ln("Creating user_sets index...")
+	err = db.CreateIndex(
+		patternUserSets,    // name
+		"user:*:set:*",     // pattern
 		buntdb.IndexString, // options
 	)
 	errCheck(err)
 
 	select {}
+}
+
+func dbGetUsers() ([]int, error) {
+	var users []int
+	err := db.View(func(tx *buntdb.Tx) error {
+		return tx.AscendKeys(
+			"user:*:state",
+			func(key, val string) bool {
+				log.Ln(key, "=", val)
+				subKeys := strings.Split(key, ":")
+				id, err := strconv.Atoi(subKeys[1])
+				if err == nil {
+					users = append(users, id)
+				}
+
+				return true
+			},
+		)
+	})
+	if err == buntdb.ErrNotFound {
+		return nil, nil
+	}
+
+	return users, err
 }
 
 func dbChangeUserState(userID int, state string) error {

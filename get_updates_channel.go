@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	"github.com/toby3d/go-telegram"     // My Telegram bindings
+	tg "github.com/toby3d/telegram"     // My Telegram bindings
 )
 
 // allowedUpdates is a value for parameter of updates configuration

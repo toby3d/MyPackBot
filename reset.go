@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/toby3d/go-telegram" // My Telegram bindings
+	tg "github.com/toby3d/telegram" // My Telegram bindings
 )
 
 const keyPhrase = "Yes, I am totally sure."

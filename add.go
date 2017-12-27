@@ -2,7 +2,7 @@ package main
 
 import (
 	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	"github.com/toby3d/go-telegram"     // My Telegram bindings
+	tg "github.com/toby3d/telegram"     // My Telegram bindings
 )
 
 func commandAdd(msg *telegram.Message, pack bool) {

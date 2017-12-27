@@ -1,6 +1,6 @@
 package main
 
-import "github.com/toby3d/go-telegram" // My Telegram bindings
+import tg "github.com/toby3d/telegram" // My Telegram bindings
 
 func commandHelp(msg *telegram.Message) {
 	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)

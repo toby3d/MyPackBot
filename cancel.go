@@ -2,8 +2,8 @@ package main
 
 import tg "github.com/toby3d/telegram" // My Telegram bindings
 
-func commandCancel(msg *telegram.Message) {
-	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
+func commandCancel(msg *tg.Message) {
+	bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
@@ -28,7 +28,7 @@ func commandCancel(msg *telegram.Message) {
 	err = dbChangeUserState(msg.From.ID, stateNone)
 	errCheck(err)
 
-	reply := telegram.NewMessage(msg.Chat.ID, text)
+	reply := tg.NewMessage(msg.Chat.ID, text)
 	_, err = bot.SendMessage(reply)
 	errCheck(err)
 }

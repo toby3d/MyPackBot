@@ -7,7 +7,7 @@ import (
 
 // message function check Message update on commands, sended stickers or other
 // user stuff
-func messages(msg *telegram.Message) {
+func messages(msg *tg.Message) {
 	if msg.IsCommand() {
 		commands(msg)
 		return
@@ -18,19 +18,19 @@ func messages(msg *telegram.Message) {
 
 	switch state {
 	case stateNone:
-		bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
+		bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 
 		T, err := switchLocale(msg.From.LanguageCode)
 		errCheck(err)
 
-		reply := telegram.NewMessage(
+		reply := tg.NewMessage(
 			msg.Chat.ID,
 			T("error_unknown", map[string]interface{}{
 				"AddStickerCommand": cmdAddSticker,
 				"AddPackCommand":    cmdAddPack,
 				"DeleteCommand":     cmdDelete,
 			}))
-		reply.ParseMode = telegram.ModeMarkdown
+		reply.ParseMode = tg.ModeMarkdown
 
 		_, err = bot.SendMessage(reply)
 		errCheck(err)

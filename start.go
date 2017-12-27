@@ -7,8 +7,8 @@ import (
 	tg "github.com/toby3d/telegram"     // My Telegram bindings
 )
 
-func commandStart(msg *telegram.Message) {
-	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
+func commandStart(msg *tg.Message) {
+	bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 
 	err := dbChangeUserState(msg.From.ID, stateNone)
 	errCheck(err)
@@ -24,13 +24,13 @@ func commandStart(msg *telegram.Message) {
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 
-	reply := telegram.NewMessage(
+	reply := tg.NewMessage(
 		msg.Chat.ID, T("reply_start", map[string]interface{}{
 			"Username": bot.Self.Username,
 			"ID":       bot.Self.ID,
 		}),
 	)
-	reply.ParseMode = telegram.ModeMarkdown
+	reply.ParseMode = tg.ModeMarkdown
 
 	_, err = bot.SendMessage(reply)
 	errCheck(err)

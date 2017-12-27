@@ -2,8 +2,8 @@ package main
 
 import tg "github.com/toby3d/telegram" // My Telegram bindings
 
-func commandDelete(msg *telegram.Message) {
-	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
+func commandDelete(msg *tg.Message) {
+	bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
@@ -15,7 +15,7 @@ func commandDelete(msg *telegram.Message) {
 		err = dbChangeUserState(msg.From.ID, stateNone)
 		errCheck(err)
 
-		reply := telegram.NewMessage(msg.Chat.ID, T("error_empty_remove"))
+		reply := tg.NewMessage(msg.Chat.ID, T("error_empty_remove"))
 		_, err = bot.SendMessage(reply)
 		errCheck(err)
 		return
@@ -24,25 +24,25 @@ func commandDelete(msg *telegram.Message) {
 	err = dbChangeUserState(msg.From.ID, stateDelete)
 	errCheck(err)
 
-	markup := telegram.NewInlineKeyboardMarkup(
-		telegram.NewInlineKeyboardRow(
-			telegram.NewInlineKeyboardButtonSwitchSelf(
+	markup := tg.NewInlineKeyboardMarkup(
+		tg.NewInlineKeyboardRow(
+			tg.NewInlineKeyboardButtonSwitchSelf(
 				T("button_remove"),
 				" ",
 			),
 		),
 	)
 
-	reply := telegram.NewMessage(msg.Chat.ID, T("reply_remove"))
-	reply.ParseMode = telegram.ModeMarkdown
+	reply := tg.NewMessage(msg.Chat.ID, T("reply_remove"))
+	reply.ParseMode = tg.ModeMarkdown
 	reply.ReplyMarkup = &markup
 
 	_, err = bot.SendMessage(reply)
 	errCheck(err)
 }
 
-func actionDelete(msg *telegram.Message) {
-	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
+func actionDelete(msg *tg.Message) {
+	bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
@@ -54,8 +54,8 @@ func actionDelete(msg *telegram.Message) {
 	)
 	errCheck(err)
 
-	reply := telegram.NewMessage(msg.Chat.ID, T("success_remove"))
-	reply.ParseMode = telegram.ModeMarkdown
+	reply := tg.NewMessage(msg.Chat.ID, T("success_remove"))
+	reply.ParseMode = tg.ModeMarkdown
 
 	if notExist {
 		reply.Text = T("error_already_remove")

@@ -16,7 +16,7 @@ var r = strings.NewReplacer(
 	"🏿", "",
 )
 
-func inlineQuery(inline *telegram.InlineQuery) {
+func inlineQuery(inline *tg.InlineQuery) {
 	inline.Query = r.Replace(inline.Query)
 
 	log.Ln("Let's preparing answer...")
@@ -32,7 +32,7 @@ func inlineQuery(inline *telegram.InlineQuery) {
 	offset++
 
 	log.Ln("CURRENT OFFSET:", inline.Offset)
-	answer := &telegram.AnswerInlineQueryParameters{}
+	answer := &tg.AnswerInlineQueryParameters{}
 	answer.InlineQueryID = inline.ID
 	answer.CacheTime = 1
 	answer.IsPersonal = true
@@ -58,6 +58,7 @@ func inlineQuery(inline *telegram.InlineQuery) {
 		} else {
 			return
 		}
+		answer.Results = nil
 	} else {
 		log.Ln("STICKERS FROM REQUEST:", totalStickers)
 		if totalStickers > 50 {
@@ -71,7 +72,7 @@ func inlineQuery(inline *telegram.InlineQuery) {
 
 		var results = make([]interface{}, len(stickers))
 		for i, sticker := range stickers {
-			results[i] = telegram.NewInlineQueryResultCachedSticker(
+			results[i] = tg.NewInlineQueryResultCachedSticker(
 				sticker, sticker,
 			)
 		}

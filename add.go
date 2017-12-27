@@ -5,14 +5,14 @@ import (
 	tg "github.com/toby3d/telegram"     // My Telegram bindings
 )
 
-func commandAdd(msg *telegram.Message, pack bool) {
-	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
+func commandAdd(msg *tg.Message, pack bool) {
+	bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 
-	reply := telegram.NewMessage(msg.Chat.ID, T("reply_add_sticker"))
-	reply.ParseMode = telegram.ModeMarkdown
+	reply := tg.NewMessage(msg.Chat.ID, T("reply_add_sticker"))
+	reply.ParseMode = tg.ModeMarkdown
 
 	err = dbChangeUserState(msg.From.ID, stateAddSticker)
 	errCheck(err)
@@ -29,14 +29,14 @@ func commandAdd(msg *telegram.Message, pack bool) {
 	errCheck(err)
 }
 
-func actionAdd(msg *telegram.Message, pack bool) {
-	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
+func actionAdd(msg *tg.Message, pack bool) {
+	bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 
-	reply := telegram.NewMessage(msg.Chat.ID, T("success_add_sticker"))
-	reply.ParseMode = telegram.ModeMarkdown
+	reply := tg.NewMessage(msg.Chat.ID, T("success_add_sticker"))
+	reply.ParseMode = tg.ModeMarkdown
 
 	switch {
 	case pack && msg.Sticker.SetName == "":
@@ -74,9 +74,9 @@ func actionAdd(msg *telegram.Message, pack bool) {
 				"SetTitle": set.Title,
 			})
 		} else {
-			markup := telegram.NewInlineKeyboardMarkup(
-				telegram.NewInlineKeyboardRow(
-					telegram.NewInlineKeyboardButtonSwitch(
+			markup := tg.NewInlineKeyboardMarkup(
+				tg.NewInlineKeyboardRow(
+					tg.NewInlineKeyboardButtonSwitch(
 						T("button_share"),
 						" ",
 					),
@@ -101,9 +101,9 @@ func actionAdd(msg *telegram.Message, pack bool) {
 			msg.Sticker.Emoji = " "
 		}
 
-		markup := telegram.NewInlineKeyboardMarkup(
-			telegram.NewInlineKeyboardRow(
-				telegram.NewInlineKeyboardButtonSwitch(
+		markup := tg.NewInlineKeyboardMarkup(
+			tg.NewInlineKeyboardRow(
+				tg.NewInlineKeyboardButtonSwitch(
 					T("button_share"),
 					msg.Sticker.Emoji,
 				),

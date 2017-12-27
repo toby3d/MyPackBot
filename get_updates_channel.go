@@ -14,7 +14,7 @@ var allowedUpdates = []string{
 }
 
 // getUpdatesChannel return webhook or long polling channel with bot updates
-func getUpdatesChannel() telegram.UpdatesChannel {
+func getUpdatesChannel() tg.UpdatesChannel {
 	log.Ln("Preparing channel for updates...")
 	if !*flagWebhook {
 		log.Ln("Use LongPolling updates")
@@ -23,7 +23,7 @@ func getUpdatesChannel() telegram.UpdatesChannel {
 		_, err := bot.DeleteWebhook()
 		errCheck(err)
 
-		return bot.NewLongPollingChannel(&telegram.GetUpdatesParameters{
+		return bot.NewLongPollingChannel(&tg.GetUpdatesParameters{
 			Offset:         0,
 			Limit:          100,
 			Timeout:        60,
@@ -41,7 +41,7 @@ func getUpdatesChannel() telegram.UpdatesChannel {
 	)
 
 	log.Ln("Creating new webhook...")
-	webhook := telegram.NewWebhook(
+	webhook := tg.NewWebhook(
 		fmt.Sprint(set, listen, bot.AccessToken), nil,
 	)
 	webhook.MaxConnections = 40

@@ -6,7 +6,7 @@ import (
 )
 
 // bot is general structure of the bot
-var bot *telegram.Bot
+var bot *tg.Bot
 
 // main function is a general function for work of this bot
 func main() {
@@ -16,7 +16,7 @@ func main() {
 	go dbInit()
 
 	log.Ln("Initializing new bot via checking access_token...")
-	bot, err = telegram.NewBot(cfg.UString("telegram.token"))
+	bot, err = tg.NewBot(cfg.UString("telegram.token"))
 	errCheck(err)
 
 	log.Ln("Let's check updates channel!")
@@ -46,8 +46,8 @@ func main() {
 			messages(update.Message)
 		default:
 			log.Ln("Get unsupported update")
+			continue
 		}
-		continue
 	}
 
 	err = db.Close()

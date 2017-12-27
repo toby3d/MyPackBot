@@ -17,7 +17,7 @@ const (
 	cmdStart      = "start"
 )
 
-func commands(msg *telegram.Message) {
+func commands(msg *tg.Message) {
 	log.Ln("Received a", msg.Command(), "command")
 	switch strings.ToLower(msg.Command()) {
 	case strings.ToLower(cmdStart):

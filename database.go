@@ -16,7 +16,7 @@ const (
 	stateDelete     = "del"
 	stateReset      = "reset"
 
-	setUploaded = "uploaded"
+	setUploaded = "?"
 
 	patternUsers    = "users"
 	patternUserSets = "user_sets"

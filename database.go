@@ -15,6 +15,8 @@ const (
 	stateAddPack    = "addPack"
 	stateDelete     = "del"
 	stateReset      = "reset"
+
+	setUploaded = "uploaded"
 )
 
 var db *buntdb.DB
@@ -68,13 +70,17 @@ func dbGetUserState(userID int) (string, error) {
 	return state, err
 }
 
-func dbAddSticker(userID int, fileID, emoji string) (bool, error) {
+func dbAddSticker(userID int, setName, fileID, emoji string) (bool, error) {
 	log.Ln("Trying to add", fileID, "sticker from", userID, "user")
+	if setName == "" {
+		setName = setUploaded
+	}
+
 	var exists bool
 	err := db.Update(func(tx *buntdb.Tx) error {
 		var err error
 		_, exists, err = tx.Set(
-			fmt.Sprint("user:", userID, ":sticker:", fileID), // key
+			fmt.Sprint("user:", userID, ":set:", setName, ":sticker:", fileID), // key
 			emoji, // value
 			nil,   // options
 		)
@@ -90,10 +96,14 @@ func dbAddSticker(userID int, fileID, emoji string) (bool, error) {
 	return exists, err
 }
 
-func dbDeleteSticker(userID int, fileID string) (bool, error) {
+func dbDeleteSticker(userID int, setName, fileID string) (bool, error) {
 	log.Ln("Trying to remove", fileID, "sticker from", userID, "user")
+	if setName == "" {
+		setName = setUploaded
+	}
+
 	err := db.Update(func(tx *buntdb.Tx) error {
-		_, err := tx.Delete(fmt.Sprint("user:", userID, ":sticker:", fileID))
+		_, err := tx.Delete(fmt.Sprint("user:", userID, ":set:", setName, ":sticker:", fileID))
 		return err
 	})
 
@@ -111,8 +121,8 @@ func dbResetUserStickers(userID int) error {
 	return db.Update(func(tx *buntdb.Tx) error {
 		var keys []string
 
-		err := tx.Ascend(
-			"user_stickers", // index
+		err := tx.AscendKeys(
+			patternUserSets, // index
 			func(key, val string) bool { // iterator
 				subKeys := strings.Split(key, ":")
 				if subKeys[1] == strconv.Itoa(userID) {
@@ -143,9 +153,10 @@ func dbGetUserStickers(userID, offset int, query string) ([]string, int, error) 
 	offset = offset * 50
 
 	err := db.View(func(tx *buntdb.Tx) error {
-		return tx.Ascend(
-			"user_stickers", // index
+		return tx.AscendKeys(
+			fmt.Sprint("user:", userID, ":set:*"), // index
 			func(key, val string) bool { // iterator
+				log.Ln(key, "=", val)
 				subKeys := strings.Split(key, ":")
 				if subKeys[1] != strconv.Itoa(userID) {
 					return true
@@ -167,7 +178,7 @@ func dbGetUserStickers(userID, offset int, query string) ([]string, int, error) 
 				}
 
 				count++
-				stickers = append(stickers, subKeys[3])
+				stickers = append(stickers, subKeys[5])
 				return true
 			},
 		)

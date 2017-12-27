@@ -31,19 +31,15 @@ func main() {
 
 			inlineQuery(update.InlineQuery)
 		case update.Message != nil:
-			if update.Message.From.ID == bot.Self.ID {
-				log.Ln("Received a message from myself, ignore this update")
+			if bot.IsMessageFromMe(update.Message) ||
+				bot.IsForwardFromMe(update.Message) {
+				log.Ln("Ignore message update")
 				return
 			}
 
-			if update.Message.ForwardFrom != nil {
-				if update.Message.ForwardFrom.ID == bot.Self.ID {
-					log.Ln("Received a forward from myself, ignore this update")
-					return
-				}
-			}
-
 			messages(update.Message)
+		case update.ChannelPost != nil:
+			channelPost(update.ChannelPost)
 		default:
 			log.Ln("Get unsupported update")
 			continue

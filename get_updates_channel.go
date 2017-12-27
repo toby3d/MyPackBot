@@ -9,8 +9,9 @@ import (
 
 // allowedUpdates is a value for parameter of updates configuration
 var allowedUpdates = []string{
-	telegram.UpdateInlineQuery, // For searching and sending stickers
-	telegram.UpdateMessage,     // For get commands and messages
+	tg.UpdateInlineQuery, // For searching and sending stickers
+	tg.UpdateMessage,     // For get commands and messages
+	tg.UpdateChannelPost,
 }
 
 // getUpdatesChannel return webhook or long polling channel with bot updates

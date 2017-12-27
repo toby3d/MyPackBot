@@ -4,3 +4,4 @@ telegram:
     set: https://www.google.com
     listen: /bot
     serve: 0.0.0.0:2368
+  channel: -1000000000000

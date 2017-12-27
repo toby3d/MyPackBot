@@ -13,7 +13,8 @@ import (
 
 var (
 	// Variables with types from imports
-	cfg *config.Config
+	cfg       *config.Config
+	channelID int64
 
 	// Setted variables
 	flagWebhook = flag.Bool(
@@ -60,4 +61,6 @@ func init() {
 		_, err = cfg.String("telegram.webhook.serve")
 		errCheck(err)
 	}
+
+	channelID = int64(cfg.UInt("telegram.channel"))
 }

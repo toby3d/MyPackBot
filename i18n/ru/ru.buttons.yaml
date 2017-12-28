@@ -7,7 +7,7 @@ button_inline_add:
   one: У тебя {{.Count}} стикер. Добавить ещё один?
   many: У тебя {{.Count}} стикеров. Добавить ещё один?
   other: У тебя {{.Count}} стикеров. Добавить ещё один?
-button_remove:
+button_del:
   other: Выбрать стикер для удаления
 button_share:
   other: Воспользоваться твоим набором!

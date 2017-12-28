@@ -15,7 +15,7 @@ func commandDelete(msg *tg.Message) {
 		err = dbChangeUserState(msg.From.ID, stateNone)
 		errCheck(err)
 
-		reply := tg.NewMessage(msg.Chat.ID, T("error_empty_remove"))
+		reply := tg.NewMessage(msg.Chat.ID, T("error_empty_del"))
 		_, err = bot.SendMessage(reply)
 		errCheck(err)
 		return
@@ -27,13 +27,13 @@ func commandDelete(msg *tg.Message) {
 	markup := tg.NewInlineKeyboardMarkup(
 		tg.NewInlineKeyboardRow(
 			tg.NewInlineKeyboardButtonSwitchSelf(
-				T("button_remove"),
+				T("button_del"),
 				" ",
 			),
 		),
 	)
 
-	reply := tg.NewMessage(msg.Chat.ID, T("reply_remove"))
+	reply := tg.NewMessage(msg.Chat.ID, T("reply_del"))
 	reply.ParseMode = tg.ModeMarkdown
 	reply.ReplyMarkup = &markup
 
@@ -54,11 +54,11 @@ func actionDelete(msg *tg.Message) {
 	)
 	errCheck(err)
 
-	reply := tg.NewMessage(msg.Chat.ID, T("success_remove"))
+	reply := tg.NewMessage(msg.Chat.ID, T("success_del"))
 	reply.ParseMode = tg.ModeMarkdown
 
 	if notExist {
-		reply.Text = T("error_already_remove")
+		reply.Text = T("error_already_del")
 	}
 
 	_, err = bot.SendMessage(reply)

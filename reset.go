@@ -7,8 +7,6 @@ import (
 	tg "github.com/toby3d/telegram" // My Telegram bindings
 )
 
-const keyPhrase = "Yes, I am totally sure."
-
 func commandReset(msg *tg.Message) {
 	bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 
@@ -36,7 +34,7 @@ func commandReset(msg *tg.Message) {
 	reply := tg.NewMessage(
 		msg.Chat.ID,
 		T("reply_reset", map[string]interface{}{
-			"KeyPhrase":     keyPhrase,
+			"KeyPhrase":     T("meta_key_phrase"),
 			"CancelCommand": cmdCancel,
 		}))
 	reply.ParseMode = tg.ModeMarkdown
@@ -54,7 +52,7 @@ func actionReset(msg *tg.Message) {
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 
-	if msg.Text != keyPhrase {
+	if msg.Text != T("meta_key_phrase") {
 		reply := tg.NewMessage(msg.Chat.ID, T("error_reset_phrase"))
 		reply.ParseMode = tg.ModeMarkdown
 

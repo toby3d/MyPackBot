@@ -38,6 +38,8 @@ error_unknown:
   other: |-
     I do not know what to do with this sticker.
     Please run /{{.AddStickerCommand}}, /{{.AddPackCommand}} or /{{.DeleteCommand}} command first.
+meta_key_phrase:
+  other: Yes, I am totally sure.
 meta_reset_1:
   other: Wait. Who are you?
 meta_reset_2:

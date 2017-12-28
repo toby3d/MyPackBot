@@ -39,6 +39,8 @@ error_unknown:
   other: |-
     Я понятия не имею что делать с этим стикером.
     Пожалуйста, сначала примени /{{.AddStickerCommand}}, /{{.AddPackCommand}} или /{{.DeleteCommand}}.
+meta_key_phrase:
+  other: Да, я абсолютно уверен.
 meta_reset_1:
   other: Подожди. Кто ты?
 meta_reset_2:

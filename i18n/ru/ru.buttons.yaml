@@ -1,0 +1,13 @@
+button_inline_empty:
+  other: Твой набор пуст
+button_inline_nothing:
+  other: Нет стикеров с {{.Query}}, добавить один?
+button_inline_add:
+  few: У тебя {{.Count}} стикеров. Добавить ещё один?
+  one: У тебя {{.Count}} стикер. Добавить ещё один?
+  many: У тебя {{.Count}} стикеров. Добавить ещё один?
+  other: У тебя {{.Count}} стикеров. Добавить ещё один?
+button_remove:
+  other: Выбрать стикер для удаления
+button_share:
+  other: Воспользоваться твоим набором!

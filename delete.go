@@ -1,21 +1,21 @@
 package main
 
-import "github.com/toby3d/go-telegram" // My Telegram bindings
+import tg "github.com/toby3d/telegram" // My Telegram bindings
 
-func commandDelete(msg *telegram.Message) {
-	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
+func commandDelete(msg *tg.Message) {
+	bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 
-	stickers, _, err := dbGetUserStickers(msg.From.ID)
+	_, total, err := dbGetUserStickers(msg.From.ID, 0, "")
 	errCheck(err)
 
-	if len(stickers) <= 0 {
+	if total <= 0 {
 		err = dbChangeUserState(msg.From.ID, stateNone)
 		errCheck(err)
 
-		reply := telegram.NewMessage(msg.Chat.ID, T("error_empty_remove"))
+		reply := tg.NewMessage(msg.Chat.ID, T("error_empty_remove"))
 		_, err = bot.SendMessage(reply)
 		errCheck(err)
 		return
@@ -24,34 +24,38 @@ func commandDelete(msg *telegram.Message) {
 	err = dbChangeUserState(msg.From.ID, stateDelete)
 	errCheck(err)
 
-	markup := telegram.NewInlineKeyboardMarkup(
-		telegram.NewInlineKeyboardRow(
-			telegram.NewInlineKeyboardButtonSwitchSelf(
+	markup := tg.NewInlineKeyboardMarkup(
+		tg.NewInlineKeyboardRow(
+			tg.NewInlineKeyboardButtonSwitchSelf(
 				T("button_remove"),
 				" ",
 			),
 		),
 	)
 
-	reply := telegram.NewMessage(msg.Chat.ID, T("reply_remove"))
-	reply.ParseMode = telegram.ModeMarkdown
+	reply := tg.NewMessage(msg.Chat.ID, T("reply_remove"))
+	reply.ParseMode = tg.ModeMarkdown
 	reply.ReplyMarkup = &markup
 
 	_, err = bot.SendMessage(reply)
 	errCheck(err)
 }
 
-func actionDelete(msg *telegram.Message) {
-	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
+func actionDelete(msg *tg.Message) {
+	bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 
-	notExist, err := dbDeleteSticker(msg.From.ID, msg.Sticker.FileID)
+	notExist, err := dbDeleteSticker(
+		msg.From.ID,
+		msg.Sticker.SetName,
+		msg.Sticker.FileID,
+	)
 	errCheck(err)
 
-	reply := telegram.NewMessage(msg.Chat.ID, T("success_remove"))
-	reply.ParseMode = telegram.ModeMarkdown
+	reply := tg.NewMessage(msg.Chat.ID, T("success_remove"))
+	reply.ParseMode = tg.ModeMarkdown
 
 	if notExist {
 		reply.Text = T("error_already_remove")

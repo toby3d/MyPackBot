@@ -1,9 +1,9 @@
 package main
 
-import "github.com/toby3d/go-telegram" // My Telegram bindings
+import tg "github.com/toby3d/telegram" // My Telegram bindings
 
-func commandHelp(msg *telegram.Message) {
-	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
+func commandHelp(msg *tg.Message) {
+	bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 
 	err := dbChangeUserState(msg.From.ID, stateNone)
 	errCheck(err)
@@ -11,16 +11,16 @@ func commandHelp(msg *telegram.Message) {
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 
-	markup := telegram.NewInlineKeyboardMarkup(
-		telegram.NewInlineKeyboardRow(
-			telegram.NewInlineKeyboardButtonSwitch(
+	markup := tg.NewInlineKeyboardMarkup(
+		tg.NewInlineKeyboardRow(
+			tg.NewInlineKeyboardButtonSwitch(
 				T("button_share"),
 				" ",
 			),
 		),
 	)
 
-	reply := telegram.NewMessage(
+	reply := tg.NewMessage(
 		msg.Chat.ID, T("reply_help", map[string]interface{}{
 			"AddStickerCommand": cmdAddSticker,
 			"AddPackCommand":    cmdAddPack,
@@ -30,7 +30,7 @@ func commandHelp(msg *telegram.Message) {
 			"Username":          bot.Self.Username,
 		}),
 	)
-	reply.ParseMode = telegram.ModeMarkdown
+	reply.ParseMode = tg.ModeMarkdown
 	reply.ReplyMarkup = &markup
 
 	_, err = bot.SendMessage(reply)

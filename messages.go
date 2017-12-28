@@ -2,13 +2,12 @@ package main
 
 import (
 	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	"github.com/toby3d/botan"
-	"github.com/toby3d/go-telegram" // My Telegram bindings
+	tg "github.com/toby3d/telegram"     // My Telegram bindings
 )
 
 // message function check Message update on commands, sended stickers or other
 // user stuff
-func messages(msg *telegram.Message) {
+func messages(msg *tg.Message) {
 	if msg.IsCommand() {
 		commands(msg)
 		return
@@ -19,118 +18,60 @@ func messages(msg *telegram.Message) {
 
 	switch state {
 	case stateNone:
-		appMetrika.TrackAsync(
-			"Nothing", msg.From.ID, *msg,
-			func(answer *botan.Answer, err error) {
-				log.Ln("Asynchonous:", answer.Status)
-				metrika <- true
-			},
-		)
-
-		bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
+		bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 
 		T, err := switchLocale(msg.From.LanguageCode)
 		errCheck(err)
 
-		reply := telegram.NewMessage(
+		reply := tg.NewMessage(
 			msg.Chat.ID,
 			T("error_unknown", map[string]interface{}{
 				"AddStickerCommand": cmdAddSticker,
 				"AddPackCommand":    cmdAddPack,
 				"DeleteCommand":     cmdDelete,
 			}))
-		reply.ParseMode = telegram.ModeMarkdown
+		reply.ParseMode = tg.ModeMarkdown
 
 		_, err = bot.SendMessage(reply)
 		errCheck(err)
-
-		<-metrika
+		return
 	case stateAddSticker:
 		if msg.Sticker == nil {
-			appMetrika.Track("Message", msg.From.ID, *msg)
 			return
 		}
 
 		log.D(msg.Sticker)
 		log.D(msg.Sticker.Emoji)
 
-		appMetrika.TrackAsync(
-			"Add single sticker", msg.From.ID, *msg,
-			func(answer *botan.Answer, err error) {
-				log.Ln("Asynchonous:", answer.Status)
-				metrika <- true
-			},
-		)
-
 		actionAdd(msg, false)
-
-		<-metrika
+		return
 	case stateAddPack:
 		if msg.Sticker == nil {
-			appMetrika.Track("Message", msg.From.ID, *msg)
 			return
 		}
-
-		appMetrika.TrackAsync(
-			"Add pack", msg.From.ID, *msg,
-			func(answer *botan.Answer, err error) {
-				log.Ln("Asynchonous:", answer.Status)
-				metrika <- true
-			},
-		)
 
 		log.D(msg.Sticker)
 		log.D(msg.Sticker.Emoji)
 
 		actionAdd(msg, true)
-
-		<-metrika
+		return
 	case stateDelete:
 		if msg.Sticker == nil {
-			appMetrika.Track("Message", msg.From.ID, *msg)
 			return
 		}
-
-		appMetrika.TrackAsync(
-			"Delete sticker", msg.From.ID, *msg,
-			func(answer *botan.Answer, err error) {
-				log.Ln("Asynchonous:", answer.Status)
-				metrika <- true
-			},
-		)
 
 		log.D(msg.Sticker)
 		log.D(msg.Sticker.Emoji)
 
 		actionDelete(msg)
-
-		<-metrika
+		return
 	case stateReset:
-		appMetrika.TrackAsync(
-			"Reset pack", msg.From.ID, *msg,
-			func(answer *botan.Answer, err error) {
-				log.Ln("Asynchonous:", answer.Status)
-				metrika <- true
-			},
-		)
-
 		actionReset(msg)
-
-		<-metrika
-	default:
-		appMetrika.TrackAsync(
-			"Message", msg.From.ID, *msg,
-			func(answer *botan.Answer, err error) {
-				log.Ln("Asynchonous:", answer.Status)
-				metrika <- true
-			},
-		)
-
-		err = dbChangeUserState(msg.From.ID, stateNone)
-		errCheck(err)
-
-		messages(msg)
-
-		<-metrika
+		return
 	}
+
+	err = dbChangeUserState(msg.From.ID, stateNone)
+	errCheck(err)
+
+	messages(msg)
 }

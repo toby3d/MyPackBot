@@ -4,26 +4,26 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/toby3d/go-telegram" // My Telegram bindings
+	tg "github.com/toby3d/telegram" // My Telegram bindings
 )
 
 const keyPhrase = "Yes, I am totally sure."
 
-func commandReset(msg *telegram.Message) {
-	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
+func commandReset(msg *tg.Message) {
+	bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 
-	stickers, _, err := dbGetUserStickers(msg.From.ID)
+	_, total, err := dbGetUserStickers(msg.From.ID, 0, "")
 	errCheck(err)
 
-	if len(stickers) <= 0 {
+	if total <= 0 {
 		err = dbChangeUserState(msg.From.ID, stateNone)
 		errCheck(err)
 
-		reply := telegram.NewMessage(msg.Chat.ID, T("error_already_reset"))
-		reply.ParseMode = telegram.ModeMarkdown
+		reply := tg.NewMessage(msg.Chat.ID, T("error_already_reset"))
+		reply.ParseMode = tg.ModeMarkdown
 
 		_, err = bot.SendMessage(reply)
 		errCheck(err)
@@ -33,20 +33,20 @@ func commandReset(msg *telegram.Message) {
 	err = dbChangeUserState(msg.From.ID, stateReset)
 	errCheck(err)
 
-	reply := telegram.NewMessage(
+	reply := tg.NewMessage(
 		msg.Chat.ID,
 		T("reply_reset", map[string]interface{}{
 			"KeyPhrase":     keyPhrase,
 			"CancelCommand": cmdCancel,
 		}))
-	reply.ParseMode = telegram.ModeMarkdown
+	reply.ParseMode = tg.ModeMarkdown
 
 	_, err = bot.SendMessage(reply)
 	errCheck(err)
 }
 
-func actionReset(msg *telegram.Message) {
-	bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
+func actionReset(msg *tg.Message) {
+	bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 
 	err := dbChangeUserState(msg.From.ID, stateNone)
 	errCheck(err)
@@ -55,8 +55,8 @@ func actionReset(msg *telegram.Message) {
 	errCheck(err)
 
 	if msg.Text != keyPhrase {
-		reply := telegram.NewMessage(msg.Chat.ID, T("error_reset_phrase"))
-		reply.ParseMode = telegram.ModeMarkdown
+		reply := tg.NewMessage(msg.Chat.ID, T("error_reset_phrase"))
+		reply.ParseMode = tg.ModeMarkdown
 
 		_, err = bot.SendMessage(reply)
 		errCheck(err)
@@ -66,21 +66,21 @@ func actionReset(msg *telegram.Message) {
 	err = dbResetUserStickers(msg.From.ID)
 	errCheck(err)
 
-	reply := telegram.NewMessage(msg.Chat.ID, T("success_reset"))
-	reply.ParseMode = telegram.ModeMarkdown
+	reply := tg.NewMessage(msg.Chat.ID, T("success_reset"))
+	reply.ParseMode = tg.ModeMarkdown
 
 	_, err = bot.SendMessage(reply)
 	errCheck(err)
 
 	for i := 1; i <= 3; i++ {
-		bot.SendChatAction(msg.Chat.ID, telegram.ActionTyping)
+		bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 
 		text := T(fmt.Sprint("meta_reset_", i))
 
 		time.Sleep(time.Minute * time.Duration(len(text)) / 1000)
 
-		reply = telegram.NewMessage(msg.Chat.ID, text)
-		reply.ParseMode = telegram.ModeMarkdown
+		reply = tg.NewMessage(msg.Chat.ID, text)
+		reply.ParseMode = tg.ModeMarkdown
 
 		_, err = bot.SendMessage(reply)
 		errCheck(err)

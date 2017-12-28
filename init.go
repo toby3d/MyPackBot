@@ -9,16 +9,14 @@ import (
 	log "github.com/kirillDanshin/dlog"  // Insert logs only in debug builds
 	"github.com/nicksnyder/go-i18n/i18n" // Internationalization and localization
 	"github.com/olebedev/config"         // Easy configuration file parsing
-	"github.com/toby3d/botan"
 )
 
 var (
 	// Variables with types from imports
-	cfg        *config.Config
-	appMetrika *botan.Botan
+	cfg       *config.Config
+	channelID int64
 
 	// Setted variables
-	metrika     = make(chan bool)
 	flagWebhook = flag.Bool(
 		"webhook",
 		false,
@@ -45,8 +43,6 @@ func init() {
 	cfg, err = config.ParseYamlFile("config.yaml")
 	errCheck(err)
 
-	appMetrika = botan.New(cfg.UString("botan"))
-
 	log.Ln("Checking bot access token in configuration file...")
 	_, err = cfg.String("telegram.token")
 	errCheck(err)
@@ -65,4 +61,6 @@ func init() {
 		_, err = cfg.String("telegram.webhook.serve")
 		errCheck(err)
 	}
+
+	channelID = int64(cfg.UInt("telegram.channel"))
 }

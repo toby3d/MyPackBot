@@ -4,18 +4,18 @@ import (
 	"fmt"
 
 	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	"github.com/toby3d/go-telegram"     // My Telegram bindings
+	tg "github.com/toby3d/telegram"     // My Telegram bindings
 )
 
 // allowedUpdates is a value for parameter of updates configuration
 var allowedUpdates = []string{
-	telegram.UpdateChosenInlineResult, // For collecting statistics
-	telegram.UpdateInlineQuery,        // For searching and sending stickers
-	telegram.UpdateMessage,            // For get commands and messages
+	tg.UpdateInlineQuery, // For searching and sending stickers
+	tg.UpdateMessage,     // For get commands and messages
+	tg.UpdateChannelPost,
 }
 
 // getUpdatesChannel return webhook or long polling channel with bot updates
-func getUpdatesChannel() telegram.UpdatesChannel {
+func getUpdatesChannel() tg.UpdatesChannel {
 	log.Ln("Preparing channel for updates...")
 	if !*flagWebhook {
 		log.Ln("Use LongPolling updates")
@@ -24,7 +24,7 @@ func getUpdatesChannel() telegram.UpdatesChannel {
 		_, err := bot.DeleteWebhook()
 		errCheck(err)
 
-		return bot.NewLongPollingChannel(&telegram.GetUpdatesParameters{
+		return bot.NewLongPollingChannel(&tg.GetUpdatesParameters{
 			Offset:         0,
 			Limit:          100,
 			Timeout:        60,
@@ -42,10 +42,10 @@ func getUpdatesChannel() telegram.UpdatesChannel {
 	)
 
 	log.Ln("Creating new webhook...")
-	webhook := telegram.NewWebhook(
+	webhook := tg.NewWebhook(
 		fmt.Sprint(set, listen, bot.AccessToken), nil,
 	)
-	webhook.MaxConnections = 100
+	webhook.MaxConnections = 40
 	webhook.AllowedUpdates = allowedUpdates
 
 	return bot.NewWebhookChannel(

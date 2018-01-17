@@ -9,10 +9,7 @@ const langFallback = "en"
 
 func switchLocale(langCode string) (T i18n.TranslateFunc, err error) {
 	log.Ln("Check", langCode, "localization")
-	T, err = i18n.Tfunc(langCode)
-	if err != nil {
-		log.Ln("Unsupported language, change to ", langFallback, " by default")
-		T, err = i18n.Tfunc(langFallback)
-	}
+	T, err = i18n.Tfunc(langCode, langFallback)
+	errCheck(err)
 	return
 }

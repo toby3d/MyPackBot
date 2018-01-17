@@ -9,3 +9,15 @@ button_del:
   other: Select sticker for remove
 button_share:
   other: Use your stickers pack!
+button_add_sticker:
+  other: ➕ Add sticker
+button_add_pack:
+  other: 📦 Add pack
+button_del_sticker:
+  other: 🗑 Delete sticker
+button_del_pack:
+  other: 🗑 Delete pack
+button_reset:
+  other: 🔥 Reset pack
+button_cancel:
+  other: ❌ Cancel

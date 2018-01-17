@@ -22,6 +22,7 @@ func commandReset(msg *tg.Message) {
 
 		reply := tg.NewMessage(msg.Chat.ID, T("error_already_reset"))
 		reply.ParseMode = tg.ModeMarkdown
+		reply.ReplyMarkup = getMenuKeyboard(T)
 
 		_, err = bot.SendMessage(reply)
 		errCheck(err)
@@ -38,6 +39,7 @@ func commandReset(msg *tg.Message) {
 			"CancelCommand": cmdCancel,
 		}))
 	reply.ParseMode = tg.ModeMarkdown
+	reply.ReplyMarkup = getCancelButton(T)
 
 	_, err = bot.SendMessage(reply)
 	errCheck(err)
@@ -55,6 +57,7 @@ func actionReset(msg *tg.Message) {
 	if msg.Text != T("meta_key_phrase") {
 		reply := tg.NewMessage(msg.Chat.ID, T("error_reset_phrase"))
 		reply.ParseMode = tg.ModeMarkdown
+		reply.ReplyMarkup = getMenuKeyboard(T)
 
 		_, err = bot.SendMessage(reply)
 		errCheck(err)
@@ -66,6 +69,7 @@ func actionReset(msg *tg.Message) {
 
 	reply := tg.NewMessage(msg.Chat.ID, T("success_reset"))
 	reply.ParseMode = tg.ModeMarkdown
+	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
 
 	_, err = bot.SendMessage(reply)
 	errCheck(err)

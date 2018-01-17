@@ -1,5 +1,15 @@
+button_add_pack:
+  other: "\U0001F4E6 Добавить набор"
+button_add_sticker:
+  other: ➕ Добавить стикер
+button_cancel:
+  other: ❌ Отменить
 button_del:
   other: Выбрать стикер для удаления
+button_del_pack:
+  other: "\U0001F5D1 Удалить набор"
+button_del_sticker:
+  other: "\U0001F5D1 Удалить стикер"
 button_inline_add:
   few: У тебя {{.Count}} стикеров. Добавить ещё один?
   many: У тебя {{.Count}} стикеров. Добавить ещё один?
@@ -9,6 +19,8 @@ button_inline_empty:
   other: Твой набор пуст
 button_inline_nothing:
   other: Нет стикеров с {{.Query}}, добавить один?
+button_reset:
+  other: "\U0001F525 Сбросить набор"
 button_share:
   other: Воспользоваться твоим набором!
 cancel_add_pack:

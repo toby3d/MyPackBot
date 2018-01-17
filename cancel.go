@@ -31,6 +31,8 @@ func commandCancel(msg *tg.Message) {
 	errCheck(err)
 
 	reply := tg.NewMessage(msg.Chat.ID, text)
+	reply.ReplyMarkup = getMenuKeyboard(T)
+
 	_, err = bot.SendMessage(reply)
 	errCheck(err)
 }

@@ -11,3 +11,15 @@ button_del:
   other: Выбрать стикер для удаления
 button_share:
   other: Воспользоваться твоим набором!
+button_add_sticker:
+  other: ➕ Добавить стикер
+button_add_pack:
+  other: 📦 Добавить набор
+button_del_sticker:
+  other: 🗑 Удалить стикер
+button_del_pack:
+  other: 🗑 Удалить набор
+button_reset:
+  other: 🔥 Сбросить набор
+button_cancel:
+  other: ❌ Отменить

@@ -19,6 +19,7 @@ func commandDelete(msg *tg.Message, pack bool) {
 		errCheck(err)
 
 		reply := tg.NewMessage(msg.Chat.ID, T("error_empty_del"))
+		reply.ReplyMarkup = getMenuKeyboard(T)
 		_, err = bot.SendMessage(reply)
 		errCheck(err)
 		return
@@ -26,26 +27,17 @@ func commandDelete(msg *tg.Message, pack bool) {
 
 	reply := tg.NewMessage(msg.Chat.ID, T("reply_del_sticker"))
 	reply.ParseMode = tg.ModeMarkdown
+	reply.ReplyMarkup = getCancelButton(T)
 
 	err = dbChangeUserState(msg.From.ID, stateDeleteSticker)
 	errCheck(err)
 
 	if pack {
-		reply.Text = T("reply_del_pack")
-
 		err = dbChangeUserState(msg.From.ID, stateDeletePack)
 		errCheck(err)
-	}
 
-	markup := tg.NewInlineKeyboardMarkup(
-		tg.NewInlineKeyboardRow(
-			tg.NewInlineKeyboardButtonSwitchSelf(
-				T("button_del"),
-				" ",
-			),
-		),
-	)
-	reply.ReplyMarkup = &markup
+		reply.Text = T("reply_del_pack")
+	}
 
 	_, err = bot.SendMessage(reply)
 	errCheck(err)
@@ -59,6 +51,7 @@ func actionDelete(msg *tg.Message, pack bool) {
 
 	reply := tg.NewMessage(msg.Chat.ID, T("success_del_sticker"))
 	reply.ParseMode = tg.ModeMarkdown
+	reply.ReplyMarkup = getCancelButton(T)
 
 	var notExist bool
 	if pack {

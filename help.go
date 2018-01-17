@@ -11,12 +11,6 @@ func commandHelp(msg *tg.Message) {
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 
-	markup := tg.NewInlineKeyboardMarkup(
-		tg.NewInlineKeyboardRow(
-			tg.NewInlineKeyboardButtonSwitch(T("button_share"), " "),
-		),
-	)
-
 	reply := tg.NewMessage(
 		msg.Chat.ID, T("reply_help", map[string]interface{}{
 			"AddStickerCommand":    cmdAddSticker,
@@ -29,7 +23,7 @@ func commandHelp(msg *tg.Message) {
 		}),
 	)
 	reply.ParseMode = tg.ModeMarkdown
-	reply.ReplyMarkup = &markup
+	reply.ReplyMarkup = getMenuKeyboard(T)
 
 	_, err = bot.SendMessage(reply)
 	errCheck(err)

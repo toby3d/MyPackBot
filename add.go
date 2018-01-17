@@ -13,6 +13,11 @@ func commandAdd(msg *tg.Message, pack bool) {
 
 	reply := tg.NewMessage(msg.Chat.ID, T("reply_add_sticker"))
 	reply.ParseMode = tg.ModeMarkdown
+	reply.ReplyMarkup = tg.NewReplyKeyboardMarkup(
+		tg.NewReplyKeyboardRow(
+			tg.NewReplyKeyboardButton(T("button_cancel")),
+		),
+	)
 
 	err = dbChangeUserState(msg.From.ID, stateAddSticker)
 	errCheck(err)
@@ -74,15 +79,7 @@ func actionAdd(msg *tg.Message, pack bool) {
 				"SetTitle": set.Title,
 			})
 		} else {
-			markup := tg.NewInlineKeyboardMarkup(
-				tg.NewInlineKeyboardRow(
-					tg.NewInlineKeyboardButtonSwitch(
-						T("button_share"),
-						" ",
-					),
-				),
-			)
-			reply.ReplyMarkup = &markup
+			reply.ReplyMarkup = getCancelButton(T)
 		}
 	default:
 		exists, err := dbAddSticker(
@@ -101,15 +98,7 @@ func actionAdd(msg *tg.Message, pack bool) {
 			msg.Sticker.Emoji = " "
 		}
 
-		markup := tg.NewInlineKeyboardMarkup(
-			tg.NewInlineKeyboardRow(
-				tg.NewInlineKeyboardButtonSwitch(
-					T("button_share"),
-					msg.Sticker.Emoji,
-				),
-			),
-		)
-		reply.ReplyMarkup = &markup
+		reply.ReplyMarkup = getCancelButton(T)
 	}
 
 	_, err = bot.SendMessage(reply)

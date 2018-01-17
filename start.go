@@ -31,6 +31,7 @@ func commandStart(msg *tg.Message) {
 		}),
 	)
 	reply.ParseMode = tg.ModeMarkdown
+	reply.ReplyMarkup = getMenuKeyboard(T)
 
 	_, err = bot.SendMessage(reply)
 	errCheck(err)

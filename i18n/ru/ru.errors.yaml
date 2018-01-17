@@ -15,4 +15,4 @@ error_empty_add_pack:
 error_unknown:
   other: |
     Я понятия не имею что делать с этим стикером.
-    Пожалуйста, сначала примени /{{.AddStickerCommand}}, /{{.AddPackCommand}} или /{{.DeleteCommand}}.
+    Пожалуйста, сначала примени /{{.AddStickerCommand}}, /{{.AddPackCommand}}, /{{.DeleteStickerCommand}} или /{{.DeletePackCommand}}.

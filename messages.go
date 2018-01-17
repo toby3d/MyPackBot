@@ -26,9 +26,10 @@ func messages(msg *tg.Message) {
 		reply := tg.NewMessage(
 			msg.Chat.ID,
 			T("error_unknown", map[string]interface{}{
-				"AddStickerCommand": cmdAddSticker,
-				"AddPackCommand":    cmdAddPack,
-				"DeleteCommand":     cmdDelete,
+				"AddStickerCommand":    cmdAddSticker,
+				"AddPackCommand":       cmdAddPack,
+				"DeleteStickerCommand": cmdDeleteSticker,
+				"DeletePackCommand":    cmdDeletePack,
 			}))
 		reply.ParseMode = tg.ModeMarkdown
 
@@ -55,7 +56,7 @@ func messages(msg *tg.Message) {
 
 		actionAdd(msg, true)
 		return
-	case stateDelete:
+	case stateDeleteSticker:
 		if msg.Sticker == nil {
 			return
 		}
@@ -63,7 +64,17 @@ func messages(msg *tg.Message) {
 		log.D(msg.Sticker)
 		log.D(msg.Sticker.Emoji)
 
-		actionDelete(msg)
+		actionDelete(msg, false)
+		return
+	case stateDeletePack:
+		if msg.Sticker == nil {
+			return
+		}
+
+		log.D(msg.Sticker)
+		log.D(msg.Sticker.Emoji)
+
+		actionDelete(msg, true)
 		return
 	case stateReset:
 		actionReset(msg)

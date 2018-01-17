@@ -37,7 +37,9 @@ func inlineQuery(inline *tg.InlineQuery) {
 	answer.CacheTime = 1
 	answer.IsPersonal = true
 
-	stickers, packSize, err := dbGetUserStickers(inline.From.ID, offset, inline.Query)
+	stickers, packSize, err := dbGetUserStickers(
+		inline.From.ID, offset, inline.Query,
+	)
 	errCheck(err)
 
 	totalStickers := len(stickers)
@@ -46,8 +48,9 @@ func inlineQuery(inline *tg.InlineQuery) {
 			if inline.Query != "" {
 				// If search stickers by emoji return 0 results
 				answer.SwitchPrivateMessageText = T(
-					"button_inline_nothing",
-					map[string]interface{}{"Query": inline.Query},
+					"button_inline_nothing", map[string]interface{}{
+						"Query": inline.Query,
+					},
 				)
 				answer.SwitchPrivateMessageParameter = cmdAddSticker
 			} else {
@@ -72,15 +75,11 @@ func inlineQuery(inline *tg.InlineQuery) {
 
 		var results = make([]interface{}, len(stickers))
 		for i, sticker := range stickers {
-			results[i] = tg.NewInlineQueryResultCachedSticker(
-				sticker, sticker,
-			)
+			results[i] = tg.NewInlineQueryResultCachedSticker(sticker, sticker)
 		}
 
 		answer.SwitchPrivateMessageText = T(
-			"button_inline_add",
-			packSize,
-			map[string]interface{}{
+			"button_inline_add", packSize, map[string]interface{}{
 				"Count": packSize,
 			},
 		)

@@ -17,9 +17,11 @@ func channelPost(post *tg.Message) {
 	errCheck(err)
 
 	for i := range users {
-		bot.ForwardMessage(
+		if _, err = bot.ForwardMessage(
 			tg.NewForwardMessage(post.Chat.ID, int64(users[i]), post.ID),
-		)
+		); err != nil {
+			log.Ln(err.Error())
+		}
 
 		time.Sleep(time.Second / 10) // For avoid spamming
 	}

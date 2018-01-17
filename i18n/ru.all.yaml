@@ -12,10 +12,12 @@ button_inline_nothing:
 button_share:
   other: Воспользоваться твоим набором!
 cancel_add_pack:
-  other: Ты отменил процесс добавления нового набора в твой.
+  other: Ты отменил процесс добавления новых наборов в твой.
 cancel_add_sticker:
-  other: Ты отменил процесс добавления нового стикера в твой набор.
-cancel_del:
+  other: Ты отменил процесс добавления новых стикеров в твой набор.
+cancel_del_pack:
+  other: Ты отменил процесс удаления наборов из твоего набора.
+cancel_del_sticker:
   other: Ты отменил процесс удаления стикера из твоего набора.
 cancel_error:
   other: Нечего отменять.
@@ -38,7 +40,7 @@ error_reset_phrase:
 error_unknown:
   other: |-
     Я понятия не имею что делать с этим стикером.
-    Пожалуйста, сначала примени /{{.AddStickerCommand}}, /{{.AddPackCommand}} или /{{.DeleteCommand}}.
+    Пожалуйста, сначала примени /{{.AddStickerCommand}}, /{{.AddPackCommand}}, /{{.DeleteStickerCommand}} или /{{.DeletePackCommand}}.
 meta_key_phrase:
   other: Да, я абсолютно уверен.
 meta_reset_1:
@@ -52,13 +54,16 @@ reply_add_pack:
     свой.
 reply_add_sticker:
   other: Пришли стикеры из любых других наборов чтобы по-одному добавить их в свой.
-reply_del:
+reply_del_pack:
+  other: Пришли стикер из своего набора чтобы удалить весь его набор.
+reply_del_sticker:
   other: Пришли стикер из своего набора чтобы удалить его.
 reply_help:
   other: |-
     /{{.AddStickerCommand}} - по-одному добавляет стикеры в твой набор
     /{{.AddPackCommand}} - добавляет сразу весь набор в твой
-    /{{.DeleteCommand}} - по-одному удаляет стикер из твоего набора
+    /{{.DeleteStickerCommand}} - по-одному удаляет стикер из твоего набора
+    /{{.DeletePackCommand}} - удаляет набор стикеров из твоего набора
     /{{.ResetCommand}} - удаляет все стикеры из твоего набора
     /{{.CancelCommand}} - отменяет текущую операцию
 
@@ -78,7 +83,9 @@ success_add_pack:
   other: Набор *{{.SetTitle}}* успешно добавлен в твой!
 success_add_sticker:
   other: Стикер успешно добавлен в твой набор!
-success_del:
+success_del_pack:
+  other: Набор *{{.SetTitle}}* успешно удалён из твоего набора!
+success_del_sticker:
   other: Стикер успешно удалён из твоего набора!
 success_reset:
   other: Сброс твоего набора успешно произведён!..

@@ -13,21 +13,19 @@ func commandHelp(msg *tg.Message) {
 
 	markup := tg.NewInlineKeyboardMarkup(
 		tg.NewInlineKeyboardRow(
-			tg.NewInlineKeyboardButtonSwitch(
-				T("button_share"),
-				" ",
-			),
+			tg.NewInlineKeyboardButtonSwitch(T("button_share"), " "),
 		),
 	)
 
 	reply := tg.NewMessage(
 		msg.Chat.ID, T("reply_help", map[string]interface{}{
-			"AddStickerCommand": cmdAddSticker,
-			"AddPackCommand":    cmdAddPack,
-			"DeleteCommand":     cmdDelete,
-			"ResetCommand":      cmdReset,
-			"CancelCommand":     cmdCancel,
-			"Username":          bot.Self.Username,
+			"AddStickerCommand":    cmdAddSticker,
+			"AddPackCommand":       cmdAddPack,
+			"DeleteStickerCommand": cmdDeleteSticker,
+			"DeletePackCommand":    cmdDeletePack,
+			"ResetCommand":         cmdReset,
+			"CancelCommand":        cmdCancel,
+			"Username":             bot.Self.Username,
 		}),
 	)
 	reply.ParseMode = tg.ModeMarkdown

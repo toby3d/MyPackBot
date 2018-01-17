@@ -17,8 +17,10 @@ func commandCancel(msg *tg.Message) {
 		text = T("cancel_add_sticker")
 	case stateAddPack:
 		text = T("cancel_add_pack")
-	case stateDelete:
-		text = T("cancel_del")
+	case stateDeleteSticker:
+		text = T("cancel_del_sticker")
+	case stateDeletePack:
+		text = T("cancel_del_pack")
 	case stateReset:
 		text = T("cancel_reset")
 	default:

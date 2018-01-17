@@ -10,11 +10,12 @@ import (
 )
 
 const (
-	stateNone       = "none"
-	stateAddSticker = "addSticker"
-	stateAddPack    = "addPack"
-	stateDelete     = "del"
-	stateReset      = "reset"
+	stateNone          = "none"
+	stateAddSticker    = "addSticker"
+	stateAddPack       = "addPack"
+	stateDeleteSticker = "delSticker"
+	stateDeletePack    = "delPack"
+	stateReset         = "reset"
 
 	setUploaded = "?"
 
@@ -46,14 +47,6 @@ func dbInit() {
 	)
 	errCheck(err)
 
-	err = db.Update(func(tx *buntdb.Tx) error {
-		return tx.AscendKeys("user:*:sticker:*", func(key, val string) bool {
-			tx.Delete(key)
-			return true
-		})
-	})
-	errCheck(err)
-
 	select {}
 }
 
@@ -63,7 +56,6 @@ func dbGetUsers() ([]int, error) {
 		return tx.AscendKeys(
 			"user:*:state",
 			func(key, val string) bool {
-				log.Ln(key, "=", val)
 				subKeys := strings.Split(key, ":")
 				id, err := strconv.Atoi(subKeys[1])
 				if err == nil {
@@ -159,12 +151,49 @@ func dbDeleteSticker(userID int, setName, fileID string) (bool, error) {
 	return false, err
 }
 
+func dbDeletePack(userID int, setName string) (bool, error) {
+	log.Ln("Trying to remove all", setName, "sticker from", userID, "user")
+	if setName == "" {
+		setName = setUploaded
+	}
+
+	var fileIDs []string
+	err := db.View(func(tx *buntdb.Tx) error {
+		return tx.AscendKeys(
+			fmt.Sprint("user:", userID, ":set:", setName, ":*"),
+			func(key, val string) bool {
+				keys := strings.Split(key, ":")
+				fileIDs = append(fileIDs, keys[5])
+				return true
+			},
+		)
+	})
+
+	if len(fileIDs) == 0 {
+		return true, nil
+	}
+
+	for _, fileID := range fileIDs {
+		notExist, err := dbDeleteSticker(userID, setName, fileID)
+		if err != nil {
+			return notExist, err
+		}
+	}
+
+	switch err {
+	case buntdb.ErrNotFound:
+		log.Ln(userID, "not found")
+		return true, nil
+	}
+
+	return false, err
+}
+
 func dbResetUserStickers(userID int) error {
 	log.Ln("Trying reset all stickers of", userID, "user")
 	return db.Update(func(tx *buntdb.Tx) error {
 		var keys []string
-
-		err := tx.AscendKeys(
+		if err := tx.AscendKeys(
 			patternUserSets, // index
 			func(key, val string) bool { // iterator
 				subKeys := strings.Split(key, ":")
@@ -173,19 +202,18 @@ func dbResetUserStickers(userID int) error {
 				}
 				return true
 			},
-		)
-		if err != nil {
+		); err != nil {
 			return err
 		}
 
 		for i := range keys {
-			_, err = tx.Delete(keys[i])
+			_, err := tx.Delete(keys[i])
 			if err != nil {
 				break
 			}
 		}
 
-		return err
+		return nil
 	})
 }
 
@@ -199,7 +227,6 @@ func dbGetUserStickers(userID, offset int, query string) ([]string, int, error) 
 		return tx.AscendKeys(
 			fmt.Sprint("user:", userID, ":set:*"), // index
 			func(key, val string) bool { // iterator
-				log.Ln(key, "=", val)
 				subKeys := strings.Split(key, ":")
 				if subKeys[1] != strconv.Itoa(userID) {
 					return true

@@ -2,7 +2,9 @@ success_add_sticker:
   other: Стикер успешно добавлен в твой набор!
 success_add_pack:
   other: Набор *{{.SetTitle}}* успешно добавлен в твой!
-success_del:
+success_del_sticker:
   other: Стикер успешно удалён из твоего набора!
+success_del_pack:
+  other: Набор *{{.SetTitle}}* успешно удалён из твоего набора!
 success_reset:
   other: Сброс твоего набора успешно произведён!..

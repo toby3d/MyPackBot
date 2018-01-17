@@ -1,9 +1,11 @@
 cancel_add_sticker:
-  other: You cancelled the process of adding a new sticker to your pack.
+  other: You cancelled the process of adding a new stickers to your pack.
 cancel_add_pack:
-  other: You cancelled the process of adding a new pack to yours.
-cancel_del:
-  other: You cancelled the process of removing a sticker from your pack.
+  other: You cancelled the process of adding a new packs to yours.
+cancel_del_sticker:
+  other: You cancelled the process of removing a stickers from your pack.
+cancel_del_pack:
+  other: You cancelled the process of removing a sticker packs from yours.
 cancel_reset:
   other: You cancelled the process of reseting your stickers pack.
 cancel_error:

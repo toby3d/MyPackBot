@@ -15,4 +15,4 @@ error_empty_add_pack:
 error_unknown:
   other: |
     I do not know what to do with this sticker.
-    Please run /{{.AddStickerCommand}}, /{{.AddPackCommand}} or /{{.DeleteCommand}} command first.
+    Please run /{{.AddStickerCommand}}, /{{.AddPackCommand}}, /{{.DeleteStickerCommand}} or /{{.DeletePackCommand}} command first.

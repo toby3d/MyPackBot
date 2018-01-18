@@ -13,11 +13,7 @@ func commandAdd(msg *tg.Message, pack bool) {
 
 	reply := tg.NewMessage(msg.Chat.ID, T("reply_add_sticker"))
 	reply.ParseMode = tg.ModeMarkdown
-	reply.ReplyMarkup = tg.NewReplyKeyboardMarkup(
-		tg.NewReplyKeyboardRow(
-			tg.NewReplyKeyboardButton(T("button_cancel")),
-		),
-	)
+	reply.ReplyMarkup = getCancelButton(T)
 
 	err = dbChangeUserState(msg.From.ID, stateAddSticker)
 	errCheck(err)

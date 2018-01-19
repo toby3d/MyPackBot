@@ -27,3 +27,5 @@ reply_help:
     /{{.CancelCommand}} - cancel the current operation
 
     To view and send stickers from your pack, just type `@{{.Username}}` (and space) in any chat.
+reply_switch_button:
+  other: This button will help you quickly call your pack to select the sticker you want.

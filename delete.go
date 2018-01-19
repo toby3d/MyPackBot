@@ -1,17 +1,18 @@
 package main
 
 import (
-	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	tg "github.com/toby3d/telegram"     // My Telegram bindings
+	log "github.com/kirillDanshin/dlog"
+	tg "github.com/toby3d/telegram"
 )
 
 func commandDelete(msg *tg.Message, pack bool) {
-	bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
-
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 
 	_, total, err := dbGetUserStickers(msg.From.ID, 0, "")
+	errCheck(err)
+
+	_, err = bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errCheck(err)
 
 	if total <= 0 {
@@ -41,12 +42,25 @@ func commandDelete(msg *tg.Message, pack bool) {
 
 	_, err = bot.SendMessage(reply)
 	errCheck(err)
+
+	_, err = bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
+	errCheck(err)
+
+	reply = tg.NewMessage(msg.Chat.ID, T("reply_switch_button"))
+	reply.ReplyMarkup = getSwitchButton(T)
+	_, err = bot.SendMessage(reply)
+	errCheck(err)
 }
 
 func actionDelete(msg *tg.Message, pack bool) {
-	bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
+	if msg.Sticker == nil {
+		return
+	}
 
 	T, err := switchLocale(msg.From.LanguageCode)
+	errCheck(err)
+
+	_, err = bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errCheck(err)
 
 	reply := tg.NewMessage(msg.Chat.ID, T("success_del_sticker"))
@@ -55,7 +69,8 @@ func actionDelete(msg *tg.Message, pack bool) {
 
 	var notExist bool
 	if pack {
-		set, err := bot.GetStickerSet(msg.Sticker.SetName)
+		var set *tg.StickerSet
+		set, err = bot.GetStickerSet(msg.Sticker.SetName)
 		errCheck(err)
 
 		log.Ln("SetName:", set.Title)

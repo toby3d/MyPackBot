@@ -3,8 +3,8 @@ package main
 import (
 	"strings"
 
-	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	tg "github.com/toby3d/telegram"     // My Telegram bindings
+	log "github.com/kirillDanshin/dlog"
+	tg "github.com/toby3d/telegram"
 )
 
 const (
@@ -19,7 +19,7 @@ const (
 )
 
 func commands(msg *tg.Message) {
-	log.Ln("Received a", msg.Command(), "command")
+	log.Ln("command:", msg.Command())
 	switch strings.ToLower(msg.Command()) {
 	case strings.ToLower(cmdStart):
 		commandStart(msg)

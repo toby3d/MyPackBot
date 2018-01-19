@@ -2,8 +2,10 @@ error_already_add_sticker:
   other: Этот стикер уже в твоём наборе.
 error_already_add_pack:
   other: Все стикеры *{{.SetTitle}}* уже в твоём наборе.
-error_already_del:
+error_already_del_sticker:
   other: Вероятно этот стикер уже удалён из твоего набора.
+error_already_del_pack:
+  other: Вероятно этот набор уже удалён из твоего.
 error_already_reset:
   other: Нечего сбрасывать, набор уже пуст.
 error_reset_phrase:

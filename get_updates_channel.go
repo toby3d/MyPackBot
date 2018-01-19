@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	tg "github.com/toby3d/telegram"     // My Telegram bindings
+	log "github.com/kirillDanshin/dlog"
+	tg "github.com/toby3d/telegram"
 )
 
 // allowedUpdates is a value for parameter of updates configuration

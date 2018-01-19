@@ -1,14 +1,14 @@
 button_inline_empty:
   other: Твой набор пуст
 button_inline_nothing:
-  other: Нет стикеров с {{.Query}}, добавить один?
-button_inline_add:
-  few: У тебя {{.Count}} стикеров. Добавить ещё один?
-  one: У тебя {{.Count}} стикер. Добавить ещё один?
-  many: У тебя {{.Count}} стикеров. Добавить ещё один?
-  other: У тебя {{.Count}} стикеров. Добавить ещё один?
-button_del:
-  other: Выбрать стикер для удаления
+  other: Не найдены стикеры для {{.Query}}
+button_inline_search:
+  few: У тебя {{.Count}} стикера
+  one: У тебя {{.Count}} стикер
+  many: У тебя {{.Count}} стикеров
+  other: У тебя {{.Count}} стикеров
+button_inline_select:
+  other: Выбрать стикер
 button_share:
   other: Воспользоваться твоим набором!
 button_add_sticker:

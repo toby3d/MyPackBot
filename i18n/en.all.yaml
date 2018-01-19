@@ -4,19 +4,19 @@ button_add_sticker:
   other: ➕ Add sticker
 button_cancel:
   other: ❌ Cancel
-button_del:
-  other: Select sticker for remove
 button_del_pack:
   other: "\U0001F5D1 Delete pack"
 button_del_sticker:
   other: "\U0001F5D1 Delete sticker"
-button_inline_add:
-  one: You have {{.Count}} sticker. Add one more?
-  other: You have {{.Count}} stickers. Add one more?
 button_inline_empty:
   other: Your pack is empty
 button_inline_nothing:
-  other: Not found stickers for {{.Query}}, add one?
+  other: Not found stickers for {{.Query}}
+button_inline_search:
+  one: You have {{.Count}} sticker
+  other: You have {{.Count}} stickers
+button_inline_select:
+  other: Select sticker
 button_reset:
   other: "\U0001F525 Reset pack"
 button_share:
@@ -37,7 +37,9 @@ error_already_add_pack:
   other: All stickers from *{{.SetTitle}}* pack is already in yours.
 error_already_add_sticker:
   other: This sticker is already in your pack.
-error_already_del:
+error_already_del_pack:
+  other: Maybe this pack is already removed from yours.
+error_already_del_sticker:
   other: Maybe this sticker is already removed from your pack.
 error_already_reset:
   other: There is nothing to reset, pack is already empty.
@@ -52,14 +54,8 @@ error_unknown:
   other: |-
     I do not know what to do with this sticker.
     Please run /{{.AddStickerCommand}}, /{{.AddPackCommand}}, /{{.DeleteStickerCommand}} or /{{.DeletePackCommand}} command first.
-meta_key_phrase:
+key_phrase:
   other: Yes, I am totally sure.
-meta_reset_1:
-  other: Wait. Who are you?
-meta_reset_2:
-  other: What are you doing here?
-meta_reset_3:
-  other: What am I doing here?
 reply_add_pack:
   other: Send an existing stickers from any other packs to add the entire packs to
     yourself.
@@ -70,7 +66,7 @@ reply_del_pack:
 reply_del_sticker:
   other: Send an existing stickers from your pack for removing it.
 reply_help:
-  other: |-
+  other: |
     /{{.AddStickerCommand}} - add a single sticker to your pack
     /{{.AddPackCommand}} - add a full other pack to your pack
     /{{.DeleteStickerCommand}} - remove a single sticker from your pack
@@ -90,6 +86,9 @@ reply_start:
     Hello, I'm the [@{{.Username}}](tg://user?id={{.ID}})!
     I can create your personal pack with stickers from others packs.
     Without limits and installing. In any chat. For free.
+reply_switch_button:
+  other: This button will help you quickly call your pack to select the sticker you
+    want.
 success_add_pack:
   other: The sticker pack *{{.SetTitle}}* was successfully added to yours!
 success_add_sticker:

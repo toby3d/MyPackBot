@@ -4,21 +4,21 @@ button_add_sticker:
   other: ➕ Добавить стикер
 button_cancel:
   other: ❌ Отменить
-button_del:
-  other: Выбрать стикер для удаления
 button_del_pack:
   other: "\U0001F5D1 Удалить набор"
 button_del_sticker:
   other: "\U0001F5D1 Удалить стикер"
-button_inline_add:
-  few: У тебя {{.Count}} стикеров. Добавить ещё один?
-  many: У тебя {{.Count}} стикеров. Добавить ещё один?
-  one: У тебя {{.Count}} стикер. Добавить ещё один?
-  other: У тебя {{.Count}} стикеров. Добавить ещё один?
 button_inline_empty:
   other: Твой набор пуст
 button_inline_nothing:
-  other: Нет стикеров с {{.Query}}, добавить один?
+  other: Не найдены стикеры для {{.Query}}
+button_inline_search:
+  few: У тебя {{.Count}} стикера
+  many: У тебя {{.Count}} стикеров
+  one: У тебя {{.Count}} стикер
+  other: У тебя {{.Count}} стикеров
+button_inline_select:
+  other: Выбрать стикер
 button_reset:
   other: "\U0001F525 Сбросить набор"
 button_share:
@@ -39,7 +39,9 @@ error_already_add_pack:
   other: Все стикеры *{{.SetTitle}}* уже в твоём наборе.
 error_already_add_sticker:
   other: Этот стикер уже в твоём наборе.
-error_already_del:
+error_already_del_pack:
+  other: Вероятно этот набор уже удалён из твоего.
+error_already_del_sticker:
   other: Вероятно этот стикер уже удалён из твоего набора.
 error_already_reset:
   other: Нечего сбрасывать, набор уже пуст.
@@ -53,14 +55,8 @@ error_unknown:
   other: |-
     Я понятия не имею что делать с этим стикером.
     Пожалуйста, сначала примени /{{.AddStickerCommand}}, /{{.AddPackCommand}}, /{{.DeleteStickerCommand}} или /{{.DeletePackCommand}}.
-meta_key_phrase:
+key_phrase:
   other: Да, я абсолютно уверен.
-meta_reset_1:
-  other: Подожди. Кто ты?
-meta_reset_2:
-  other: Что ты здесь делаешь?
-meta_reset_3:
-  other: Что Я здесь делаю?
 reply_add_pack:
   other: Пришли стикеры из любых других наборов чтобы целиком добавить их наборы в
     свой.
@@ -71,7 +67,7 @@ reply_del_pack:
 reply_del_sticker:
   other: Пришли стикер из своего набора чтобы удалить его.
 reply_help:
-  other: |-
+  other: |
     /{{.AddStickerCommand}} - по-одному добавляет стикеры в твой набор
     /{{.AddPackCommand}} - добавляет сразу весь набор в твой
     /{{.DeleteStickerCommand}} - по-одному удаляет стикер из твоего набора
@@ -91,6 +87,8 @@ reply_start:
     Привет, я [@{{.Username}}](tg://user?id={{.ID}})!
     Я могу создать твой персональный набор стикеров из других наборов.
     Без ограничений и установки. В любых чатах. Бесплатно.
+reply_switch_button:
+  other: Эта кнопка поможет тебе быстро вызвать твой набор для выбора нужного стикера.
 success_add_pack:
   other: Набор *{{.SetTitle}}* успешно добавлен в твой!
 success_add_sticker:

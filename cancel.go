@@ -1,14 +1,15 @@
 package main
 
-import tg "github.com/toby3d/telegram" // My Telegram bindings
+import tg "github.com/toby3d/telegram"
 
 func commandCancel(msg *tg.Message) {
-	bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
-
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 
 	state, err := dbGetUserState(msg.From.ID)
+	errCheck(err)
+
+	_, err = bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errCheck(err)
 
 	var text string

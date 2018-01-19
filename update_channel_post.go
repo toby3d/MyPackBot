@@ -3,11 +3,11 @@ package main
 import (
 	"time"
 
-	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	tg "github.com/toby3d/telegram"     // My Telegram bindings
+	log "github.com/kirillDanshin/dlog"
+	tg "github.com/toby3d/telegram"
 )
 
-func channelPost(post *tg.Message) {
+func updateChannelPost(post *tg.Message) {
 	if post.Chat.ID != channelID {
 		log.Ln(post.Chat.ID, "!=", channelID)
 		return

@@ -8,6 +8,11 @@ import (
 )
 
 func updateInlineQuery(inlineQuery *tg.InlineQuery) {
+	fixedQuery, err := fixEmoji(inlineQuery.Query)
+	if err == nil {
+		inlineQuery.Query = fixedQuery
+	}
+
 	answer := &tg.AnswerInlineQueryParameters{}
 	answer.InlineQueryID = inlineQuery.ID
 	answer.CacheTime = 1

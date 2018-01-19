@@ -8,12 +8,13 @@ import (
 )
 
 func commandReset(msg *tg.Message) {
-	bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
-
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 
 	_, total, err := dbGetUserStickers(msg.From.ID, 0, "")
+	errCheck(err)
+
+	_, err = bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errCheck(err)
 
 	if total <= 0 {
@@ -46,12 +47,13 @@ func commandReset(msg *tg.Message) {
 }
 
 func actionReset(msg *tg.Message) {
-	bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
-
-	err := dbChangeUserState(msg.From.ID, stateNone)
+	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 
-	T, err := switchLocale(msg.From.LanguageCode)
+	err = dbChangeUserState(msg.From.ID, stateNone)
+	errCheck(err)
+
+	_, err = bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errCheck(err)
 
 	if msg.Text != T("meta_key_phrase") {
@@ -75,7 +77,8 @@ func actionReset(msg *tg.Message) {
 	errCheck(err)
 
 	for i := 1; i <= 3; i++ {
-		bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
+		_, err = bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
+		errCheck(err)
 
 		text := T(fmt.Sprint("meta_reset_", i))
 

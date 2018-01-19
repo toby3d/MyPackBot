@@ -2,54 +2,49 @@ package main
 
 import (
 	"strconv"
-	"strings"
 
 	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
 	tg "github.com/toby3d/telegram"     // My Telegram bindings
 )
 
-var r = strings.NewReplacer(
-	"🏻", "",
-	"🏼", "",
-	"🏽", "",
-	"🏾", "",
-	"🏿", "",
-)
-
-func inlineQuery(inline *tg.InlineQuery) {
-	inline.Query = r.Replace(inline.Query)
-
-	log.Ln("Let's preparing answer...")
-	T, err := switchLocale(inline.From.LanguageCode)
-	errCheck(err)
-
-	log.Ln("INLINE OFFSET:", inline.Offset)
-	if inline.Offset == "" {
-		inline.Offset = "-1"
-	}
-	offset, err := strconv.Atoi(inline.Offset)
-	errCheck(err)
-	offset++
-
-	log.Ln("CURRENT OFFSET:", inline.Offset)
+func updateInlineQuery(inlineQuery *tg.InlineQuery) {
 	answer := &tg.AnswerInlineQueryParameters{}
-	answer.InlineQueryID = inline.ID
+	answer.InlineQueryID = inlineQuery.ID
 	answer.CacheTime = 1
 	answer.IsPersonal = true
 
+	if len([]rune(inlineQuery.Query)) >= 256 {
+		if _, err := bot.AnswerInlineQuery(answer); err != nil {
+			log.Ln(err.Error())
+		}
+		return
+	}
+
+	log.Ln("Let's preparing answer...")
+	T, err := switchLocale(inlineQuery.From.LanguageCode)
+	errCheck(err)
+
+	log.Ln("INLINE OFFSET:", inlineQuery.Offset)
+	if inlineQuery.Offset == "" {
+		inlineQuery.Offset = "-1"
+	}
+	offset, err := strconv.Atoi(inlineQuery.Offset)
+	errCheck(err)
+	offset++
+
 	stickers, packSize, err := dbGetUserStickers(
-		inline.From.ID, offset, inline.Query,
+		inlineQuery.From.ID, offset, inlineQuery.Query,
 	)
 	errCheck(err)
 
 	totalStickers := len(stickers)
 	if totalStickers == 0 {
 		if offset == 0 {
-			if inline.Query != "" {
+			if inlineQuery.Query != "" {
 				// If search stickers by emoji return 0 results
 				answer.SwitchPrivateMessageText = T(
 					"button_inline_nothing", map[string]interface{}{
-						"Query": inline.Query,
+						"Query": inlineQuery.Query,
 					},
 				)
 				answer.SwitchPrivateMessageParameter = cmdAddSticker
@@ -89,8 +84,7 @@ func inlineQuery(inline *tg.InlineQuery) {
 
 	log.Ln("CacheTime:", answer.CacheTime)
 
-	_, err = bot.AnswerInlineQuery(answer)
-	if err != nil {
+	if _, err = bot.AnswerInlineQuery(answer); err != nil {
 		log.Ln(err.Error())
 	}
 }

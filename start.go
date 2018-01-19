@@ -8,9 +8,10 @@ import (
 )
 
 func commandStart(msg *tg.Message) {
-	bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
-
 	err := dbChangeUserState(msg.From.ID, stateNone)
+	errCheck(err)
+
+	_, err = bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errCheck(err)
 
 	if msg.HasArgument() {

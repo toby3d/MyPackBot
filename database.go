@@ -18,9 +18,6 @@ const (
 	stateReset         = "reset"
 
 	setUploaded = "?"
-
-	patternUsers    = "users"
-	patternUserSets = "user_sets"
 )
 
 var db *buntdb.DB
@@ -29,22 +26,6 @@ func dbInit() {
 	log.Ln("Open database file...")
 	var err error
 	db, err = buntdb.Open("stickers.db")
-	errCheck(err)
-
-	log.Ln("Creating users index...")
-	err = db.CreateIndex(
-		patternUsers,       // name
-		"user:*",           // pattern
-		buntdb.IndexString, // options
-	)
-	errCheck(err)
-
-	log.Ln("Creating user_sets index...")
-	err = db.CreateIndex(
-		patternUserSets,    // name
-		"user:*:set:*",     // pattern
-		buntdb.IndexString, // options
-	)
 	errCheck(err)
 
 	select {}
@@ -97,7 +78,7 @@ func dbGetUserState(userID int) (string, error) {
 	switch err {
 	case buntdb.ErrNotFound:
 		log.Ln(userID, "not found, create new one")
-		if err := dbChangeUserState(userID, stateNone); err != nil {
+		if err = dbChangeUserState(userID, stateNone); err != nil {
 			return state, err
 		}
 	}
@@ -174,7 +155,8 @@ func dbDeletePack(userID int, setName string) (bool, error) {
 	}
 
 	for _, fileID := range fileIDs {
-		notExist, err := dbDeleteSticker(userID, setName, fileID)
+		var notExist bool
+		notExist, err = dbDeleteSticker(userID, setName, fileID)
 		if err != nil {
 			return notExist, err
 		}
@@ -194,7 +176,7 @@ func dbResetUserStickers(userID int) error {
 	return db.Update(func(tx *buntdb.Tx) error {
 		var keys []string
 		if err := tx.AscendKeys(
-			patternUserSets, // index
+			fmt.Sprint("user:", userID, ":set:*"), // index
 			func(key, val string) bool { // iterator
 				subKeys := strings.Split(key, ":")
 				if subKeys[1] == strconv.Itoa(userID) {
@@ -242,8 +224,7 @@ func dbGetUserStickers(userID, offset int, query string) ([]string, int, error) 
 					return true
 				}
 
-				if query != "" &&
-					query != val {
+				if query != "" && !strings.Contains(query, val) {
 					return true
 				}
 

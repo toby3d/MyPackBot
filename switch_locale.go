@@ -7,9 +7,7 @@ import (
 
 const langFallback = "en"
 
-func switchLocale(langCode string) (T i18n.TranslateFunc, err error) {
+func switchLocale(langCode string) (i18n.TranslateFunc, error) {
 	log.Ln("Check", langCode, "localization")
-	T, err = i18n.Tfunc(langCode, langFallback)
-	errCheck(err)
-	return
+	return i18n.Tfunc(langCode, langFallback)
 }

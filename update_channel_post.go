@@ -7,7 +7,7 @@ import (
 	tg "github.com/toby3d/telegram"     // My Telegram bindings
 )
 
-func channelPost(post *tg.Message) {
+func updateChannelPost(post *tg.Message) {
 	if post.Chat.ID != channelID {
 		log.Ln(post.Chat.ID, "!=", channelID)
 		return

@@ -1,10 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"time"
+	"strings"
 
-	tg "github.com/toby3d/telegram" // My Telegram bindings
+	tg "github.com/toby3d/telegram"
 )
 
 func commandReset(msg *tg.Message) {
@@ -24,7 +23,6 @@ func commandReset(msg *tg.Message) {
 		reply := tg.NewMessage(msg.Chat.ID, T("error_already_reset"))
 		reply.ParseMode = tg.ModeMarkdown
 		reply.ReplyMarkup = getMenuKeyboard(T)
-
 		_, err = bot.SendMessage(reply)
 		errCheck(err)
 		return
@@ -33,15 +31,12 @@ func commandReset(msg *tg.Message) {
 	err = dbChangeUserState(msg.From.ID, stateReset)
 	errCheck(err)
 
-	reply := tg.NewMessage(
-		msg.Chat.ID,
-		T("reply_reset", map[string]interface{}{
-			"KeyPhrase":     T("meta_key_phrase"),
-			"CancelCommand": cmdCancel,
-		}))
+	reply := tg.NewMessage(msg.Chat.ID, T("reply_reset", map[string]interface{}{
+		"KeyPhrase":     T("meta_key_phrase"),
+		"CancelCommand": cmdCancel,
+	}))
 	reply.ParseMode = tg.ModeMarkdown
 	reply.ReplyMarkup = getCancelButton(T)
-
 	_, err = bot.SendMessage(reply)
 	errCheck(err)
 }
@@ -56,11 +51,10 @@ func actionReset(msg *tg.Message) {
 	_, err = bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errCheck(err)
 
-	if msg.Text != T("meta_key_phrase") {
+	if !strings.EqualFold(msg.Text, T("meta_key_phrase")) {
 		reply := tg.NewMessage(msg.Chat.ID, T("error_reset_phrase"))
 		reply.ParseMode = tg.ModeMarkdown
 		reply.ReplyMarkup = getMenuKeyboard(T)
-
 		_, err = bot.SendMessage(reply)
 		errCheck(err)
 		return
@@ -71,23 +65,7 @@ func actionReset(msg *tg.Message) {
 
 	reply := tg.NewMessage(msg.Chat.ID, T("success_reset"))
 	reply.ParseMode = tg.ModeMarkdown
-	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
-
+	reply.ReplyMarkup = getMenuKeyboard(T)
 	_, err = bot.SendMessage(reply)
 	errCheck(err)
-
-	for i := 1; i <= 3; i++ {
-		_, err = bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
-		errCheck(err)
-
-		text := T(fmt.Sprint("meta_reset_", i))
-
-		time.Sleep(time.Minute * time.Duration(len(text)) / 1000)
-
-		reply = tg.NewMessage(msg.Chat.ID, text)
-		reply.ParseMode = tg.ModeMarkdown
-
-		_, err = bot.SendMessage(reply)
-		errCheck(err)
-	}
 }

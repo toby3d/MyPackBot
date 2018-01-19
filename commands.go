@@ -3,7 +3,7 @@ package main
 import (
 	"strings"
 
-	// log "github.com/kirillDanshin/dlog"
+	log "github.com/kirillDanshin/dlog"
 	tg "github.com/toby3d/telegram"
 )
 
@@ -19,31 +19,23 @@ const (
 )
 
 func commands(msg *tg.Message) {
-	T, err := switchLocale(msg.From.LanguageCode)
-	errCheck(err)
-
-	switch {
-	case strings.ToLower(msg.Command()) == strings.ToLower(cmdStart):
+	log.Ln("command:", msg.Command())
+	switch strings.ToLower(msg.Command()) {
+	case strings.ToLower(cmdStart):
 		commandStart(msg)
-	case strings.ToLower(msg.Command()) == strings.ToLower(cmdHelp):
+	case strings.ToLower(cmdHelp):
 		commandHelp(msg)
-	case msg.Text == T("button_add_sticker"),
-		strings.ToLower(msg.Command()) == strings.ToLower(cmdAddSticker):
+	case strings.ToLower(cmdAddSticker):
 		commandAdd(msg, false)
-	case msg.Text == T("button_add_pack"),
-		strings.ToLower(msg.Command()) == strings.ToLower(cmdAddPack):
+	case strings.ToLower(cmdAddPack):
 		commandAdd(msg, true)
-	case msg.Text == T("button_del_sticker"),
-		strings.ToLower(msg.Command()) == strings.ToLower(cmdDeleteSticker):
+	case strings.ToLower(cmdDeleteSticker):
 		commandDelete(msg, false)
-	case msg.Text == T("button_del_pack"),
-		strings.ToLower(msg.Command()) == strings.ToLower(cmdDeletePack):
+	case strings.ToLower(cmdDeletePack):
 		commandDelete(msg, true)
-	case msg.Text == T("button_reset"),
-		strings.ToLower(msg.Command()) == strings.ToLower(cmdReset):
+	case strings.ToLower(cmdReset):
 		commandReset(msg)
-	case msg.Text == T("button_cancel"),
-		strings.ToLower(msg.Command()) == strings.ToLower(cmdCancel):
+	case strings.ToLower(cmdCancel):
 		commandCancel(msg)
 	}
 }

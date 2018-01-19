@@ -55,14 +55,8 @@ error_unknown:
   other: |-
     Я понятия не имею что делать с этим стикером.
     Пожалуйста, сначала примени /{{.AddStickerCommand}}, /{{.AddPackCommand}}, /{{.DeleteStickerCommand}} или /{{.DeletePackCommand}}.
-meta_key_phrase:
+key_phrase:
   other: Да, я абсолютно уверен.
-meta_reset_1:
-  other: Подожди. Кто ты?
-meta_reset_2:
-  other: Что ты здесь делаешь?
-meta_reset_3:
-  other: Что Я здесь делаю?
 reply_add_pack:
   other: Пришли стикеры из любых других наборов чтобы целиком добавить их наборы в
     свой.

@@ -3,8 +3,8 @@ package main
 import (
 	"strings"
 
-	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	tg "github.com/toby3d/telegram"     // My Telegram bindings
+	log "github.com/kirillDanshin/dlog"
+	tg "github.com/toby3d/telegram"
 )
 
 func commandStart(msg *tg.Message) {
@@ -25,12 +25,10 @@ func commandStart(msg *tg.Message) {
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 
-	reply := tg.NewMessage(
-		msg.Chat.ID, T("reply_start", map[string]interface{}{
-			"Username": bot.Self.Username,
-			"ID":       bot.Self.ID,
-		}),
-	)
+	reply := tg.NewMessage(msg.Chat.ID, T("reply_start", map[string]interface{}{
+		"Username": bot.Self.Username,
+		"ID":       bot.Self.ID,
+	}))
 	reply.ParseMode = tg.ModeMarkdown
 	reply.ReplyMarkup = getMenuKeyboard(T)
 

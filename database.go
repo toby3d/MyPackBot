@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	"github.com/tidwall/buntdb"         // Redis-like database
+	log "github.com/kirillDanshin/dlog"
+	"github.com/tidwall/buntdb"
 )
 
 const (
@@ -57,11 +57,7 @@ func dbGetUsers() ([]int, error) {
 func dbChangeUserState(userID int, state string) error {
 	log.Ln("Trying to change", userID, "state to", state)
 	return db.Update(func(tx *buntdb.Tx) error {
-		_, _, err := tx.Set(
-			fmt.Sprint("user:", userID, ":state"), // key
-			state, // val
-			nil,   // options
-		)
+		_, _, err := tx.Set(fmt.Sprint("user:", userID, ":state"), state, nil)
 		return err
 	})
 }
@@ -119,7 +115,9 @@ func dbDeleteSticker(userID int, setName, fileID string) (bool, error) {
 	}
 
 	err := db.Update(func(tx *buntdb.Tx) error {
-		_, err := tx.Delete(fmt.Sprint("user:", userID, ":set:", setName, ":sticker:", fileID))
+		_, err := tx.Delete(
+			fmt.Sprint("user:", userID, ":set:", setName, ":sticker:", fileID),
+		)
 		return err
 	})
 
@@ -215,7 +213,6 @@ func dbGetUserStickers(userID, offset int, query string) ([]string, int, error) 
 				}
 
 				total++
-
 				if count >= 51 {
 					return true
 				}

@@ -47,11 +47,9 @@ func actionAdd(msg *tg.Message, pack bool) {
 
 	if !pack {
 		var exist bool
+		sticker := msg.Sticker
 		exist, err = dbAddSticker(
-			msg.From.ID,
-			msg.Sticker.SetName,
-			msg.Sticker.FileID,
-			msg.Sticker.Emoji,
+			msg.From.ID, sticker.SetName, sticker.FileID, sticker.Emoji,
 		)
 		errCheck(err)
 
@@ -83,10 +81,7 @@ func actionAdd(msg *tg.Message, pack bool) {
 		for _, sticker := range set.Stickers {
 			var exist bool
 			exist, err = dbAddSticker(
-				msg.From.ID,
-				sticker.SetName,
-				sticker.FileID,
-				sticker.Emoji,
+				msg.From.ID, sticker.SetName, sticker.FileID, sticker.Emoji,
 			)
 			errCheck(err)
 
@@ -96,7 +91,6 @@ func actionAdd(msg *tg.Message, pack bool) {
 		}
 
 		log.Ln("All exists?", allExists)
-
 		if allExists {
 			reply.Text = T("error_already_add_pack", map[string]interface{}{
 				"SetTitle": set.Title,

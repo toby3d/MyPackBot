@@ -1,8 +1,8 @@
 package main
 
 import (
-	log "github.com/kirillDanshin/dlog"  // Insert logs only in debug builds
-	"github.com/nicksnyder/go-i18n/i18n" // Internationalization and localization
+	log "github.com/kirillDanshin/dlog"
+	"github.com/nicksnyder/go-i18n/i18n"
 )
 
 const langFallback = "en"

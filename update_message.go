@@ -11,10 +11,12 @@ func updateMessage(msg *tg.Message) {
 		return
 	}
 
-	if msg.IsCommand() || msg.Text != "" {
+	switch {
+	case bot.IsCommandToMe(msg):
 		commands(msg)
-		return
+	case msg.Text != "":
+		messages(msg)
+	default:
+		actions(msg)
 	}
-
-	messages(msg)
 }

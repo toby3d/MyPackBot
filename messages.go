@@ -1,30 +1,29 @@
 package main
 
-import tg "github.com/toby3d/telegram"
+import (
+	"strings"
 
-// message function check Message update on commands, sended stickers or other
-// user stuff
+	tg "github.com/toby3d/telegram"
+)
+
 func messages(msg *tg.Message) {
-	state, err := dbGetUserState(msg.From.ID)
+	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 
-	switch state {
-	case stateAddSticker:
-		actionAdd(msg, false)
-	case stateAddPack:
-		actionAdd(msg, true)
-	case stateDeleteSticker:
-		actionDelete(msg, false)
-	case stateDeletePack:
-		actionDelete(msg, true)
-	case stateReset:
-		actionReset(msg)
-	case stateNone:
-		actionError(msg)
-	default:
-		err = dbChangeUserState(msg.From.ID, stateNone)
-		errCheck(err)
-
-		messages(msg)
+	switch {
+	case strings.EqualFold(msg.Text, T("button_add_sticker")):
+		commandAdd(msg, false)
+	case strings.EqualFold(msg.Text, T("button_add_pack")):
+		commandAdd(msg, true)
+	case strings.EqualFold(msg.Text, T("button_del_sticker")):
+		commandDelete(msg, false)
+	case strings.EqualFold(msg.Text, T("button_del_pack")):
+		commandDelete(msg, true)
+	case strings.EqualFold(msg.Text, T("button_reset")):
+		commandReset(msg)
+	case strings.EqualFold(msg.Text, T("button_cancel")):
+		commandCancel(msg)
+	case strings.EqualFold(msg.Text, T("meta_key_phrase")):
+		actions(msg)
 	}
 }

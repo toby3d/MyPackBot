@@ -54,14 +54,8 @@ error_unknown:
   other: |-
     I do not know what to do with this sticker.
     Please run /{{.AddStickerCommand}}, /{{.AddPackCommand}}, /{{.DeleteStickerCommand}} or /{{.DeletePackCommand}} command first.
-meta_key_phrase:
+key_phrase:
   other: Yes, I am totally sure.
-meta_reset_1:
-  other: Wait. Who are you?
-meta_reset_2:
-  other: What are you doing here?
-meta_reset_3:
-  other: What am I doing here?
 reply_add_pack:
   other: Send an existing stickers from any other packs to add the entire packs to
     yourself.

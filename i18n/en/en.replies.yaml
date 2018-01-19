@@ -7,8 +7,10 @@ reply_add_sticker:
   other: Send an existing stickers from any other packs to add it to yourself.
 reply_add_pack:
   other: Send an existing stickers from any other packs to add the entire packs to yourself.
-reply_del:
+reply_del_sticker:
   other: Send an existing stickers from your pack for removing it.
+reply_del_pack:
+  other: Send an existing stickers from your pack to delete its entire set.
 reply_reset:
   other: |
     This operation will remove *all* stickers from your pack and *this can't be undone*.
@@ -19,8 +21,11 @@ reply_help:
   other: |
     /{{.AddStickerCommand}} - add a single sticker to your pack
     /{{.AddPackCommand}} - add a full other pack to your pack
-    /{{.DeleteCommand}} - remove a single sticker from your pack
+    /{{.DeleteStickerCommand}} - remove a single sticker from your pack
+    /{{.DeletePackCommand}} - remove a sticker set from your pack
     /{{.ResetCommand}} - remove all stickers from your pack
     /{{.CancelCommand}} - cancel the current operation
 
     To view and send stickers from your pack, just type `@{{.Username}}` (and space) in any chat.
+reply_switch_button:
+  other: This button will help you quickly call your pack to select the sticker you want.

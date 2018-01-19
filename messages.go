@@ -1,77 +1,29 @@
 package main
 
 import (
-	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	tg "github.com/toby3d/telegram"     // My Telegram bindings
+	"strings"
+
+	tg "github.com/toby3d/telegram"
 )
 
-// message function check Message update on commands, sended stickers or other
-// user stuff
 func messages(msg *tg.Message) {
-	if msg.IsCommand() {
-		commands(msg)
-		return
-	}
-
-	state, err := dbGetUserState(msg.From.ID)
+	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 
-	switch state {
-	case stateNone:
-		bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
-
-		T, err := switchLocale(msg.From.LanguageCode)
-		errCheck(err)
-
-		reply := tg.NewMessage(
-			msg.Chat.ID,
-			T("error_unknown", map[string]interface{}{
-				"AddStickerCommand": cmdAddSticker,
-				"AddPackCommand":    cmdAddPack,
-				"DeleteCommand":     cmdDelete,
-			}))
-		reply.ParseMode = tg.ModeMarkdown
-
-		_, err = bot.SendMessage(reply)
-		errCheck(err)
-		return
-	case stateAddSticker:
-		if msg.Sticker == nil {
-			return
-		}
-
-		log.D(msg.Sticker)
-		log.D(msg.Sticker.Emoji)
-
-		actionAdd(msg, false)
-		return
-	case stateAddPack:
-		if msg.Sticker == nil {
-			return
-		}
-
-		log.D(msg.Sticker)
-		log.D(msg.Sticker.Emoji)
-
-		actionAdd(msg, true)
-		return
-	case stateDelete:
-		if msg.Sticker == nil {
-			return
-		}
-
-		log.D(msg.Sticker)
-		log.D(msg.Sticker.Emoji)
-
-		actionDelete(msg)
-		return
-	case stateReset:
-		actionReset(msg)
-		return
+	switch {
+	case strings.EqualFold(msg.Text, T("button_add_sticker")):
+		commandAdd(msg, false)
+	case strings.EqualFold(msg.Text, T("button_add_pack")):
+		commandAdd(msg, true)
+	case strings.EqualFold(msg.Text, T("button_del_sticker")):
+		commandDelete(msg, false)
+	case strings.EqualFold(msg.Text, T("button_del_pack")):
+		commandDelete(msg, true)
+	case strings.EqualFold(msg.Text, T("button_reset")):
+		commandReset(msg)
+	case strings.EqualFold(msg.Text, T("button_cancel")):
+		commandCancel(msg)
+	case strings.EqualFold(msg.Text, T("meta_key_phrase")):
+		actions(msg)
 	}
-
-	err = dbChangeUserState(msg.From.ID, stateNone)
-	errCheck(err)
-
-	messages(msg)
 }

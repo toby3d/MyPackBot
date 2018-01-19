@@ -1,0 +1,23 @@
+button_inline_empty:
+  other: Your pack is empty
+button_inline_nothing:
+  other: Not found stickers for {{.Query}}
+button_inline_search:
+  one: You have {{.Count}} sticker
+  other: You have {{.Count}} stickers
+button_inline_select:
+  other: Select sticker
+button_share:
+  other: Use your stickers pack!
+button_add_sticker:
+  other: ➕ Add sticker
+button_add_pack:
+  other: 📦 Add pack
+button_del_sticker:
+  other: 🗑 Delete sticker
+button_del_pack:
+  other: 🗑 Delete pack
+button_reset:
+  other: 🔥 Reset pack
+button_cancel:
+  other: ❌ Cancel

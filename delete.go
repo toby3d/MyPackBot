@@ -6,10 +6,6 @@ import (
 )
 
 func commandDelete(msg *tg.Message, pack bool) {
-	if msg.Sticker == nil {
-		return
-	}
-
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 
@@ -49,6 +45,10 @@ func commandDelete(msg *tg.Message, pack bool) {
 }
 
 func actionDelete(msg *tg.Message, pack bool) {
+	if msg.Sticker == nil {
+		return
+	}
+
 	T, err := switchLocale(msg.From.LanguageCode)
 	errCheck(err)
 

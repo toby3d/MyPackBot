@@ -19,9 +19,8 @@ func updateInlineQuery(inlineQuery *tg.InlineQuery) {
 	answer.IsPersonal = true
 
 	if len([]rune(inlineQuery.Query)) >= 256 {
-		if _, err := bot.AnswerInlineQuery(answer); err != nil {
-			log.Ln(err.Error())
-		}
+		_, err = bot.AnswerInlineQuery(answer)
+		errCheck(err)
 		return
 	}
 
@@ -58,10 +57,8 @@ func updateInlineQuery(inlineQuery *tg.InlineQuery) {
 				answer.SwitchPrivateMessageText = T("button_inline_empty")
 				answer.SwitchPrivateMessageParameter = cmdAddSticker
 			}
-		} else {
-			return
+			answer.Results = nil
 		}
-		answer.Results = nil
 	} else {
 		log.Ln("STICKERS FROM REQUEST:", totalStickers)
 		if totalStickers > 50 {
@@ -79,17 +76,16 @@ func updateInlineQuery(inlineQuery *tg.InlineQuery) {
 		}
 
 		answer.SwitchPrivateMessageText = T(
-			"button_inline_add", packSize, map[string]interface{}{
+			"button_inline_search", packSize, map[string]interface{}{
 				"Count": packSize,
 			},
 		)
-		answer.SwitchPrivateMessageParameter = cmdAddSticker
+		answer.SwitchPrivateMessageParameter = cmdHelp
 		answer.Results = results
 	}
 
 	log.Ln("CacheTime:", answer.CacheTime)
 
-	if _, err = bot.AnswerInlineQuery(answer); err != nil {
-		log.Ln(err.Error())
-	}
+	_, err = bot.AnswerInlineQuery(answer)
+	errCheck(err)
 }

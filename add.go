@@ -1,8 +1,8 @@
 package main
 
 import (
-	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	tg "github.com/toby3d/telegram"     // My Telegram bindings
+	log "github.com/kirillDanshin/dlog"
+	tg "github.com/toby3d/telegram"
 )
 
 func commandAdd(msg *tg.Message, pack bool) {
@@ -45,14 +45,31 @@ func actionAdd(msg *tg.Message, pack bool) {
 	reply := tg.NewMessage(msg.Chat.ID, T("success_add_sticker"))
 	reply.ParseMode = tg.ModeMarkdown
 
-	switch {
-	case pack &&
-		msg.Sticker.SetName == "":
-		reply.Text = T("error_empty_add_pack", map[string]interface{}{
-			"AddStickerCommand": cmdAddSticker,
-		})
-	case pack &&
-		msg.Sticker.SetName != "":
+	if !pack {
+		var exist bool
+		exist, err = dbAddSticker(
+			msg.From.ID,
+			msg.Sticker.SetName,
+			msg.Sticker.FileID,
+			msg.Sticker.Emoji,
+		)
+		errCheck(err)
+
+		if exist {
+			reply.Text = T("error_already_add_sticker")
+		}
+
+		reply.ReplyMarkup = getCancelButton(T)
+		_, err = bot.SendMessage(reply)
+		errCheck(err)
+		return
+	}
+
+	reply.Text = T("error_empty_add_pack", map[string]interface{}{
+		"AddStickerCommand": cmdAddSticker,
+	})
+
+	if msg.Sticker.SetName != "" {
 		var set *tg.StickerSet
 		set, err = bot.GetStickerSet(msg.Sticker.SetName)
 		errCheck(err)
@@ -84,19 +101,6 @@ func actionAdd(msg *tg.Message, pack bool) {
 			reply.Text = T("error_already_add_pack", map[string]interface{}{
 				"SetTitle": set.Title,
 			})
-		}
-	default:
-		var exist bool
-		exist, err = dbAddSticker(
-			msg.From.ID,
-			msg.Sticker.SetName,
-			msg.Sticker.FileID,
-			msg.Sticker.Emoji,
-		)
-		errCheck(err)
-
-		if exist {
-			reply.Text = T("error_already_add_sticker")
 		}
 	}
 

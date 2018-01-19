@@ -44,6 +44,14 @@ func getCancelButton(T i18n.TranslateFunc) *tg.ReplyKeyboardMarkup {
 	)
 }
 
+func getSwitchButton(T i18n.TranslateFunc) *tg.InlineKeyboardMarkup {
+	return tg.NewInlineKeyboardMarkup(
+		tg.NewInlineKeyboardRow(
+			tg.NewInlineKeyboardButtonSwitchSelf(T("button_inline_select"), " "),
+		),
+	)
+}
+
 func fixEmoji(raw string) (string, error) {
 	result, _, err := transform.String(skinRemover, raw)
 	return result, err

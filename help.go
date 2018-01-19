@@ -1,6 +1,6 @@
 package main
 
-import tg "github.com/toby3d/telegram" // My Telegram bindings
+import tg "github.com/toby3d/telegram"
 
 func commandHelp(msg *tg.Message) {
 	T, err := switchLocale(msg.From.LanguageCode)

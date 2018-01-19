@@ -1,8 +1,8 @@
 package main
 
 import (
-	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	tg "github.com/toby3d/telegram"     // My Telegram bindings
+	log "github.com/kirillDanshin/dlog"
+	tg "github.com/toby3d/telegram"
 )
 
 func commandDelete(msg *tg.Message, pack bool) {
@@ -40,6 +40,14 @@ func commandDelete(msg *tg.Message, pack bool) {
 		reply.Text = T("reply_del_pack")
 	}
 
+	_, err = bot.SendMessage(reply)
+	errCheck(err)
+
+	_, err = bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
+	errCheck(err)
+
+	reply = tg.NewMessage(msg.Chat.ID, T("reply_switch_button"))
+	reply.ReplyMarkup = getSwitchButton(T)
 	_, err = bot.SendMessage(reply)
 	errCheck(err)
 }

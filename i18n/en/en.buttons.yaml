@@ -1,12 +1,12 @@
 button_inline_empty:
   other: Your pack is empty
 button_inline_nothing:
-  other: Not found stickers for {{.Query}}, add one?
-button_inline_add:
-  one: You have {{.Count}} sticker. Add one more?
-  other: You have {{.Count}} stickers. Add one more?
-button_del:
-  other: Select sticker for remove
+  other: Not found stickers for {{.Query}}
+button_inline_search:
+  one: You have {{.Count}} sticker
+  other: You have {{.Count}} stickers
+button_inline_select:
+  other: Select sticker
 button_share:
   other: Use your stickers pack!
 button_add_sticker:

@@ -1,8 +1,8 @@
 package main
 
 import (
-	log "github.com/kirillDanshin/dlog" // Insert logs only in debug builds
-	tg "github.com/toby3d/telegram"     // My Telegram bindings
+	log "github.com/kirillDanshin/dlog"
+	tg "github.com/toby3d/telegram"
 )
 
 // bot is general structure of the bot
@@ -23,26 +23,16 @@ func main() {
 	for update := range getUpdatesChannel() {
 		switch {
 		case update.InlineQuery != nil:
-			// Just don't check same updates
-			log.D(update.InlineQuery.Query)
-			if len(update.InlineQuery.Query) > 25 {
-				continue
-			}
-
-			inlineQuery(update.InlineQuery)
+			log.D(update.InlineQuery)
+			updateInlineQuery(update.InlineQuery)
 		case update.Message != nil:
-			if bot.IsMessageFromMe(update.Message) ||
-				bot.IsForwardFromMe(update.Message) {
-				log.Ln("Ignore message update")
-				return
-			}
-
-			messages(update.Message)
+			log.D(update.Message)
+			updateMessage(update.Message)
 		case update.ChannelPost != nil:
-			channelPost(update.ChannelPost)
+			log.D(update.ChannelPost)
+			updateChannelPost(update.ChannelPost)
 		default:
-			log.Ln("Get unsupported update")
-			continue
+			log.D(update)
 		}
 	}
 

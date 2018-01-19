@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	log "github.com/kirillDanshin/dlog"  // Insert logs only in debug builds
-	"github.com/nicksnyder/go-i18n/i18n" // Internationalization and localization
-	"github.com/olebedev/config"         // Easy configuration file parsing
+	log "github.com/kirillDanshin/dlog"
+	"github.com/nicksnyder/go-i18n/i18n"
+	"github.com/olebedev/config"
 )
 
 var (

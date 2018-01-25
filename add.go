@@ -32,7 +32,7 @@ func commandAdd(msg *tg.Message, pack bool) {
 }
 
 func actionAdd(msg *tg.Message, pack bool) {
-	if msg.Sticker == nil {
+	if !msg.IsSticker() {
 		return
 	}
 

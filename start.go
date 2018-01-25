@@ -14,7 +14,7 @@ func commandStart(msg *tg.Message) {
 	_, err = bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errCheck(err)
 
-	if msg.HasArgument() {
+	if msg.HasCommandArgument() {
 		log.Ln("Received a", msg.Command(), "command with", msg.CommandArgument(), "argument")
 		if strings.ToLower(msg.CommandArgument()) == strings.ToLower(cmdHelp) {
 			commandHelp(msg)

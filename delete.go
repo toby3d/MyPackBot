@@ -53,7 +53,7 @@ func commandDelete(msg *tg.Message, pack bool) {
 }
 
 func actionDelete(msg *tg.Message, pack bool) {
-	if msg.Sticker == nil {
+	if !msg.IsSticker() {
 		return
 	}
 

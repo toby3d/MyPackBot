@@ -22,13 +22,13 @@ func main() {
 	log.Ln("Let's check updates channel!")
 	for update := range getUpdatesChannel() {
 		switch {
-		case update.InlineQuery != nil:
+		case update.IsInlineQuery():
 			log.D(update.InlineQuery)
 			updateInlineQuery(update.InlineQuery)
-		case update.Message != nil:
+		case update.IsMessage():
 			log.D(update.Message)
 			updateMessage(update.Message)
-		case update.ChannelPost != nil:
+		case update.IsChannelPost():
 			log.D(update.ChannelPost)
 			updateChannelPost(update.ChannelPost)
 		default:

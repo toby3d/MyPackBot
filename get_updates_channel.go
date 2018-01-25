@@ -42,9 +42,7 @@ func getUpdatesChannel() tg.UpdatesChannel {
 	)
 
 	log.Ln("Creating new webhook...")
-	webhook := tg.NewWebhook(
-		fmt.Sprint(set, listen, bot.AccessToken), nil,
-	)
+	webhook := tg.NewWebhook(fmt.Sprint(set, listen, bot.AccessToken), nil)
 	webhook.MaxConnections = 40
 	webhook.AllowedUpdates = allowedUpdates
 

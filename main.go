@@ -14,6 +14,10 @@ func main() {
 	var err error
 
 	go dbInit()
+	defer func() {
+		err = db.Close()
+		errCheck(err)
+	}()
 
 	log.Ln("Initializing new bot via checking access_token...")
 	bot, err = tg.NewBot(cfg.UString("telegram.token"))
@@ -35,7 +39,4 @@ func main() {
 			log.D(update)
 		}
 	}
-
-	err = db.Close()
-	errCheck(err)
 }

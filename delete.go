@@ -79,14 +79,16 @@ func actionDelete(msg *tg.Message, pack bool) {
 		})
 
 		notExist, err = dbDeletePack(msg.From.ID, msg.Sticker.SetName)
+		if notExist {
+			reply.Text = T("error_already_del_pack")
+		}
 	} else {
 		notExist, err = dbDeleteSticker(msg.From.ID, msg.Sticker.SetName, msg.Sticker.FileID)
+		if notExist {
+			reply.Text = T("error_already_del_sticker")
+		}
 	}
 	errCheck(err)
-
-	if notExist {
-		reply.Text = T("error_already_del")
-	}
 
 	_, err = bot.SendMessage(reply)
 	errCheck(err)

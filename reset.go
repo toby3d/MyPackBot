@@ -32,7 +32,7 @@ func commandReset(msg *tg.Message) {
 	errCheck(err)
 
 	reply := tg.NewMessage(msg.Chat.ID, T("reply_reset", map[string]interface{}{
-		"KeyPhrase":     T("meta_key_phrase"),
+		"KeyPhrase":     T("key_phrase"),
 		"CancelCommand": cmdCancel,
 	}))
 	reply.ParseMode = tg.ModeMarkdown
@@ -51,7 +51,7 @@ func actionReset(msg *tg.Message) {
 	_, err = bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errCheck(err)
 
-	if !strings.EqualFold(msg.Text, T("meta_key_phrase")) {
+	if !strings.EqualFold(msg.Text, T("key_phrase")) {
 		reply := tg.NewMessage(msg.Chat.ID, T("error_reset_phrase"))
 		reply.ParseMode = tg.ModeMarkdown
 		reply.ReplyMarkup = getMenuKeyboard(T)

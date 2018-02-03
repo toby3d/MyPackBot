@@ -14,7 +14,7 @@ func updateMessage(msg *tg.Message) {
 	switch {
 	case bot.IsCommandToMe(msg):
 		commands(msg)
-	case msg.Text != "":
+	case msg.IsText():
 		messages(msg)
 	default:
 		actions(msg)

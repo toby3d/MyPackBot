@@ -1,8 +1,6 @@
 package main
 
 import (
-	"strings"
-
 	log "github.com/kirillDanshin/dlog"
 	tg "github.com/toby3d/telegram"
 )
@@ -20,22 +18,22 @@ const (
 
 func commands(msg *tg.Message) {
 	log.Ln("command:", msg.Command())
-	switch strings.ToLower(msg.Command()) {
-	case strings.ToLower(cmdStart):
+	switch {
+	case msg.IsCommand(cmdStart):
 		commandStart(msg)
-	case strings.ToLower(cmdHelp):
+	case msg.IsCommand(cmdHelp):
 		commandHelp(msg)
-	case strings.ToLower(cmdAddSticker):
+	case msg.IsCommand(cmdAddSticker):
 		commandAdd(msg, false)
-	case strings.ToLower(cmdAddPack):
+	case msg.IsCommand(cmdAddPack):
 		commandAdd(msg, true)
-	case strings.ToLower(cmdDeleteSticker):
+	case msg.IsCommand(cmdDeleteSticker):
 		commandDelete(msg, false)
-	case strings.ToLower(cmdDeletePack):
+	case msg.IsCommand(cmdDeletePack):
 		commandDelete(msg, true)
-	case strings.ToLower(cmdReset):
+	case msg.IsCommand(cmdReset):
 		commandReset(msg)
-	case strings.ToLower(cmdCancel):
+	case msg.IsCommand(cmdCancel):
 		commandCancel(msg)
 	}
 }

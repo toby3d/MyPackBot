@@ -17,10 +17,15 @@ fmt:
 
 # Build localization files with separated untranslated strings
 translation:
-	goi18n merge -format yaml -sourceLanguage en -outdir ./i18n/ ./i18n/*/*
+	goi18n merge -format yaml \
+	-sourceLanguage en \
+	-outdir ./translations/ \
+	./translations/src/*/*
 
 # Build localization files and merge untranslated strings
 localization:
 	make translation
-	goi18n -format yaml -sourceLanguage en -outdir ./i18n/ ./i18n/*.all.yaml \
-	./i18n/*.untranslated.yaml
+	goi18n -format yaml \
+	-sourceLanguage en \
+	-outdir ./translations/ \
+	./translations/*.all.yaml ./translations/*.untranslated.yaml

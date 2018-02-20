@@ -1,0 +1,7 @@
+telegram:
+  token: 123456789:ABCd1efGhjKLM23O4pqR5stuvwx678yz90
+  webhook:
+    set: https://toby3d.github.io
+    listen: /bot
+    serve: 0.0.0.0:2368
+  channel: -1000000000000

@@ -1,0 +1,13 @@
+version: "3"
+services:
+  bot:
+    container_name: mypackbot
+    image: golang:latest
+    expose:
+      - 2368
+    volumes:
+      - ./MyPackBot:/go/MyPackBot
+      - ./translations/:/go/translations/
+      - ./configs/config.yaml:/go/configs/config.yaml
+      - ./stickers.db:/go/stickers.db
+    entrypoint: ["/go/MyPackBot", "-webhook"]

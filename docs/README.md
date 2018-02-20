@@ -1,6 +1,6 @@
 # [@MyPackBot](https://t.me/MyPackBot) [![discord](https://discordapp.com/api/guilds/208605007744860163/widget.png)](https://discord.gg/KYQB9FR)
 
-[![License](https://img.shields.io/crates/l/rustc-serialize.svg)](docs/LICENSE)
+[![License](https://img.shields.io/crates/l/rustc-serialize.svg)](LICENSE)
 [![Build Status](https://travis-ci.org/toby3d/MyPackBot.svg)](https://travis-ci.org/toby3d/MyPackBot)
 [![Go Report](https://goreportcard.com/badge/github.com/toby3d/MyPackBot)](https://goreportcard.com/report/github.com/toby3d/MyPackBot)
 [![Release](https://img.shields.io/github/release/toby3d/MyPackBot.svg)](https://github.com/toby3d/MyPackBot/releases/latest)

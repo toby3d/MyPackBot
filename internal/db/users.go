@@ -8,7 +8,7 @@ import (
 	"github.com/tidwall/buntdb"
 )
 
-// Users return array of all avaliable UserID in database
+// Users return array of all available UserID in database
 func Users() ([]int, error) {
 	var users []int
 	err := DB.View(func(tx *buntdb.Tx) error {

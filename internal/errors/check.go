@@ -8,8 +8,10 @@ import (
 )
 
 var (
+	// WaitForwards is a wait group which wait send all announcements before panic
 	WaitForwards = new(sync.WaitGroup)
-	sysLogger    *syslog.Writer
+
+	sysLogger *syslog.Writer
 )
 
 // Check helps debug critical errors without warnings from 'gocyclo' linter
@@ -20,7 +22,11 @@ func Check(err error) {
 		// Wait what all users get announcement message first
 		WaitForwards.Wait()
 
-		sysLogger.Crit(err.Error())
+		err = sysLogger.Crit(err.Error())
+		if err != nil {
+			log.Panicln(err.Error())
+		}
+
 		os.Exit(1)
 	}
 }

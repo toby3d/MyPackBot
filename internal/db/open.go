@@ -6,6 +6,7 @@ import (
 	"github.com/toby3d/MyPackBot/internal/errors"
 )
 
+// DB is a main object of current database connection
 var DB *buntdb.DB
 
 // Open just open connection to database for work

@@ -12,11 +12,11 @@ button_share:
 button_add_sticker:
   other: ➕ Add sticker
 button_add_pack:
-  other: 📦 Add pack
+  other: 📦 Add set
 button_del_sticker:
   other: 🗑 Delete sticker
 button_del_pack:
-  other: 🗑 Delete pack
+  other: 🗑 Delete set
 button_reset:
   other: 🔥 Reset pack
 button_cancel:

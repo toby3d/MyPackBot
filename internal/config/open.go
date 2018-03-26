@@ -6,7 +6,10 @@ import (
 )
 
 var (
-	Config    *config.Config
+	// Config is a main object of preloaded configuration YAML
+	Config *config.Config
+
+	// ChannelID is a announcements channel ID
 	ChannelID int64
 )
 

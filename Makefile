@@ -15,6 +15,9 @@ debug:
 fmt:
 	go fmt
 
+check:
+	gometalinter --fast
+
 # Build localization files with separated untranslated strings
 translation:
 	goi18n merge -format yaml \

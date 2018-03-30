@@ -21,7 +21,6 @@ func DeleteSticker(userID int, setName, fileID string) (bool, error) {
 		)
 		return err
 	})
-
 	if err == buntdb.ErrNotFound {
 		log.Ln(userID, "not found, create new one")
 		return true, nil

@@ -16,7 +16,6 @@ var flagWebhook = flag.Bool(
 // main function is a general function for work of this bot
 func main() {
 	flag.Parse() // Parse flagWebhook
-
 	for update := range updates.Channel(*flagWebhook) {
 		log.D(update)
 		switch {

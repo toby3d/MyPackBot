@@ -17,9 +17,7 @@ func UserState(userID int) (string, error) {
 		state, err = tx.Get(fmt.Sprint("user:", userID, ":state"))
 		return err
 	})
-
-	switch err {
-	case buntdb.ErrNotFound:
+	if err == buntdb.ErrNotFound {
 		log.Ln(userID, "not found, create new one")
 		if err = ChangeUserState(userID, models.StateNone); err != nil {
 			return state, err

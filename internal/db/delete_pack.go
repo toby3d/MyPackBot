@@ -16,23 +16,23 @@ func DeletePack(userID int, setName string) (bool, error) {
 		setName = models.SetUploaded
 	}
 
-	var fileIDs []string
+	var ids []string
 	err := DB.View(func(tx *buntdb.Tx) error {
 		return tx.AscendKeys(
 			fmt.Sprint("user:", userID, ":set:", setName, ":*"),
 			func(key, val string) bool {
 				keys := strings.Split(key, ":")
-				fileIDs = append(fileIDs, keys[5])
+				ids = append(ids, keys[5])
 				return true
 			},
 		)
 	})
 
-	if len(fileIDs) == 0 {
+	if len(ids) == 0 {
 		return true, nil
 	}
 
-	for _, fileID := range fileIDs {
+	for _, fileID := range ids {
 		var notExist bool
 		notExist, err = DeleteSticker(userID, setName, fileID)
 		if err != nil {

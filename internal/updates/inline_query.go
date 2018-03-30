@@ -43,7 +43,7 @@ func InlineQuery(inlineQuery *tg.InlineQuery) {
 	errors.Check(err)
 	offset++
 
-	stickers, packSize, err := db.UserStickers(
+	stickers, err := db.GetUserStickers(
 		inlineQuery.From.ID, offset, inlineQuery.Query,
 	)
 	errors.Check(err)

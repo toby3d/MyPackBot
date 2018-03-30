@@ -20,7 +20,7 @@ func InlineQuery(inlineQuery *tg.InlineQuery) {
 		inlineQuery.Query = fixedQuery
 	}
 
-	answer := &tg.AnswerInlineQueryParameters{}
+	answer := new(tg.AnswerInlineQueryParameters)
 	answer.InlineQueryID = inlineQuery.ID
 	answer.CacheTime = 1
 	answer.IsPersonal = true
@@ -48,46 +48,31 @@ func InlineQuery(inlineQuery *tg.InlineQuery) {
 	)
 	errors.Check(err)
 
-	totalStickers := len(stickers)
-	if totalStickers == 0 {
-		if offset == 0 {
-			if inlineQuery.Query != "" {
-				// If search stickers by emoji return 0 results
-				answer.SwitchPrivateMessageText = T(
-					"button_inline_nothing", map[string]interface{}{
-						"Query": inlineQuery.Query,
-					},
-				)
-				answer.SwitchPrivateMessageParameter = models.CommandAddSticker
-			} else {
-				// If query is empty and get 0 stickers
-				answer.SwitchPrivateMessageText = T("button_inline_empty")
-				answer.SwitchPrivateMessageParameter = models.CommandAddSticker
-			}
-			answer.Results = nil
+	if len(stickers) == 0 {
+		if offset == 0 && inlineQuery.Query != "" {
+			// If search stickers by emoji return 0 results
+			answer.SwitchPrivateMessageText = T(
+				"button_inline_nothing", map[string]interface{}{
+					"Query": inlineQuery.Query,
+				},
+			)
+
+			answer.SwitchPrivateMessageParameter = models.CommandHelp
 		}
+
+		answer.Results = nil
 	} else {
-		log.Ln("STICKERS FROM REQUEST:", totalStickers)
-		if totalStickers > 50 {
+		log.Ln("STICKERS FROM REQUEST:", len(stickers))
+		if len(stickers) == 50 {
 			answer.NextOffset = strconv.Itoa(offset)
 			log.Ln("NEXT OFFSET:", answer.NextOffset)
-
-			stickers = stickers[:totalStickers-1]
 		}
-
-		log.Ln("Stickers after checks:", len(stickers))
 
 		var results = make([]interface{}, len(stickers))
 		for i, sticker := range stickers {
 			results[i] = tg.NewInlineQueryResultCachedSticker(sticker, sticker)
 		}
 
-		answer.SwitchPrivateMessageText = T(
-			"button_inline_search", packSize, map[string]interface{}{
-				"Count": packSize,
-			},
-		)
-		answer.SwitchPrivateMessageParameter = models.CommandHelp
 		answer.Results = results
 	}
 

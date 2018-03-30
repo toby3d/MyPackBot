@@ -18,7 +18,7 @@ func ChannelPost(post *tg.Message) {
 		return
 	}
 
-	users, err := db.Users()
+	users, err := db.GetUsers()
 	errors.Check(err)
 
 	for i := range users {

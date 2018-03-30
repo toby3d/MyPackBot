@@ -9,12 +9,12 @@ import (
 	"github.com/tidwall/buntdb"
 )
 
-// UserStickers return array of saved stickers for input UserID and his total count
-func UserStickers(userID, offset int, query string) ([]string, int, error) {
+// GetUserStickers return array of saved stickers for input UserID and his total count
+func GetUserStickers(userID, offset int, query string) ([]string, error) {
 	log.Ln("Trying to get", userID, "stickers")
-	var total, count int
+	var i int
 	var stickers []string
-	offset = offset * 50
+	offset *= 50
 
 	err := DB.View(func(tx *buntdb.Tx) error {
 		return tx.AscendKeys(
@@ -25,12 +25,12 @@ func UserStickers(userID, offset int, query string) ([]string, int, error) {
 					return true
 				}
 
-				total++
-				if count >= 51 {
-					return true
+				if len(stickers) == 50 {
+					return false
 				}
 
-				if total < offset {
+				i++
+				if i < offset {
 					return true
 				}
 
@@ -38,7 +38,6 @@ func UserStickers(userID, offset int, query string) ([]string, int, error) {
 					return true
 				}
 
-				count++
 				stickers = append(stickers, subKeys[5])
 				return true
 			},
@@ -47,8 +46,8 @@ func UserStickers(userID, offset int, query string) ([]string, int, error) {
 
 	if err == buntdb.ErrNotFound {
 		log.Ln("Not found stickers")
-		return nil, total, nil
+		return nil, nil
 	}
 
-	return stickers, total, err
+	return stickers, err
 }

@@ -15,13 +15,13 @@ func Reset(msg *tg.Message) {
 	T, err := i18n.SwitchTo(msg.From.LanguageCode)
 	errors.Check(err)
 
-	_, total, err := db.UserStickers(msg.From.ID, 0, "")
+	stickers, err := db.GetUserStickers(msg.From.ID, 0, "")
 	errors.Check(err)
 
 	_, err = bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errors.Check(err)
 
-	if total <= 0 {
+	if len(stickers) <= 0 {
 		err = db.ChangeUserState(msg.From.ID, models.StateNone)
 		errors.Check(err)
 

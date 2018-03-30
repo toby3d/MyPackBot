@@ -19,13 +19,13 @@ fmt:
 translation:
 	goi18n merge -format yaml \
 	-sourceLanguage en \
-	-outdir ./translations/ \
-	./translations/src/*/*
+	-outdir ./i18n/ \
+	./i18n/src/*/*
 
 # Build localization files and merge untranslated strings
 localization:
 	make translation
 	goi18n -format yaml \
 	-sourceLanguage en \
-	-outdir ./translations/ \
-	./translations/*.all.yaml ./translations/*.untranslated.yaml
+	-outdir ./i18n/ \
+	./i18n/*.all.yaml ./i18n/*.untranslated.yaml

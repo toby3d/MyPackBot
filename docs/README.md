@@ -5,6 +5,7 @@
 [![Go Report](https://goreportcard.com/badge/github.com/toby3d/MyPackBot)](https://goreportcard.com/report/github.com/toby3d/MyPackBot)
 [![Release](https://img.shields.io/github/release/toby3d/MyPackBot.svg)](https://github.com/toby3d/MyPackBot/releases/latest)
 [![Patreon](https://img.shields.io/badge/support-patreon-E6461A.svg?maxAge=2592000)](https://www.patreon.com/toby3d)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Ftoby3d%2FMyPackBot.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Ftoby3d%2FMyPackBot?ref=badge_shield)
 
 ![bot logo](https://raw.githubusercontent.com/toby3d/MyPackBot/gh-pages/static/social/og-image.jpg)
 
@@ -76,3 +77,6 @@ Ah, and star this repo, of course.
 
 ### Social
 Subscribe, follow my resources and feel free to maintain contact with me: https://toby3d.github.io
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Ftoby3d%2FMyPackBot.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Ftoby3d%2FMyPackBot?ref=badge_large)

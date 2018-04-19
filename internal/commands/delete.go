@@ -15,14 +15,14 @@ func Delete(msg *tg.Message, pack bool) {
 	T, err := i18n.SwitchTo(msg.From.LanguageCode)
 	errors.Check(err)
 
-	stickers, err := db.GetUserStickers(msg.From.ID, 0, "")
+	stickers, err := db.DB.GetUserStickers(msg.From, &tg.InlineQuery{})
 	errors.Check(err)
 
 	_, err = bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errors.Check(err)
 
 	if len(stickers) <= 0 {
-		err = db.ChangeUserState(msg.From.ID, models.StateNone)
+		err = db.DB.ChangeUserState(msg.From, models.StateNone)
 		errors.Check(err)
 
 		reply := tg.NewMessage(msg.Chat.ID, T("error_empty_del"))
@@ -36,11 +36,11 @@ func Delete(msg *tg.Message, pack bool) {
 	reply.ParseMode = tg.ModeMarkdown
 	reply.ReplyMarkup = helpers.CancelButton(T)
 
-	err = db.ChangeUserState(msg.From.ID, models.StateDeleteSticker)
+	err = db.DB.ChangeUserState(msg.From, models.StateDeleteSticker)
 	errors.Check(err)
 
 	if pack {
-		err = db.ChangeUserState(msg.From.ID, models.StateDeletePack)
+		err = db.DB.ChangeUserState(msg.From, models.StateDeletePack)
 		errors.Check(err)
 
 		reply.Text = T("reply_del_pack")

@@ -37,16 +37,12 @@ func Delete(msg *tg.Message, pack bool) {
 			"SetTitle": set.Title,
 		})
 
-		notExist, err = db.DeletePack(msg.From.ID, msg.Sticker.SetName)
+		notExist, err = db.DB.DeletePack(msg.From, msg.Sticker)
 		if notExist {
 			reply.Text = T("error_already_del_pack")
 		}
 	} else {
-		notExist, err = db.DeleteSticker(
-			msg.From.ID,
-			msg.Sticker.SetName,
-			msg.Sticker.FileID,
-		)
+		notExist, err = db.DB.DeleteSticker(msg.From, msg.Sticker)
 		if notExist {
 			reply.Text = T("error_already_del_sticker")
 		}

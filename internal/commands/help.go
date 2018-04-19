@@ -15,7 +15,7 @@ func Help(msg *tg.Message) {
 	T, err := i18n.SwitchTo(msg.From.LanguageCode)
 	errors.Check(err)
 
-	err = db.ChangeUserState(msg.From.ID, models.StateNone)
+	err = db.DB.ChangeUserState(msg.From, models.StateNone)
 	errors.Check(err)
 
 	_, err = bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
@@ -29,7 +29,7 @@ func Help(msg *tg.Message) {
 			"DeletePackCommand":    models.CommandDeletePack,
 			"ResetCommand":         models.CommandReset,
 			"CancelCommand":        models.CommandCancel,
-			"Username":             bot.Bot.Self.Username,
+			"Username":             bot.Bot.Username,
 		}),
 	)
 	reply.ParseMode = tg.ModeMarkdown

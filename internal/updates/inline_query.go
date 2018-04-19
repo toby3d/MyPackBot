@@ -43,8 +43,12 @@ func InlineQuery(inlineQuery *tg.InlineQuery) {
 	errors.Check(err)
 	offset++
 
-	stickers, err := db.GetUserStickers(
-		inlineQuery.From.ID, offset, inlineQuery.Query,
+	stickers, err := db.DB.GetUserStickers(
+		inlineQuery.From,
+		&tg.InlineQuery{
+			Offset: strconv.Itoa(offset),
+			Query:  inlineQuery.Query,
+		},
 	)
 	errors.Check(err)
 

@@ -13,12 +13,13 @@ import (
 
 // ChannelPost checks ChannelPost update for forwarding content to bot users
 func ChannelPost(post *tg.Message) {
-	if post.Chat.ID != config.ChannelID {
-		log.Ln(post.Chat.ID, "!=", config.ChannelID)
+	channelID := config.Config.GetInt64("telegram.channel")
+	if post.Chat.ID != channelID {
+		log.Ln(post.Chat.ID, "!=", channelID)
 		return
 	}
 
-	users, err := db.GetUsers()
+	users, err := db.DB.GetUsers()
 	errors.Check(err)
 
 	for i := range users {

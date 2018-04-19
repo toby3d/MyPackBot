@@ -7,21 +7,23 @@ import (
 
 	log "github.com/kirillDanshin/dlog"
 	"github.com/tidwall/buntdb"
+	tg "github.com/toby3d/telegram"
 )
 
 // GetUserStickers return array of saved stickers for input UserID and his total count
-func GetUserStickers(userID, offset int, query string) ([]string, error) {
-	log.Ln("Trying to get", userID, "stickers")
+func (db *DataBase) GetUserStickers(user *tg.User, query *tg.InlineQuery) ([]string, error) {
+	log.Ln("Trying to get", user.ID, "stickers")
 	var i int
 	var stickers []string
+	offset, _ := strconv.Atoi(query.Offset)
 	offset *= 50
 
-	err := DB.View(func(tx *buntdb.Tx) error {
+	err := db.View(func(tx *buntdb.Tx) error {
 		return tx.AscendKeys(
-			fmt.Sprint("user:", userID, ":set:*"), // index
+			fmt.Sprint("user:", user.ID, ":set:*"), // index
 			func(key, val string) bool { // iterator
 				subKeys := strings.Split(key, ":")
-				if subKeys[1] != strconv.Itoa(userID) {
+				if subKeys[1] != strconv.Itoa(user.ID) {
 					return true
 				}
 
@@ -34,7 +36,7 @@ func GetUserStickers(userID, offset int, query string) ([]string, error) {
 					return true
 				}
 
-				if query != "" && !strings.Contains(query, val) {
+				if query.Query != "" && !strings.Contains(query.Query, val) {
 					return true
 				}
 

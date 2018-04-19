@@ -10,21 +10,21 @@ import (
 func Command(msg *tg.Message) {
 	log.Ln("command:", msg.Command())
 	switch {
-	case msg.IsCommand(models.CommandStart):
+	case msg.IsCommandEqual(models.CommandStart):
 		Start(msg)
-	case msg.IsCommand(models.CommandHelp):
+	case msg.IsCommandEqual(models.CommandHelp):
 		Help(msg)
-	case msg.IsCommand(models.CommandAddSticker):
+	case msg.IsCommandEqual(models.CommandAddSticker):
 		Add(msg, false)
-	case msg.IsCommand(models.CommandAddPack):
+	case msg.IsCommandEqual(models.CommandAddPack):
 		Add(msg, true)
-	case msg.IsCommand(models.CommandDeleteSticker):
+	case msg.IsCommandEqual(models.CommandDeleteSticker):
 		Delete(msg, false)
-	case msg.IsCommand(models.CommandDeletePack):
+	case msg.IsCommandEqual(models.CommandDeletePack):
 		Delete(msg, true)
-	case msg.IsCommand(models.CommandReset):
+	case msg.IsCommandEqual(models.CommandReset):
 		Reset(msg)
-	case msg.IsCommand(models.CommandCancel):
+	case msg.IsCommandEqual(models.CommandCancel):
 		Cancel(msg)
 	}
 }

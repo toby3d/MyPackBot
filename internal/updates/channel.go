@@ -34,14 +34,9 @@ func Channel(webhookMode bool) tg.UpdatesChannel {
 		})
 	}
 
-	var err error
-	var set, listen, serve string
-	set, err = config.Config.String("telegram.webhook.set")
-	errors.Check(err)
-	listen, err = config.Config.String("telegram.webhook.listen")
-	errors.Check(err)
-	serve, err = config.Config.String("telegram.webhook.serve")
-	errors.Check(err)
+	set := config.Config.GetString("telegram.webhook.set")
+	listen := config.Config.GetString("telegram.webhook.listen")
+	serve := config.Config.GetString("telegram.webhook.serve")
 
 	log.Ln(
 		"Trying set webhook on address:",

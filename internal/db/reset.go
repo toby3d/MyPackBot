@@ -7,18 +7,19 @@ import (
 
 	log "github.com/kirillDanshin/dlog"
 	"github.com/tidwall/buntdb"
+	tg "github.com/toby3d/telegram"
 )
 
 // ResetUser just drop out all stickers keys for input UserID
-func ResetUser(userID int) error {
-	log.Ln("Trying reset all stickers of", userID, "user")
-	return DB.Update(func(tx *buntdb.Tx) error {
+func (db *DataBase) ResetUser(user *tg.User) error {
+	log.Ln("Trying reset all stickers of", user.ID, "user")
+	return db.Update(func(tx *buntdb.Tx) error {
 		var keys []string
 		if err := tx.AscendKeys(
-			fmt.Sprint("user:", userID, ":set:*"), // index
+			fmt.Sprint("user:", user.ID, ":set:*"), // index
 			func(key, val string) bool { // iterator
 				subKeys := strings.Split(key, ":")
-				if subKeys[1] == strconv.Itoa(userID) {
+				if subKeys[1] == strconv.Itoa(user.ID) {
 					keys = append(keys, key)
 				}
 				return true

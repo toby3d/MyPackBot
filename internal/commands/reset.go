@@ -15,14 +15,14 @@ func Reset(msg *tg.Message) {
 	T, err := i18n.SwitchTo(msg.From.LanguageCode)
 	errors.Check(err)
 
-	stickers, err := db.GetUserStickers(msg.From.ID, 0, "")
+	stickers, err := db.DB.GetUserStickers(msg.From, &tg.InlineQuery{})
 	errors.Check(err)
 
 	_, err = bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errors.Check(err)
 
 	if len(stickers) <= 0 {
-		err = db.ChangeUserState(msg.From.ID, models.StateNone)
+		err = db.DB.ChangeUserState(msg.From, models.StateNone)
 		errors.Check(err)
 
 		reply := tg.NewMessage(msg.Chat.ID, T("error_already_reset"))
@@ -33,7 +33,7 @@ func Reset(msg *tg.Message) {
 		return
 	}
 
-	err = db.ChangeUserState(msg.From.ID, models.StateReset)
+	err = db.DB.ChangeUserState(msg.From, models.StateReset)
 	errors.Check(err)
 
 	reply := tg.NewMessage(msg.Chat.ID, T("reply_reset", map[string]interface{}{

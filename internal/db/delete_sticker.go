@@ -6,23 +6,24 @@ import (
 	log "github.com/kirillDanshin/dlog"
 	"github.com/tidwall/buntdb"
 	"github.com/toby3d/MyPackBot/internal/models"
+	tg "github.com/toby3d/telegram"
 )
 
 // DeleteSticker just remove specified sticker key from database.
-func DeleteSticker(userID int, setName, fileID string) (bool, error) {
-	log.Ln("Trying to remove", fileID, "sticker from", userID, "user")
-	if setName == "" {
-		setName = models.SetUploaded
+func (db *DataBase) DeleteSticker(user *tg.User, sticker *tg.Sticker) (bool, error) {
+	log.Ln("Trying to remove", sticker.FileID, "sticker from", user.ID, "user")
+	if sticker.SetName == "" {
+		sticker.SetName = models.SetUploaded
 	}
 
-	err := DB.Update(func(tx *buntdb.Tx) error {
+	err := db.Update(func(tx *buntdb.Tx) error {
 		_, err := tx.Delete(
-			fmt.Sprint("user:", userID, ":set:", setName, ":sticker:", fileID),
+			fmt.Sprint("user:", user.ID, ":set:", sticker.SetName, ":sticker:", sticker.FileID),
 		)
 		return err
 	})
 	if err == buntdb.ErrNotFound {
-		log.Ln(userID, "not found, create new one")
+		log.Ln(user.ID, "not found, create new one")
 		return true, nil
 	}
 

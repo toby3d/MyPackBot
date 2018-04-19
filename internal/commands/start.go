@@ -15,7 +15,7 @@ import (
 
 // Start just send introduction about bot to user
 func Start(msg *tg.Message) {
-	err := db.ChangeUserState(msg.From.ID, models.StateNone)
+	err := db.DB.ChangeUserState(msg.From, models.StateNone)
 	errors.Check(err)
 
 	_, err = bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
@@ -35,8 +35,8 @@ func Start(msg *tg.Message) {
 	reply := tg.NewMessage(
 		msg.Chat.ID,
 		T("reply_start", map[string]interface{}{
-			"Username": bot.Bot.Self.Username,
-			"ID":       bot.Bot.Self.ID,
+			"Username": bot.Bot.Username,
+			"ID":       bot.Bot.ID,
 		}),
 	)
 	reply.ParseMode = tg.ModeMarkdown

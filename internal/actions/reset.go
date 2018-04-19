@@ -17,7 +17,7 @@ func Reset(msg *tg.Message) {
 	T, err := i18n.SwitchTo(msg.From.LanguageCode)
 	errors.Check(err)
 
-	err = db.ChangeUserState(msg.From.ID, models.StateNone)
+	err = db.DB.ChangeUserState(msg.From, models.StateNone)
 	errors.Check(err)
 
 	_, err = bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
@@ -33,7 +33,7 @@ func Reset(msg *tg.Message) {
 		return
 	}
 
-	err = db.ResetUser(msg.From.ID)
+	err = db.DB.ResetUser(msg.From)
 	errors.Check(err)
 
 	reply := tg.NewMessage(msg.Chat.ID, T("success_reset"))

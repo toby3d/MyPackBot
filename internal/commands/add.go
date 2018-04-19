@@ -23,13 +23,13 @@ func Add(msg *tg.Message, pack bool) {
 	reply.ParseMode = tg.ModeMarkdown
 	reply.ReplyMarkup = helpers.CancelButton(T)
 
-	err = db.ChangeUserState(msg.From.ID, models.StateAddSticker)
+	err = db.DB.ChangeUserState(msg.From, models.StateAddSticker)
 	errors.Check(err)
 
 	if pack {
 		reply.Text = T("reply_add_pack")
 
-		err = db.ChangeUserState(msg.From.ID, models.StateAddPack)
+		err = db.DB.ChangeUserState(msg.From, models.StateAddPack)
 		errors.Check(err)
 	}
 

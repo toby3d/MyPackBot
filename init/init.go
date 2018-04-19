@@ -12,17 +12,21 @@ import (
 // init prepare configuration and other things for successful start
 func init() {
 	log.Ln("Initializing...")
-
-	// Preload localization strings
-	err := i18n.Open("i18n/")
-	errors.Check(err)
+	var err error
 
 	// Preload configuration file
-	config.Open("configs/config.yaml")
+	config.Config, err = config.Open("./configs")
+	errors.Check(err)
+
+	// Preload localization strings
+	err = i18n.Open("i18n/")
+	errors.Check(err)
 
 	// Open database or create new one
-	db.Open("stickers.db")
+	db.DB, err = db.Open("stickers.db")
+	errors.Check(err)
 
 	// Create bot with credentials from config
-	bot.New()
+	bot.Bot, err = bot.New(config.Config.GetString("telegram.token"))
+	errors.Check(err)
 }

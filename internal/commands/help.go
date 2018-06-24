@@ -12,7 +12,7 @@ import (
 
 // Help just send instructions about bot usage
 func Help(msg *tg.Message) {
-	T, err := i18n.SwitchTo(msg.From.LanguageCode)
+	t, err := i18n.SwitchTo(msg.From.LanguageCode)
 	errors.Check(err)
 
 	err = db.DB.ChangeUserState(msg.From, models.StateNone)
@@ -22,7 +22,7 @@ func Help(msg *tg.Message) {
 	errors.Check(err)
 
 	reply := tg.NewMessage(
-		msg.Chat.ID, T("reply_help", map[string]interface{}{
+		msg.Chat.ID, t("reply_help", map[string]interface{}{
 			"AddStickerCommand":    models.CommandAddSticker,
 			"AddPackCommand":       models.CommandAddPack,
 			"DeleteStickerCommand": models.CommandDeleteSticker,
@@ -33,7 +33,7 @@ func Help(msg *tg.Message) {
 		}),
 	)
 	reply.ParseMode = tg.StyleMarkdown
-	reply.ReplyMarkup = utils.MenuKeyboard(T)
+	reply.ReplyMarkup = utils.MenuKeyboard(t)
 
 	_, err = bot.Bot.SendMessage(reply)
 	errors.Check(err)

@@ -31,7 +31,7 @@ func InlineQuery(inlineQuery *tg.InlineQuery) {
 	}
 
 	log.Ln("Let's preparing answer...")
-	T, err := i18n.SwitchTo(inlineQuery.From.LanguageCode)
+	t, err := i18n.SwitchTo(inlineQuery.From.LanguageCode)
 	errors.Check(err)
 
 	log.Ln("INLINE OFFSET:", inlineQuery.Offset)
@@ -54,7 +54,7 @@ func InlineQuery(inlineQuery *tg.InlineQuery) {
 	if len(stickers) == 0 {
 		if offset == 0 && inlineQuery.Query != "" {
 			// If search stickers by emoji return 0 results
-			answer.SwitchPrivateMessageText = T(
+			answer.SwitchPrivateMessageText = t(
 				"button_inline_nothing", map[string]interface{}{
 					"Query": inlineQuery.Query,
 				},

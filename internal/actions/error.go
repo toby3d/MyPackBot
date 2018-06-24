@@ -11,14 +11,14 @@ import (
 
 // Error action send error reply about invalid user request
 func Error(msg *tg.Message) {
-	T, err := i18n.SwitchTo(msg.From.LanguageCode)
+	t, err := i18n.SwitchTo(msg.From.LanguageCode)
 	errors.Check(err)
 
 	_, err = bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errors.Check(err)
 
 	reply := tg.NewMessage(
-		msg.Chat.ID, T("error_unknown", map[string]interface{}{
+		msg.Chat.ID, t("error_unknown", map[string]interface{}{
 			"AddStickerCommand":    models.CommandAddSticker,
 			"AddPackCommand":       models.CommandAddPack,
 			"DeleteStickerCommand": models.CommandDeleteSticker,
@@ -26,7 +26,7 @@ func Error(msg *tg.Message) {
 		}),
 	)
 	reply.ParseMode = tg.StyleMarkdown
-	reply.ReplyMarkup = utils.MenuKeyboard(T)
+	reply.ReplyMarkup = utils.MenuKeyboard(t)
 
 	_, err = bot.Bot.SendMessage(reply)
 	errors.Check(err)

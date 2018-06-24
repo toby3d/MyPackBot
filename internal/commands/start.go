@@ -29,18 +29,18 @@ func Start(msg *tg.Message) {
 		}
 	}
 
-	T, err := i18n.SwitchTo(msg.From.LanguageCode)
+	t, err := i18n.SwitchTo(msg.From.LanguageCode)
 	errors.Check(err)
 
 	reply := tg.NewMessage(
 		msg.Chat.ID,
-		T("reply_start", map[string]interface{}{
+		t("reply_start", map[string]interface{}{
 			"Username": bot.Bot.Username,
 			"ID":       bot.Bot.ID,
 		}),
 	)
 	reply.ParseMode = tg.StyleMarkdown
-	reply.ReplyMarkup = utils.MenuKeyboard(T)
+	reply.ReplyMarkup = utils.MenuKeyboard(t)
 
 	_, err = bot.Bot.SendMessage(reply)
 	errors.Check(err)

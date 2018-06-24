@@ -19,8 +19,7 @@ func (db *DataBase) UserState(usr *tg.User) (string, error) {
 		return err
 	})
 
-	switch err {
-	case buntdb.ErrNotFound:
+	if err == buntdb.ErrNotFound {
 		log.Ln(usr.ID, "not found, create new one")
 		if err = db.ChangeUserState(usr, models.StateNone); err != nil {
 			return state, err

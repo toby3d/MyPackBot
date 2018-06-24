@@ -16,15 +16,15 @@ func Delete(msg *tg.Message, pack bool) {
 		return
 	}
 
-	T, err := i18n.SwitchTo(msg.From.LanguageCode)
+	t, err := i18n.SwitchTo(msg.From.LanguageCode)
 	errors.Check(err)
 
 	_, err = bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errors.Check(err)
 
-	reply := tg.NewMessage(msg.Chat.ID, T("success_del_sticker"))
+	reply := tg.NewMessage(msg.Chat.ID, t("success_del_sticker"))
 	reply.ParseMode = tg.StyleMarkdown
-	reply.ReplyMarkup = utils.CancelButton(T)
+	reply.ReplyMarkup = utils.CancelButton(t)
 
 	var notExist bool
 	if pack {
@@ -33,18 +33,18 @@ func Delete(msg *tg.Message, pack bool) {
 		errors.Check(err)
 
 		log.Ln("SetName:", set.Title)
-		reply.Text = T("success_del_pack", map[string]interface{}{
+		reply.Text = t("success_del_pack", map[string]interface{}{
 			"SetTitle": set.Title,
 		})
 
 		notExist, err = db.DB.DeletePack(msg.From, msg.Sticker)
 		if notExist {
-			reply.Text = T("error_already_del_pack")
+			reply.Text = t("error_already_del_pack")
 		}
 	} else {
 		notExist, err = db.DB.DeleteSticker(msg.From, msg.Sticker)
 		if notExist {
-			reply.Text = T("error_already_del_sticker")
+			reply.Text = t("error_already_del_sticker")
 		}
 	}
 	errors.Check(err)

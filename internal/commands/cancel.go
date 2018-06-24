@@ -12,7 +12,7 @@ import (
 
 // Cancel just cancel current user operation
 func Cancel(msg *tg.Message) {
-	T, err := i18n.SwitchTo(msg.From.LanguageCode)
+	t, err := i18n.SwitchTo(msg.From.LanguageCode)
 	errors.Check(err)
 
 	state, err := db.DB.GetUserState(msg.From)
@@ -24,24 +24,24 @@ func Cancel(msg *tg.Message) {
 	var text string
 	switch state {
 	case models.StateAddSticker:
-		text = T("cancel_add_sticker")
+		text = t("cancel_add_sticker")
 	case models.StateAddPack:
-		text = T("cancel_add_pack")
+		text = t("cancel_add_pack")
 	case models.StateDeleteSticker:
-		text = T("cancel_del_sticker")
+		text = t("cancel_del_sticker")
 	case models.StateDeletePack:
-		text = T("cancel_del_pack")
+		text = t("cancel_del_pack")
 	case models.StateReset:
-		text = T("cancel_reset")
+		text = t("cancel_reset")
 	default:
-		text = T("cancel_error")
+		text = t("cancel_error")
 	}
 
 	err = db.DB.ChangeUserState(msg.From, models.StateNone)
 	errors.Check(err)
 
 	reply := tg.NewMessage(msg.Chat.ID, text)
-	reply.ReplyMarkup = utils.MenuKeyboard(T)
+	reply.ReplyMarkup = utils.MenuKeyboard(t)
 
 	_, err = bot.Bot.SendMessage(reply)
 	errors.Check(err)

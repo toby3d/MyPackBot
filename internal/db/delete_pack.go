@@ -41,8 +41,7 @@ func (db *DataBase) DeletePack(user *tg.User, sticker *tg.Sticker) (bool, error)
 		}
 	}
 
-	switch err {
-	case buntdb.ErrNotFound:
+	if err == buntdb.ErrNotFound {
 		log.Ln(user.ID, "not found")
 		return true, nil
 	}

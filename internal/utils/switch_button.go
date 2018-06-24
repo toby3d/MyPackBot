@@ -6,10 +6,10 @@ import (
 )
 
 // SwitchButton helper just generate ReplyMarkup with SelfSwitch button
-func SwitchButton(T i18n.TranslateFunc) *tg.InlineKeyboardMarkup {
+func SwitchButton(t i18n.TranslateFunc) *tg.InlineKeyboardMarkup {
 	return tg.NewInlineKeyboardMarkup(
 		tg.NewInlineKeyboardRow(
-			tg.NewInlineKeyboardButtonSwitchSelf(T("button_inline_select"), " "),
+			tg.NewInlineKeyboardButtonSwitchSelf(t("button_inline_select"), " "),
 		),
 	)
 }

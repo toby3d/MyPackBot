@@ -12,7 +12,7 @@ import (
 
 // Reset prepare user to reset his pack
 func Reset(msg *tg.Message) {
-	T, err := i18n.SwitchTo(msg.From.LanguageCode)
+	t, err := i18n.SwitchTo(msg.From.LanguageCode)
 	errors.Check(err)
 
 	stickers, err := db.DB.GetUserStickers(msg.From, &tg.InlineQuery{})
@@ -25,9 +25,9 @@ func Reset(msg *tg.Message) {
 		err = db.DB.ChangeUserState(msg.From, models.StateNone)
 		errors.Check(err)
 
-		reply := tg.NewMessage(msg.Chat.ID, T("error_already_reset"))
+		reply := tg.NewMessage(msg.Chat.ID, t("error_already_reset"))
 		reply.ParseMode = tg.StyleMarkdown
-		reply.ReplyMarkup = utils.MenuKeyboard(T)
+		reply.ReplyMarkup = utils.MenuKeyboard(t)
 		_, err = bot.Bot.SendMessage(reply)
 		errors.Check(err)
 		return
@@ -36,12 +36,12 @@ func Reset(msg *tg.Message) {
 	err = db.DB.ChangeUserState(msg.From, models.StateReset)
 	errors.Check(err)
 
-	reply := tg.NewMessage(msg.Chat.ID, T("reply_reset", map[string]interface{}{
-		"KeyPhrase":     T("key_phrase"),
+	reply := tg.NewMessage(msg.Chat.ID, t("reply_reset", map[string]interface{}{
+		"KeyPhrase":     t("key_phrase"),
 		"CancelCommand": models.CommandCancel,
 	}))
 	reply.ParseMode = tg.StyleMarkdown
-	reply.ReplyMarkup = utils.CancelButton(T)
+	reply.ReplyMarkup = utils.CancelButton(t)
 	_, err = bot.Bot.SendMessage(reply)
 	errors.Check(err)
 }

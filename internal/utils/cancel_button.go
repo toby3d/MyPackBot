@@ -6,10 +6,10 @@ import (
 )
 
 // CancelButton helper just generate ReplyMarkup with cancel button
-func CancelButton(T i18n.TranslateFunc) *tg.ReplyKeyboardMarkup {
+func CancelButton(t i18n.TranslateFunc) *tg.ReplyKeyboardMarkup {
 	return tg.NewReplyKeyboardMarkup(
 		tg.NewReplyKeyboardRow(
-			tg.NewReplyKeyboardButton(T("button_cancel")),
+			tg.NewReplyKeyboardButton(t("button_cancel")),
 		),
 	)
 }

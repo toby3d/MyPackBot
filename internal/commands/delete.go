@@ -12,7 +12,7 @@ import (
 
 // Delete prepare user to remove some stickers or sets from his pack
 func Delete(msg *tg.Message, pack bool) {
-	T, err := i18n.SwitchTo(msg.From.LanguageCode)
+	t, err := i18n.SwitchTo(msg.From.LanguageCode)
 	errors.Check(err)
 
 	stickers, err := db.DB.GetUserStickers(msg.From, &tg.InlineQuery{})
@@ -25,16 +25,16 @@ func Delete(msg *tg.Message, pack bool) {
 		err = db.DB.ChangeUserState(msg.From, models.StateNone)
 		errors.Check(err)
 
-		reply := tg.NewMessage(msg.Chat.ID, T("error_empty_del"))
-		reply.ReplyMarkup = utils.MenuKeyboard(T)
+		reply := tg.NewMessage(msg.Chat.ID, t("error_empty_del"))
+		reply.ReplyMarkup = utils.MenuKeyboard(t)
 		_, err = bot.Bot.SendMessage(reply)
 		errors.Check(err)
 		return
 	}
 
-	reply := tg.NewMessage(msg.Chat.ID, T("reply_del_sticker"))
+	reply := tg.NewMessage(msg.Chat.ID, t("reply_del_sticker"))
 	reply.ParseMode = tg.StyleMarkdown
-	reply.ReplyMarkup = utils.CancelButton(T)
+	reply.ReplyMarkup = utils.CancelButton(t)
 
 	err = db.DB.ChangeUserState(msg.From, models.StateDeleteSticker)
 	errors.Check(err)
@@ -43,7 +43,7 @@ func Delete(msg *tg.Message, pack bool) {
 		err = db.DB.ChangeUserState(msg.From, models.StateDeletePack)
 		errors.Check(err)
 
-		reply.Text = T("reply_del_pack")
+		reply.Text = t("reply_del_pack")
 	}
 
 	_, err = bot.Bot.SendMessage(reply)
@@ -52,8 +52,8 @@ func Delete(msg *tg.Message, pack bool) {
 	_, err = bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errors.Check(err)
 
-	reply = tg.NewMessage(msg.Chat.ID, T("reply_switch_button"))
-	reply.ReplyMarkup = utils.SwitchButton(T)
+	reply = tg.NewMessage(msg.Chat.ID, t("reply_switch_button"))
+	reply.ReplyMarkup = utils.SwitchButton(t)
 	_, err = bot.Bot.SendMessage(reply)
 	errors.Check(err)
 }

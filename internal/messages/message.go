@@ -13,21 +13,21 @@ import (
 // Message checks user message on response, stickers, reset key phrase, else do
 // Actions
 func Message(msg *tg.Message) {
-	T, err := i18n.SwitchTo(msg.From.LanguageCode)
+	t, err := i18n.SwitchTo(msg.From.LanguageCode)
 	errors.Check(err)
 
 	switch {
-	case strings.EqualFold(msg.Text, T("button_add_sticker")):
+	case strings.EqualFold(msg.Text, t("button_add_sticker")):
 		commands.Add(msg, false)
-	case strings.EqualFold(msg.Text, T("button_add_pack")):
+	case strings.EqualFold(msg.Text, t("button_add_pack")):
 		commands.Add(msg, true)
-	case strings.EqualFold(msg.Text, T("button_del_sticker")):
+	case strings.EqualFold(msg.Text, t("button_del_sticker")):
 		commands.Delete(msg, false)
-	case strings.EqualFold(msg.Text, T("button_del_pack")):
+	case strings.EqualFold(msg.Text, t("button_del_pack")):
 		commands.Delete(msg, true)
-	case strings.EqualFold(msg.Text, T("button_reset")):
+	case strings.EqualFold(msg.Text, t("button_reset")):
 		commands.Reset(msg)
-	case strings.EqualFold(msg.Text, T("button_cancel")):
+	case strings.EqualFold(msg.Text, t("button_cancel")):
 		commands.Cancel(msg)
 	default:
 		actions.Action(msg)

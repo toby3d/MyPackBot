@@ -2,13 +2,13 @@ package commands
 
 import (
 	log "github.com/kirillDanshin/dlog"
-	"github.com/toby3d/MyPackBot/internal/bot"
-	"github.com/toby3d/MyPackBot/internal/db"
-	"github.com/toby3d/MyPackBot/internal/errors"
-	"github.com/toby3d/MyPackBot/internal/helpers"
-	"github.com/toby3d/MyPackBot/internal/i18n"
-	"github.com/toby3d/MyPackBot/internal/models"
-	tg "github.com/toby3d/telegram"
+	"gitlab.com/toby3d/mypackbot/internal/bot"
+	"gitlab.com/toby3d/mypackbot/internal/db"
+	"gitlab.com/toby3d/mypackbot/internal/errors"
+	"gitlab.com/toby3d/mypackbot/internal/i18n"
+	"gitlab.com/toby3d/mypackbot/internal/models"
+	"gitlab.com/toby3d/mypackbot/internal/utils"
+	tg "gitlab.com/toby3d/telegram"
 )
 
 // Add command prepare user for adding some stickers or sets to his pack
@@ -20,8 +20,8 @@ func Add(msg *tg.Message, pack bool) {
 	errors.Check(err)
 
 	reply := tg.NewMessage(msg.Chat.ID, T("reply_add_sticker"))
-	reply.ParseMode = tg.ModeMarkdown
-	reply.ReplyMarkup = helpers.CancelButton(T)
+	reply.ParseMode = tg.StyleMarkdown
+	reply.ReplyMarkup = utils.CancelButton(T)
 
 	err = db.DB.ChangeUserState(msg.From, models.StateAddSticker)
 	errors.Check(err)

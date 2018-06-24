@@ -1,13 +1,13 @@
 package commands
 
 import (
-	"github.com/toby3d/MyPackBot/internal/bot"
-	"github.com/toby3d/MyPackBot/internal/db"
-	"github.com/toby3d/MyPackBot/internal/errors"
-	"github.com/toby3d/MyPackBot/internal/helpers"
-	"github.com/toby3d/MyPackBot/internal/i18n"
-	"github.com/toby3d/MyPackBot/internal/models"
-	tg "github.com/toby3d/telegram"
+	"gitlab.com/toby3d/mypackbot/internal/bot"
+	"gitlab.com/toby3d/mypackbot/internal/db"
+	"gitlab.com/toby3d/mypackbot/internal/errors"
+	"gitlab.com/toby3d/mypackbot/internal/i18n"
+	"gitlab.com/toby3d/mypackbot/internal/models"
+	"gitlab.com/toby3d/mypackbot/internal/utils"
+	tg "gitlab.com/toby3d/telegram"
 )
 
 // Help just send instructions about bot usage
@@ -32,8 +32,8 @@ func Help(msg *tg.Message) {
 			"Username":             bot.Bot.Username,
 		}),
 	)
-	reply.ParseMode = tg.ModeMarkdown
-	reply.ReplyMarkup = helpers.MenuKeyboard(T)
+	reply.ParseMode = tg.StyleMarkdown
+	reply.ReplyMarkup = utils.MenuKeyboard(T)
 
 	_, err = bot.Bot.SendMessage(reply)
 	errors.Check(err)

@@ -2,10 +2,10 @@ package actions
 
 import (
 	log "github.com/kirillDanshin/dlog"
-	"github.com/toby3d/MyPackBot/internal/db"
-	"github.com/toby3d/MyPackBot/internal/errors"
-	"github.com/toby3d/MyPackBot/internal/models"
-	tg "github.com/toby3d/telegram"
+	"gitlab.com/toby3d/mypackbot/internal/db"
+	"gitlab.com/toby3d/mypackbot/internal/errors"
+	"gitlab.com/toby3d/mypackbot/internal/models"
+	tg "gitlab.com/toby3d/telegram"
 )
 
 // Action function check Message update on commands, sended stickers or other

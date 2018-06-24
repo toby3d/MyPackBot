@@ -7,7 +7,7 @@ import (
 
 	log "github.com/kirillDanshin/dlog"
 	"github.com/tidwall/buntdb"
-	tg "github.com/toby3d/telegram"
+	tg "gitlab.com/toby3d/telegram"
 )
 
 // ResetUser just drop out all stickers keys for input UserID

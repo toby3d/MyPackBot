@@ -4,18 +4,17 @@ import (
 	"strconv"
 
 	log "github.com/kirillDanshin/dlog"
-	"github.com/toby3d/MyPackBot/internal/bot"
-	"github.com/toby3d/MyPackBot/internal/db"
-	"github.com/toby3d/MyPackBot/internal/errors"
-	"github.com/toby3d/MyPackBot/internal/helpers"
-	"github.com/toby3d/MyPackBot/internal/i18n"
-	"github.com/toby3d/MyPackBot/internal/models"
-	tg "github.com/toby3d/telegram"
+	"gitlab.com/toby3d/mypackbot/internal/bot"
+	"gitlab.com/toby3d/mypackbot/internal/db"
+	"gitlab.com/toby3d/mypackbot/internal/errors"
+	"gitlab.com/toby3d/mypackbot/internal/i18n"
+	"gitlab.com/toby3d/mypackbot/internal/utils"
+	tg "gitlab.com/toby3d/telegram"
 )
 
 // InlineQuery checks InlineQuery updates for answer with personal results
 func InlineQuery(inlineQuery *tg.InlineQuery) {
-	fixedQuery, err := helpers.FixEmoji(inlineQuery.Query)
+	fixedQuery, err := utils.FixEmoji(inlineQuery.Query)
 	if err == nil {
 		inlineQuery.Query = fixedQuery
 	}
@@ -61,7 +60,7 @@ func InlineQuery(inlineQuery *tg.InlineQuery) {
 				},
 			)
 
-			answer.SwitchPrivateMessageParameter = models.CommandHelp
+			answer.SwitchPrivateMessageParameter = tg.CommandHelp
 		}
 
 		answer.Results = nil

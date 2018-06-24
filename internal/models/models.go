@@ -1,17 +1,15 @@
 package models
 
-import tg "github.com/toby3d/telegram"
+import tg "gitlab.com/toby3d/telegram"
 
 // Commands... represents available and supported bot commands
 const (
 	CommandAddPack       = "addPack"
 	CommandAddSticker    = "addSticker"
 	CommandCancel        = "cancel"
-	CommandHelp          = "help"
 	CommandDeleteSticker = "delSticker"
 	CommandDeletePack    = "delPack"
 	CommandReset         = "reset"
-	CommandStart         = "start"
 )
 
 // State... represents current state of user action

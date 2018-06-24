@@ -1,8 +1,8 @@
-package helpers
+package utils
 
 import (
 	"github.com/nicksnyder/go-i18n/i18n"
-	tg "github.com/toby3d/telegram"
+	tg "gitlab.com/toby3d/telegram"
 )
 
 // SwitchButton helper just generate ReplyMarkup with SelfSwitch button

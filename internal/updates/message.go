@@ -2,11 +2,11 @@ package updates
 
 import (
 	log "github.com/kirillDanshin/dlog"
-	"github.com/toby3d/MyPackBot/internal/actions"
-	"github.com/toby3d/MyPackBot/internal/bot"
-	"github.com/toby3d/MyPackBot/internal/commands"
-	"github.com/toby3d/MyPackBot/internal/messages"
-	tg "github.com/toby3d/telegram"
+	"gitlab.com/toby3d/mypackbot/internal/actions"
+	"gitlab.com/toby3d/mypackbot/internal/bot"
+	"gitlab.com/toby3d/mypackbot/internal/commands"
+	"gitlab.com/toby3d/mypackbot/internal/messages"
+	tg "gitlab.com/toby3d/telegram"
 )
 
 // Message checks Message updates for answer to user commands, replies or sended

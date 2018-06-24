@@ -3,11 +3,11 @@ package messages
 import (
 	"strings"
 
-	"github.com/toby3d/MyPackBot/internal/actions"
-	"github.com/toby3d/MyPackBot/internal/commands"
-	"github.com/toby3d/MyPackBot/internal/errors"
-	"github.com/toby3d/MyPackBot/internal/i18n"
-	tg "github.com/toby3d/telegram"
+	"gitlab.com/toby3d/mypackbot/internal/actions"
+	"gitlab.com/toby3d/mypackbot/internal/commands"
+	"gitlab.com/toby3d/mypackbot/internal/errors"
+	"gitlab.com/toby3d/mypackbot/internal/i18n"
+	tg "gitlab.com/toby3d/telegram"
 )
 
 // Message checks user message on response, stickers, reset key phrase, else do

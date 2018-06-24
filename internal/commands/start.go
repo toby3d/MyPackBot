@@ -4,13 +4,13 @@ import (
 	"strings"
 
 	log "github.com/kirillDanshin/dlog"
-	"github.com/toby3d/MyPackBot/internal/bot"
-	"github.com/toby3d/MyPackBot/internal/db"
-	"github.com/toby3d/MyPackBot/internal/errors"
-	"github.com/toby3d/MyPackBot/internal/helpers"
-	"github.com/toby3d/MyPackBot/internal/i18n"
-	"github.com/toby3d/MyPackBot/internal/models"
-	tg "github.com/toby3d/telegram"
+	"gitlab.com/toby3d/mypackbot/internal/bot"
+	"gitlab.com/toby3d/mypackbot/internal/db"
+	"gitlab.com/toby3d/mypackbot/internal/errors"
+	"gitlab.com/toby3d/mypackbot/internal/i18n"
+	"gitlab.com/toby3d/mypackbot/internal/models"
+	"gitlab.com/toby3d/mypackbot/internal/utils"
+	tg "gitlab.com/toby3d/telegram"
 )
 
 // Start just send introduction about bot to user
@@ -23,7 +23,7 @@ func Start(msg *tg.Message) {
 
 	if msg.HasCommandArgument() {
 		log.Ln("Received a", msg.Command(), "command with", msg.CommandArgument(), "argument")
-		if strings.EqualFold(msg.CommandArgument(), models.CommandHelp) {
+		if strings.EqualFold(msg.CommandArgument(), tg.CommandHelp) {
 			Help(msg)
 			return
 		}
@@ -39,8 +39,8 @@ func Start(msg *tg.Message) {
 			"ID":       bot.Bot.ID,
 		}),
 	)
-	reply.ParseMode = tg.ModeMarkdown
-	reply.ReplyMarkup = helpers.MenuKeyboard(T)
+	reply.ParseMode = tg.StyleMarkdown
+	reply.ReplyMarkup = utils.MenuKeyboard(T)
 
 	_, err = bot.Bot.SendMessage(reply)
 	errors.Check(err)

@@ -5,8 +5,8 @@ import (
 
 	log "github.com/kirillDanshin/dlog"
 	"github.com/tidwall/buntdb"
-	"github.com/toby3d/MyPackBot/internal/models"
-	tg "github.com/toby3d/telegram"
+	"gitlab.com/toby3d/mypackbot/internal/models"
+	tg "gitlab.com/toby3d/telegram"
 )
 
 // DeleteSticker just remove specified sticker key from database.

@@ -2,7 +2,7 @@ package i18n
 
 import (
 	"github.com/nicksnyder/go-i18n/i18n"
-	"github.com/toby3d/MyPackBot/internal/models"
+	"gitlab.com/toby3d/mypackbot/internal/models"
 )
 
 // SwitchTo try load locales by input language codes and return TranslateFunc

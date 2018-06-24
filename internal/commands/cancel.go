@@ -1,21 +1,21 @@
 package commands
 
 import (
-	"github.com/toby3d/MyPackBot/internal/bot"
-	"github.com/toby3d/MyPackBot/internal/db"
-	"github.com/toby3d/MyPackBot/internal/errors"
-	"github.com/toby3d/MyPackBot/internal/helpers"
-	"github.com/toby3d/MyPackBot/internal/i18n"
-	"github.com/toby3d/MyPackBot/internal/models"
-	tg "github.com/toby3d/telegram"
+	"gitlab.com/toby3d/mypackbot/internal/bot"
+	"gitlab.com/toby3d/mypackbot/internal/db"
+	"gitlab.com/toby3d/mypackbot/internal/errors"
+	"gitlab.com/toby3d/mypackbot/internal/i18n"
+	"gitlab.com/toby3d/mypackbot/internal/models"
+	"gitlab.com/toby3d/mypackbot/internal/utils"
+	tg "gitlab.com/toby3d/telegram"
 )
 
 // Cancel just cancel current user operation
 func Cancel(msg *tg.Message) {
-	T, err := i18n.SwitchTo(msg.From.LanguageCode)
+	t, err := i18n.SwitchTo(msg.From.LanguageCode)
 	errors.Check(err)
 
-	state, err := db.UserState(msg.From.ID)
+	state, err := db.DB.GetUserState(msg.From)
 	errors.Check(err)
 
 	_, err = bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
@@ -24,24 +24,24 @@ func Cancel(msg *tg.Message) {
 	var text string
 	switch state {
 	case models.StateAddSticker:
-		text = T("cancel_add_sticker")
+		text = t("cancel_add_sticker")
 	case models.StateAddPack:
-		text = T("cancel_add_pack")
+		text = t("cancel_add_pack")
 	case models.StateDeleteSticker:
-		text = T("cancel_del_sticker")
+		text = t("cancel_del_sticker")
 	case models.StateDeletePack:
-		text = T("cancel_del_pack")
+		text = t("cancel_del_pack")
 	case models.StateReset:
-		text = T("cancel_reset")
+		text = t("cancel_reset")
 	default:
-		text = T("cancel_error")
+		text = t("cancel_error")
 	}
 
-	err = db.ChangeUserState(msg.From.ID, models.StateNone)
+	err = db.DB.ChangeUserState(msg.From, models.StateNone)
 	errors.Check(err)
 
 	reply := tg.NewMessage(msg.Chat.ID, text)
-	reply.ReplyMarkup = helpers.MenuKeyboard(T)
+	reply.ReplyMarkup = utils.MenuKeyboard(t)
 
 	_, err = bot.Bot.SendMessage(reply)
 	errors.Check(err)

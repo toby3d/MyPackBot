@@ -1,15 +1,15 @@
-package helpers
+package utils
 
 import (
 	"github.com/nicksnyder/go-i18n/i18n"
-	tg "github.com/toby3d/telegram"
+	tg "gitlab.com/toby3d/telegram"
 )
 
 // CancelButton helper just generate ReplyMarkup with cancel button
-func CancelButton(T i18n.TranslateFunc) *tg.ReplyKeyboardMarkup {
+func CancelButton(t i18n.TranslateFunc) *tg.ReplyKeyboardMarkup {
 	return tg.NewReplyKeyboardMarkup(
 		tg.NewReplyKeyboardRow(
-			tg.NewReplyKeyboardButton(T("button_cancel")),
+			tg.NewReplyKeyboardButton(t("button_cancel")),
 		),
 	)
 }

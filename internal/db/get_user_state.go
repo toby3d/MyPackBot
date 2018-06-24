@@ -10,18 +10,17 @@ import (
 )
 
 // UserState return current state for UserID
-func (db *DataBase) UserState(usr *tg.User) (string, error) {
-	log.Ln("Trying to get", usr.ID, "state")
+func (db *DataBase) GetUserState(user *tg.User) (string, error) {
+	log.Ln("Trying to get", user.ID, "state")
 	var state string
-	err := DB.View(func(tx *buntdb.Tx) error {
+	err := db.View(func(tx *buntdb.Tx) error {
 		var err error
-		state, err = tx.Get(fmt.Sprint("user:", usr.ID, ":state"))
+		state, err = tx.Get(fmt.Sprint("user:", user.ID, ":state"))
 		return err
 	})
-
 	if err == buntdb.ErrNotFound {
-		log.Ln(usr.ID, "not found, create new one")
-		if err = db.ChangeUserState(usr, models.StateNone); err != nil {
+		log.Ln(user.ID, "not found, create new one")
+		if err = db.ChangeUserState(user, models.StateNone); err != nil {
 			return state, err
 		}
 	}

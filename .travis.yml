@@ -1,8 +1,0 @@
-language: go
-
-go:
-  - tip
-
-install:
-  - go get -tags=debug
-  - go get -u github.com/nicksnyder/go-i18n/goi18n

@@ -4,21 +4,22 @@ import (
 	"time"
 
 	log "github.com/kirillDanshin/dlog"
-	"github.com/toby3d/MyPackBot/internal/bot"
-	"github.com/toby3d/MyPackBot/internal/config"
-	"github.com/toby3d/MyPackBot/internal/db"
-	"github.com/toby3d/MyPackBot/internal/errors"
-	tg "github.com/toby3d/telegram"
+	"gitlab.com/toby3d/mypackbot/internal/bot"
+	"gitlab.com/toby3d/mypackbot/internal/config"
+	"gitlab.com/toby3d/mypackbot/internal/db"
+	"gitlab.com/toby3d/mypackbot/internal/errors"
+	tg "gitlab.com/toby3d/telegram"
 )
 
 // ChannelPost checks ChannelPost update for forwarding content to bot users
 func ChannelPost(post *tg.Message) {
-	if post.Chat.ID != config.ChannelID {
-		log.Ln(post.Chat.ID, "!=", config.ChannelID)
+	channelID := config.Config.GetInt64("telegram.channel")
+	if post.Chat.ID != channelID {
+		log.Ln(post.Chat.ID, "!=", channelID)
 		return
 	}
 
-	users, err := db.Users()
+	users, err := db.DB.GetUsers()
 	errors.Check(err)
 
 	for i := range users {

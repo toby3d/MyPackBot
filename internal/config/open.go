@@ -1,23 +1,17 @@
 package config
 
-import (
-	"github.com/olebedev/config"
-	"github.com/toby3d/MyPackBot/internal/errors"
-)
+import "github.com/spf13/viper"
 
-var (
-	// Config is a main object of preloaded configuration YAML
-	Config *config.Config
-
-	// ChannelID is a announcements channel ID
-	ChannelID int64
-)
+var Config *viper.Viper
 
 // Open just open configuration file for parsing some data in other functions
-func Open(path string) {
-	var err error
-	Config, err = config.ParseYamlFile(path)
-	errors.Check(err)
+func Open(path string) (*viper.Viper, error) {
+	cfg := viper.New()
 
-	ChannelID = int64(Config.UInt("telegram.channel"))
+	cfg.AddConfigPath(path)
+	cfg.SetConfigName("config")
+	cfg.SetConfigType("yaml")
+
+	err := cfg.ReadInConfig()
+	return cfg, err
 }

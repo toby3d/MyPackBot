@@ -1,47 +1,47 @@
 package commands
 
 import (
-	"github.com/toby3d/MyPackBot/internal/bot"
-	"github.com/toby3d/MyPackBot/internal/db"
-	"github.com/toby3d/MyPackBot/internal/errors"
-	"github.com/toby3d/MyPackBot/internal/helpers"
-	"github.com/toby3d/MyPackBot/internal/i18n"
-	"github.com/toby3d/MyPackBot/internal/models"
-	tg "github.com/toby3d/telegram"
+	"gitlab.com/toby3d/mypackbot/internal/bot"
+	"gitlab.com/toby3d/mypackbot/internal/db"
+	"gitlab.com/toby3d/mypackbot/internal/errors"
+	"gitlab.com/toby3d/mypackbot/internal/i18n"
+	"gitlab.com/toby3d/mypackbot/internal/models"
+	"gitlab.com/toby3d/mypackbot/internal/utils"
+	tg "gitlab.com/toby3d/telegram"
 )
 
 // Reset prepare user to reset his pack
 func Reset(msg *tg.Message) {
-	T, err := i18n.SwitchTo(msg.From.LanguageCode)
+	t, err := i18n.SwitchTo(msg.From.LanguageCode)
 	errors.Check(err)
 
-	_, total, err := db.UserStickers(msg.From.ID, 0, "")
+	stickers, err := db.DB.GetUserStickers(msg.From, &tg.InlineQuery{})
 	errors.Check(err)
 
 	_, err = bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errors.Check(err)
 
-	if total <= 0 {
-		err = db.ChangeUserState(msg.From.ID, models.StateNone)
+	if len(stickers) <= 0 {
+		err = db.DB.ChangeUserState(msg.From, models.StateNone)
 		errors.Check(err)
 
-		reply := tg.NewMessage(msg.Chat.ID, T("error_already_reset"))
-		reply.ParseMode = tg.ModeMarkdown
-		reply.ReplyMarkup = helpers.MenuKeyboard(T)
+		reply := tg.NewMessage(msg.Chat.ID, t("error_already_reset"))
+		reply.ParseMode = tg.StyleMarkdown
+		reply.ReplyMarkup = utils.MenuKeyboard(t)
 		_, err = bot.Bot.SendMessage(reply)
 		errors.Check(err)
 		return
 	}
 
-	err = db.ChangeUserState(msg.From.ID, models.StateReset)
+	err = db.DB.ChangeUserState(msg.From, models.StateReset)
 	errors.Check(err)
 
-	reply := tg.NewMessage(msg.Chat.ID, T("reply_reset", map[string]interface{}{
-		"KeyPhrase":     T("key_phrase"),
+	reply := tg.NewMessage(msg.Chat.ID, t("reply_reset", map[string]interface{}{
+		"KeyPhrase":     t("key_phrase"),
 		"CancelCommand": models.CommandCancel,
 	}))
-	reply.ParseMode = tg.ModeMarkdown
-	reply.ReplyMarkup = helpers.CancelButton(T)
+	reply.ParseMode = tg.StyleMarkdown
+	reply.ReplyMarkup = utils.CancelButton(t)
 	_, err = bot.Bot.SendMessage(reply)
 	errors.Check(err)
 }

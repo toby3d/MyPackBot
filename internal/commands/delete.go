@@ -1,49 +1,49 @@
 package commands
 
 import (
-	"github.com/toby3d/MyPackBot/internal/bot"
-	"github.com/toby3d/MyPackBot/internal/db"
-	"github.com/toby3d/MyPackBot/internal/errors"
-	"github.com/toby3d/MyPackBot/internal/helpers"
-	"github.com/toby3d/MyPackBot/internal/i18n"
-	"github.com/toby3d/MyPackBot/internal/models"
-	tg "github.com/toby3d/telegram"
+	"gitlab.com/toby3d/mypackbot/internal/bot"
+	"gitlab.com/toby3d/mypackbot/internal/db"
+	"gitlab.com/toby3d/mypackbot/internal/errors"
+	"gitlab.com/toby3d/mypackbot/internal/i18n"
+	"gitlab.com/toby3d/mypackbot/internal/models"
+	"gitlab.com/toby3d/mypackbot/internal/utils"
+	tg "gitlab.com/toby3d/telegram"
 )
 
 // Delete prepare user to remove some stickers or sets from his pack
 func Delete(msg *tg.Message, pack bool) {
-	T, err := i18n.SwitchTo(msg.From.LanguageCode)
+	t, err := i18n.SwitchTo(msg.From.LanguageCode)
 	errors.Check(err)
 
-	_, total, err := db.UserStickers(msg.From.ID, 0, "")
+	stickers, err := db.DB.GetUserStickers(msg.From, &tg.InlineQuery{})
 	errors.Check(err)
 
 	_, err = bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errors.Check(err)
 
-	if total <= 0 {
-		err = db.ChangeUserState(msg.From.ID, models.StateNone)
+	if len(stickers) <= 0 {
+		err = db.DB.ChangeUserState(msg.From, models.StateNone)
 		errors.Check(err)
 
-		reply := tg.NewMessage(msg.Chat.ID, T("error_empty_del"))
-		reply.ReplyMarkup = helpers.MenuKeyboard(T)
+		reply := tg.NewMessage(msg.Chat.ID, t("error_empty_del"))
+		reply.ReplyMarkup = utils.MenuKeyboard(t)
 		_, err = bot.Bot.SendMessage(reply)
 		errors.Check(err)
 		return
 	}
 
-	reply := tg.NewMessage(msg.Chat.ID, T("reply_del_sticker"))
-	reply.ParseMode = tg.ModeMarkdown
-	reply.ReplyMarkup = helpers.CancelButton(T)
+	reply := tg.NewMessage(msg.Chat.ID, t("reply_del_sticker"))
+	reply.ParseMode = tg.StyleMarkdown
+	reply.ReplyMarkup = utils.CancelButton(t)
 
-	err = db.ChangeUserState(msg.From.ID, models.StateDeleteSticker)
+	err = db.DB.ChangeUserState(msg.From, models.StateDeleteSticker)
 	errors.Check(err)
 
 	if pack {
-		err = db.ChangeUserState(msg.From.ID, models.StateDeletePack)
+		err = db.DB.ChangeUserState(msg.From, models.StateDeletePack)
 		errors.Check(err)
 
-		reply.Text = T("reply_del_pack")
+		reply.Text = t("reply_del_pack")
 	}
 
 	_, err = bot.Bot.SendMessage(reply)
@@ -52,8 +52,8 @@ func Delete(msg *tg.Message, pack bool) {
 	_, err = bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errors.Check(err)
 
-	reply = tg.NewMessage(msg.Chat.ID, T("reply_switch_button"))
-	reply.ReplyMarkup = helpers.SwitchButton(T)
+	reply = tg.NewMessage(msg.Chat.ID, t("reply_switch_button"))
+	reply.ReplyMarkup = utils.SwitchButton(t)
 	_, err = bot.Bot.SendMessage(reply)
 	errors.Check(err)
 }

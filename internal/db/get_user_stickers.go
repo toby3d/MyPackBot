@@ -14,28 +14,29 @@ import (
 func (db *DataBase) GetUserStickers(uid int, query *tg.InlineQuery) (stickers []string, err error) {
 	log.Ln("Trying to get", uid, "stickers")
 	var i int
-	offset, _ := strconv.Atoi(query.Offset)
-	offset *= 50
+	page, _ := strconv.Atoi(query.Offset)
+	offset := page * 50
 
 	err = db.View(func(tx *buntdb.Tx) error {
 		return tx.AscendKeys(
 			fmt.Sprint("user:", uid, ":set:*"), // index
 			func(key, val string) bool { // iterator
-				subKeys := strings.Split(key, ":")
-				if subKeys[1] != strconv.Itoa(uid) {
-					return true
-				}
+				defer func() { i++ }()
 
-				if len(stickers) == 50 {
+				if i >= 50 {
 					return false
 				}
 
-				i++
+				subKeys := strings.Split(key, ":")
+				if !strings.EqualFold(subKeys[1], strconv.Itoa(uid)) {
+					return true
+				}
+
 				if i < offset {
 					return true
 				}
 
-				if query.Query != "" && !strings.Contains(query.Query, val) {
+				if query.Query != "" && !strings.ContainsAny(query.Query, val) {
 					return true
 				}
 

@@ -6,8 +6,8 @@ import (
 )
 
 // MenuKeyboard helper just generate ReplyMarkup with menu buttons
-func MenuKeyboard(t i18n.TranslateFunc) *tg.ReplyKeyboardMarkup {
-	return tg.NewReplyKeyboardMarkup(
+func MenuKeyboard(t i18n.TranslateFunc) (rkm *tg.ReplyKeyboardMarkup) {
+	rkm = tg.NewReplyKeyboardMarkup(
 		tg.NewReplyKeyboardRow(
 			tg.NewReplyKeyboardButton(t("button_add_sticker")),
 			tg.NewReplyKeyboardButton(t("button_add_pack")),
@@ -20,4 +20,7 @@ func MenuKeyboard(t i18n.TranslateFunc) *tg.ReplyKeyboardMarkup {
 			tg.NewReplyKeyboardButton(t("button_reset")),
 		),
 	)
+
+	rkm.ResizeKeyboard = true
+	return
 }

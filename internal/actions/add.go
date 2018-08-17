@@ -29,7 +29,7 @@ func Add(msg *tg.Message, pack bool) {
 	if !pack {
 		var exist bool
 		sticker := msg.Sticker
-		exist, err = db.DB.AddSticker(msg.From, sticker)
+		exist, err = db.DB.AddSticker(msg.From.ID, sticker)
 		errors.Check(err)
 
 		if exist {
@@ -59,7 +59,7 @@ func Add(msg *tg.Message, pack bool) {
 		allExists := true
 		for i := range set.Stickers {
 			var exist bool
-			exist, err = db.DB.AddSticker(msg.From, &set.Stickers[i])
+			exist, err = db.DB.AddSticker(msg.From.ID, &set.Stickers[i])
 			errors.Check(err)
 
 			if !exist {

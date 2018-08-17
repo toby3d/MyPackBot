@@ -11,8 +11,8 @@ import (
 )
 
 // DeletePack remove all keys for UserID which contains input SetName
-func (db *DataBase) DeletePack(user *tg.User, sticker *tg.Sticker) (bool, error) {
-	log.Ln("Trying to remove all", sticker.SetName, "sticker from", user.ID, "user")
+func (db *DataBase) DeletePack(uid int, sticker *tg.Sticker) (bool, error) {
+	log.Ln("Trying to remove all", sticker.SetName, "sticker from", uid, "user")
 	if sticker.SetName == "" {
 		sticker.SetName = models.SetUploaded
 	}
@@ -20,7 +20,7 @@ func (db *DataBase) DeletePack(user *tg.User, sticker *tg.Sticker) (bool, error)
 	var ids []string
 	err := db.View(func(tx *buntdb.Tx) error {
 		return tx.AscendKeys(
-			fmt.Sprint("user:", user.ID, ":set:", sticker.SetName, ":*"),
+			fmt.Sprint("user:", uid, ":set:", sticker.SetName, ":*"),
 			func(key, val string) bool {
 				keys := strings.Split(key, ":")
 				ids = append(ids, keys[5])
@@ -35,14 +35,14 @@ func (db *DataBase) DeletePack(user *tg.User, sticker *tg.Sticker) (bool, error)
 
 	for _, id := range ids {
 		var notExist bool
-		notExist, err = db.DeleteSticker(user, &tg.Sticker{FileID: id})
+		notExist, err = db.DeleteSticker(uid, &tg.Sticker{FileID: id})
 		if err != nil {
 			return notExist, err
 		}
 	}
 
 	if err == buntdb.ErrNotFound {
-		log.Ln(user.ID, "not found")
+		log.Ln(uid, "not found")
 		return true, nil
 	}
 

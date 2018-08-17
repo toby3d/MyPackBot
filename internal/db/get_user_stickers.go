@@ -11,19 +11,18 @@ import (
 )
 
 // GetUserStickers return array of saved stickers for input UserID and his total count
-func (db *DataBase) GetUserStickers(user *tg.User, query *tg.InlineQuery) ([]string, error) {
-	log.Ln("Trying to get", user.ID, "stickers")
+func (db *DataBase) GetUserStickers(uid int, query *tg.InlineQuery) (stickers []string, err error) {
+	log.Ln("Trying to get", uid, "stickers")
 	var i int
-	var stickers []string
 	offset, _ := strconv.Atoi(query.Offset)
 	offset *= 50
 
-	err := db.View(func(tx *buntdb.Tx) error {
+	err = db.View(func(tx *buntdb.Tx) error {
 		return tx.AscendKeys(
-			fmt.Sprint("user:", user.ID, ":set:*"), // index
+			fmt.Sprint("user:", uid, ":set:*"), // index
 			func(key, val string) bool { // iterator
 				subKeys := strings.Split(key, ":")
-				if subKeys[1] != strconv.Itoa(user.ID) {
+				if subKeys[1] != strconv.Itoa(uid) {
 					return true
 				}
 

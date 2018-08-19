@@ -1,17 +1,41 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"path/filepath"
+
+	"github.com/kirillDanshin/dlog"
+	"github.com/spf13/viper"
+	"gitlab.com/toby3d/mypackbot/internal/errors"
+)
 
 var Config *viper.Viper
 
 // Open just open configuration file for parsing some data in other functions
-func Open(path string) (*viper.Viper, error) {
-	cfg := viper.New()
+func Open(path string) (v *viper.Viper, err error) {
+	dlog.Ln("Opening config on path:", path)
 
-	cfg.AddConfigPath(path)
-	cfg.SetConfigName("config")
-	cfg.SetConfigType("yaml")
+	dir, file := filepath.Split(path)
+	ext := filepath.Ext(file)
+	if file == "" || ext == "" {
+		return nil, errors.New("invalid path to config file")
+	}
 
-	err := cfg.ReadInConfig()
-	return cfg, err
+	fileExt := ext[1:]
+	fileName := file[:(len(file)-len(fileExt))-1]
+
+	dlog.Ln("dir:", dir)
+	dlog.Ln("file:", file)
+	dlog.Ln("fileName:", fileName)
+	dlog.Ln("fileExt:", fileExt)
+
+	v = viper.New()
+
+	v.AddConfigPath(dir)
+	v.SetConfigName(fileName)
+	v.SetConfigType(fileExt)
+
+	dlog.Ln("Reading", file)
+	err = v.ReadInConfig()
+
+	return
 }

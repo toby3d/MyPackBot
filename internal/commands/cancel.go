@@ -15,7 +15,7 @@ func Cancel(msg *tg.Message) {
 	t, err := i18n.SwitchTo(msg.From.LanguageCode)
 	errors.Check(err)
 
-	state, err := db.DB.GetUserState(msg.From)
+	state, err := db.DB.GetUserState(msg.From.ID)
 	errors.Check(err)
 
 	_, err = bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
@@ -37,7 +37,7 @@ func Cancel(msg *tg.Message) {
 		text = t("cancel_error")
 	}
 
-	err = db.DB.ChangeUserState(msg.From, models.StateNone)
+	err = db.DB.ChangeUserState(msg.From.ID, models.StateNone)
 	errors.Check(err)
 
 	reply := tg.NewMessage(msg.Chat.ID, text)

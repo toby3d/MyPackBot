@@ -15,7 +15,7 @@ import (
 
 // Start just send introduction about bot to user
 func Start(msg *tg.Message) {
-	err := db.DB.ChangeUserState(msg.From, models.StateNone)
+	err := db.DB.ChangeUserState(msg.From.ID, models.StateNone)
 	errors.Check(err)
 
 	_, err = bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)

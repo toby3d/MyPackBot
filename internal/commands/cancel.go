@@ -4,7 +4,6 @@ import (
 	"gitlab.com/toby3d/mypackbot/internal/bot"
 	"gitlab.com/toby3d/mypackbot/internal/db"
 	"gitlab.com/toby3d/mypackbot/internal/errors"
-	"gitlab.com/toby3d/mypackbot/internal/i18n"
 	"gitlab.com/toby3d/mypackbot/internal/models"
 	"gitlab.com/toby3d/mypackbot/internal/utils"
 	tg "gitlab.com/toby3d/telegram"
@@ -12,8 +11,7 @@ import (
 
 // Cancel just cancel current user operation
 func Cancel(msg *tg.Message) {
-	t, err := i18n.SwitchTo(msg.From.LanguageCode)
-	errors.Check(err)
+	p := utils.NewPrinter(msg.From.LanguageCode)
 
 	state, err := db.DB.GetUserState(msg.From.ID)
 	errors.Check(err)
@@ -24,24 +22,24 @@ func Cancel(msg *tg.Message) {
 	var text string
 	switch state {
 	case models.StateAddSticker:
-		text = t("cancel_add_sticker")
+		text = p.Sprintf("You canceled the process of adding new stickers to your collection.")
 	case models.StateAddPack:
-		text = t("cancel_add_pack")
+		text = p.Sprintf("You canceled the process of adding new sets to yours.")
 	case models.StateDeleteSticker:
-		text = t("cancel_del_sticker")
+		text = p.Sprintf("You canceled the process of removing the sticker from your collection.")
 	case models.StateDeletePack:
-		text = t("cancel_del_pack")
+		text = p.Sprintf("You canceled the process of removing sets from your collection.")
 	case models.StateReset:
-		text = t("cancel_reset")
+		text = p.Sprintf("You canceled the process of resetting your collection.")
 	default:
-		text = t("cancel_error")
+		text = p.Sprintf("Nothing to cancel.")
 	}
 
 	err = db.DB.ChangeUserState(msg.From.ID, models.StateNone)
 	errors.Check(err)
 
 	reply := tg.NewMessage(msg.Chat.ID, text)
-	reply.ReplyMarkup = utils.MenuKeyboard(t)
+	reply.ReplyMarkup = utils.MenuKeyboard(p)
 
 	_, err = bot.Bot.SendMessage(reply)
 	errors.Check(err)

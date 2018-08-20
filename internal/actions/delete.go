@@ -5,7 +5,6 @@ import (
 	"gitlab.com/toby3d/mypackbot/internal/bot"
 	"gitlab.com/toby3d/mypackbot/internal/db"
 	"gitlab.com/toby3d/mypackbot/internal/errors"
-	"gitlab.com/toby3d/mypackbot/internal/i18n"
 	"gitlab.com/toby3d/mypackbot/internal/utils"
 	tg "gitlab.com/toby3d/telegram"
 )
@@ -16,15 +15,14 @@ func Delete(msg *tg.Message, pack bool) {
 		return
 	}
 
-	t, err := i18n.SwitchTo(msg.From.LanguageCode)
+	p := utils.NewPrinter(msg.From.LanguageCode)
+
+	_, err := bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errors.Check(err)
 
-	_, err = bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
-	errors.Check(err)
-
-	reply := tg.NewMessage(msg.Chat.ID, t("success_del_sticker"))
+	reply := tg.NewMessage(msg.Chat.ID, p.Sprintf("The sticker has been successfully removed from your set!"))
 	reply.ParseMode = tg.StyleMarkdown
-	reply.ReplyMarkup = utils.CancelButton(t)
+	reply.ReplyMarkup = utils.CancelButton(p)
 
 	var notExist bool
 	if pack {
@@ -33,18 +31,19 @@ func Delete(msg *tg.Message, pack bool) {
 		errors.Check(err)
 
 		log.Ln("SetName:", set.Title)
-		reply.Text = t("success_del_pack", map[string]interface{}{
-			"SetTitle": set.Title,
-		})
+		reply.Text = p.Sprintf(
+			"The set *%s* was successfully removed from your collection!",
+			set.Title,
+		)
 
 		notExist, err = db.DB.DeletePack(msg.From.ID, msg.Sticker)
 		if notExist {
-			reply.Text = t("error_already_del_pack")
+			reply.Text = p.Sprintf("Probably this set is already removed from yours.")
 		}
 	} else {
 		notExist, err = db.DB.DeleteSticker(msg.From.ID, msg.Sticker)
 		if notExist {
-			reply.Text = t("error_already_del_sticker")
+			reply.Text = p.Sprintf("Probably this sticker is already removed from your set.")
 		}
 	}
 	errors.Check(err)

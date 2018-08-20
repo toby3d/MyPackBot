@@ -1,5 +1,7 @@
 package main
 
+//go:generate gotext -srclang=en update -out=i18n_gen.go -lang=en
+
 import (
 	"flag"
 
@@ -8,7 +10,6 @@ import (
 	"gitlab.com/toby3d/mypackbot/internal/config"
 	"gitlab.com/toby3d/mypackbot/internal/db"
 	"gitlab.com/toby3d/mypackbot/internal/errors"
-	"gitlab.com/toby3d/mypackbot/internal/i18n"
 	"gitlab.com/toby3d/mypackbot/internal/updates"
 )
 
@@ -20,10 +21,7 @@ var flagWebhook = flag.Bool(
 // init prepare configuration and other things for successful start
 func init() {
 	log.Ln("Initializing...")
-
-	// Preload localization strings
-	err := i18n.Open("i18n/")
-	errors.Check(err)
+	var err error
 
 	// Preload configuration file
 	config.Config, err = config.Open("./configs/config.yaml")

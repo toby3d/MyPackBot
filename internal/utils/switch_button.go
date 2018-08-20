@@ -1,15 +1,18 @@
 package utils
 
 import (
-	"github.com/nicksnyder/go-i18n/i18n"
 	tg "gitlab.com/toby3d/telegram"
+	"golang.org/x/text/message"
 )
 
 // SwitchButton helper just generate ReplyMarkup with SelfSwitch button
-func SwitchButton(t i18n.TranslateFunc) *tg.InlineKeyboardMarkup {
+func SwitchButton(p *message.Printer) *tg.InlineKeyboardMarkup {
 	return tg.NewInlineKeyboardMarkup(
 		tg.NewInlineKeyboardRow(
-			tg.NewInlineKeyboardButtonSwitchSelf(t("button_inline_select"), " "),
+			tg.NewInlineKeyboardButtonSwitchSelf(
+				p.Sprintf("select sticker"),
+				" ",
+			),
 		),
 	)
 }

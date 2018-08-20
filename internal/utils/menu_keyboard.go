@@ -1,23 +1,33 @@
 package utils
 
 import (
-	"github.com/nicksnyder/go-i18n/i18n"
+	"fmt"
+
 	tg "gitlab.com/toby3d/telegram"
+	"golang.org/x/text/message"
 )
 
 // MenuKeyboard helper just generate ReplyMarkup with menu buttons
-func MenuKeyboard(t i18n.TranslateFunc) (rkm *tg.ReplyKeyboardMarkup) {
+func MenuKeyboard(p *message.Printer) (rkm *tg.ReplyKeyboardMarkup) {
 	rkm = tg.NewReplyKeyboardMarkup(
 		tg.NewReplyKeyboardRow(
-			tg.NewReplyKeyboardButton(t("button_add_sticker")),
-			tg.NewReplyKeyboardButton(t("button_add_pack")),
+			tg.NewReplyKeyboardButton(
+				fmt.Sprintf("➕ %s", p.Sprintf("add a sticker")),
+			), tg.NewReplyKeyboardButton(
+				fmt.Sprintf("📦 %s", p.Sprintf("add set")),
+			),
 		),
 		tg.NewReplyKeyboardRow(
-			tg.NewReplyKeyboardButton(t("button_del_sticker")),
-			tg.NewReplyKeyboardButton(t("button_del_pack")),
+			tg.NewReplyKeyboardButton(
+				fmt.Sprintf("🗑 %s", p.Sprintf("remove sticker")),
+			), tg.NewReplyKeyboardButton(
+				fmt.Sprintf("🗑 %s", p.Sprintf("delete set")),
+			),
 		),
 		tg.NewReplyKeyboardRow(
-			tg.NewReplyKeyboardButton(t("button_reset")),
+			tg.NewReplyKeyboardButton(
+				fmt.Sprintf("🔥 %s", p.Sprintf("reset set")),
+			),
 		),
 	)
 

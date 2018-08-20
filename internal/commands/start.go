@@ -7,7 +7,6 @@ import (
 	"gitlab.com/toby3d/mypackbot/internal/bot"
 	"gitlab.com/toby3d/mypackbot/internal/db"
 	"gitlab.com/toby3d/mypackbot/internal/errors"
-	"gitlab.com/toby3d/mypackbot/internal/i18n"
 	"gitlab.com/toby3d/mypackbot/internal/models"
 	"gitlab.com/toby3d/mypackbot/internal/utils"
 	tg "gitlab.com/toby3d/telegram"
@@ -29,18 +28,17 @@ func Start(msg *tg.Message) {
 		}
 	}
 
-	t, err := i18n.SwitchTo(msg.From.LanguageCode)
-	errors.Check(err)
+	p := utils.NewPrinter(msg.From.LanguageCode)
 
 	reply := tg.NewMessage(
 		msg.Chat.ID,
-		t("reply_start", map[string]interface{}{
-			"Username": bot.Bot.Username,
-			"ID":       bot.Bot.ID,
-		}),
+		p.Sprintf(
+			"Hello, I'm @%s!\nI can create your personal set of stickers from other sets.\nWithout restrictions and installation. In any chat. Is free.",
+			bot.Bot.Username,
+		),
 	)
 	reply.ParseMode = tg.StyleMarkdown
-	reply.ReplyMarkup = utils.MenuKeyboard(t)
+	reply.ReplyMarkup = utils.MenuKeyboard(p)
 
 	_, err = bot.Bot.SendMessage(reply)
 	errors.Check(err)

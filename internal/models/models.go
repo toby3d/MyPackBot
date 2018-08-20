@@ -25,10 +25,6 @@ const (
 // SetUploaded is a mimic set name of uploaded stickers without any parent set
 const SetUploaded = "?"
 
-// LanguageFallback is a default language code in case what current user language
-// is not support yet
-const LanguageFallback = "en"
-
 // AllowedUpdates is
 var AllowedUpdates = []string{
 	tg.UpdateInlineQuery, // For searching and sending stickers

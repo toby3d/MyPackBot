@@ -1,15 +1,19 @@
 package utils
 
 import (
-	"github.com/nicksnyder/go-i18n/i18n"
+	"fmt"
+
 	tg "gitlab.com/toby3d/telegram"
+	"golang.org/x/text/message"
 )
 
 // CancelButton helper just generate ReplyMarkup with cancel button
-func CancelButton(t i18n.TranslateFunc) (rkm *tg.ReplyKeyboardMarkup) {
+func CancelButton(p *message.Printer) (rkm *tg.ReplyKeyboardMarkup) {
 	rkm = tg.NewReplyKeyboardMarkup(
 		tg.NewReplyKeyboardRow(
-			tg.NewReplyKeyboardButton(t("button_cancel")),
+			tg.NewReplyKeyboardButton(
+				fmt.Sprintf("❌ %s", p.Sprintf("cancel")),
+			),
 		),
 	)
 	rkm.ResizeKeyboard = true

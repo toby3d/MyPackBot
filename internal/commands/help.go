@@ -4,7 +4,6 @@ import (
 	"gitlab.com/toby3d/mypackbot/internal/bot"
 	"gitlab.com/toby3d/mypackbot/internal/db"
 	"gitlab.com/toby3d/mypackbot/internal/errors"
-	"gitlab.com/toby3d/mypackbot/internal/i18n"
 	"gitlab.com/toby3d/mypackbot/internal/models"
 	"gitlab.com/toby3d/mypackbot/internal/utils"
 	tg "gitlab.com/toby3d/telegram"
@@ -12,28 +11,28 @@ import (
 
 // Help just send instructions about bot usage
 func Help(msg *tg.Message) {
-	t, err := i18n.SwitchTo(msg.From.LanguageCode)
-	errors.Check(err)
+	p := utils.NewPrinter(msg.From.LanguageCode)
 
-	err = db.DB.ChangeUserState(msg.From.ID, models.StateNone)
+	err := db.DB.ChangeUserState(msg.From.ID, models.StateNone)
 	errors.Check(err)
 
 	_, err = bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errors.Check(err)
 
 	reply := tg.NewMessage(
-		msg.Chat.ID, t("reply_help", map[string]interface{}{
-			"AddStickerCommand":    models.CommandAddSticker,
-			"AddPackCommand":       models.CommandAddPack,
-			"DeleteStickerCommand": models.CommandDeleteSticker,
-			"DeletePackCommand":    models.CommandDeletePack,
-			"ResetCommand":         models.CommandReset,
-			"CancelCommand":        models.CommandCancel,
-			"Username":             bot.Bot.Username,
-		}),
+		msg.Chat.ID, p.Sprintf(
+			"/%s - adds stickers one by one to your collection\n/%s - adds the entire set to your\n/%s at once - removes the sticker from your set one by one\n/%s - deletes the sticker set from your set\n/%s - removes all stickers from your set\n/%s - undoes the current operation\n\nTo view and send stickers from your set, simply type `@%s` (and space) in any chat.",
+			models.CommandAddSticker,
+			models.CommandAddPack,
+			models.CommandDeleteSticker,
+			models.CommandDeletePack,
+			models.CommandReset,
+			models.CommandCancel,
+			bot.Bot.Username,
+		),
 	)
 	reply.ParseMode = tg.StyleMarkdown
-	reply.ReplyMarkup = utils.MenuKeyboard(t)
+	reply.ReplyMarkup = utils.MenuKeyboard(p)
 
 	_, err = bot.Bot.SendMessage(reply)
 	errors.Check(err)

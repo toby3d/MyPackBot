@@ -5,7 +5,6 @@ import (
 	"gitlab.com/toby3d/mypackbot/internal/bot"
 	"gitlab.com/toby3d/mypackbot/internal/db"
 	"gitlab.com/toby3d/mypackbot/internal/errors"
-	"gitlab.com/toby3d/mypackbot/internal/i18n"
 	"gitlab.com/toby3d/mypackbot/internal/models"
 	"gitlab.com/toby3d/mypackbot/internal/utils"
 	tg "gitlab.com/toby3d/telegram"
@@ -13,21 +12,20 @@ import (
 
 // Add command prepare user for adding some stickers or sets to his pack
 func Add(msg *tg.Message, pack bool) {
-	t, err := i18n.SwitchTo(msg.From.LanguageCode)
+	p := utils.NewPrinter(msg.From.LanguageCode)
+
+	_, err := bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
 	errors.Check(err)
 
-	_, err = bot.Bot.SendChatAction(msg.Chat.ID, tg.ActionTyping)
-	errors.Check(err)
-
-	reply := tg.NewMessage(msg.Chat.ID, t("reply_add_sticker"))
+	reply := tg.NewMessage(msg.Chat.ID, p.Sprintf("Send stickers from any other sets to add them one by one."))
 	reply.ParseMode = tg.StyleMarkdown
-	reply.ReplyMarkup = utils.CancelButton(t)
+	reply.ReplyMarkup = utils.CancelButton(p)
 
 	err = db.DB.ChangeUserState(msg.From.ID, models.StateAddSticker)
 	errors.Check(err)
 
 	if pack {
-		reply.Text = t("reply_add_pack")
+		reply.Text = p.Sprintf("Send stickers from any other sets to completely add their sets to your.")
 
 		err = db.DB.ChangeUserState(msg.From.ID, models.StateAddPack)
 		errors.Check(err)

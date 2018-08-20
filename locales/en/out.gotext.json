@@ -1,0 +1,434 @@
+{
+    "language": "en",
+    "messages": [
+        {
+            "id": "cancel",
+            "message": "cancel",
+            "translation": "cancel",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "add a sticker",
+            "message": "add a sticker",
+            "translation": "add a sticker",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "add set",
+            "message": "add set",
+            "translation": "add set",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "remove sticker",
+            "message": "remove sticker",
+            "translation": "remove sticker",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "delete set",
+            "message": "delete set",
+            "translation": "delete set",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "reset set",
+            "message": "reset set",
+            "translation": "reset set",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "select sticker",
+            "message": "select sticker",
+            "translation": "select sticker",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "The sticker was successfully added to your set!",
+            "message": "The sticker was successfully added to your set!",
+            "translation": "The sticker was successfully added to your set!",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "This sticker is already in your collection.",
+            "message": "This sticker is already in your collection.",
+            "translation": "This sticker is already in your collection.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "It seems you're trying to add your own sticker. Use the /{CommandAddSticker} command for this.",
+            "message": "It seems you're trying to add your own sticker. Use the /{CommandAddSticker} command for this.",
+            "translation": "It seems you're trying to add your own sticker. Use the /{CommandAddSticker} command for this.",
+            "translatorComment": "Copied from source.",
+            "placeholders": [
+                {
+                    "id": "CommandAddSticker",
+                    "string": "%[1]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "models.CommandAddSticker"
+                }
+            ],
+            "fuzzy": true
+        },
+        {
+            "id": "The set *{Title}* was successfully added to yours!",
+            "message": "The set *{Title}* was successfully added to yours!",
+            "translation": "The set *{Title}* was successfully added to yours!",
+            "translatorComment": "Copied from source.",
+            "placeholders": [
+                {
+                    "id": "Title",
+                    "string": "%[1]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "set.Title"
+                }
+            ],
+            "fuzzy": true
+        },
+        {
+            "id": "All of the *{Title}* stickers are already in your collection.",
+            "message": "All of the *{Title}* stickers are already in your collection.",
+            "translation": "All of the *{Title}* stickers are already in your collection.",
+            "translatorComment": "Copied from source.",
+            "placeholders": [
+                {
+                    "id": "Title",
+                    "string": "%[1]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "set.Title"
+                }
+            ],
+            "fuzzy": true
+        },
+        {
+            "id": "The sticker has been successfully removed from your set!",
+            "message": "The sticker has been successfully removed from your set!",
+            "translation": "The sticker has been successfully removed from your set!",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "The set *{Title}* was successfully removed from your collection!",
+            "message": "The set *{Title}* was successfully removed from your collection!",
+            "translation": "The set *{Title}* was successfully removed from your collection!",
+            "translatorComment": "Copied from source.",
+            "placeholders": [
+                {
+                    "id": "Title",
+                    "string": "%[1]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "set.Title"
+                }
+            ],
+            "fuzzy": true
+        },
+        {
+            "id": "Probably this set is already removed from yours.",
+            "message": "Probably this set is already removed from yours.",
+            "translation": "Probably this set is already removed from yours.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Probably this sticker is already removed from your set.",
+            "message": "Probably this sticker is already removed from your set.",
+            "translation": "Probably this sticker is already removed from your set.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "I have no idea what to do with this sticker.\nPlease use /{CommandAddSticker}, /{CommandAddPack}, /{CommandDeleteSticker} or /{CommandDeletePack} first.",
+            "message": "I have no idea what to do with this sticker.\nPlease use /{CommandAddSticker}, /{CommandAddPack}, /{CommandDeleteSticker} or /{CommandDeletePack} first.",
+            "translation": "I have no idea what to do with this sticker.\nPlease use /{CommandAddSticker}, /{CommandAddPack}, /{CommandDeleteSticker} or /{CommandDeletePack} first.",
+            "translatorComment": "Copied from source.",
+            "placeholders": [
+                {
+                    "id": "CommandAddSticker",
+                    "string": "%[1]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "models.CommandAddSticker"
+                },
+                {
+                    "id": "CommandAddPack",
+                    "string": "%[2]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 2,
+                    "expr": "models.CommandAddPack"
+                },
+                {
+                    "id": "CommandDeleteSticker",
+                    "string": "%[3]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 3,
+                    "expr": "models.CommandDeleteSticker"
+                },
+                {
+                    "id": "CommandDeletePack",
+                    "string": "%[4]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 4,
+                    "expr": "models.CommandDeletePack"
+                }
+            ],
+            "fuzzy": true
+        },
+        {
+            "id": "Yes, I am absolutely sure.",
+            "message": "Yes, I am absolutely sure.",
+            "translation": "Yes, I am absolutely sure.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Wrong phrase for reset. The action was canceled.",
+            "message": "Wrong phrase for reset. The action was canceled.",
+            "translation": "Wrong phrase for reset. The action was canceled.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Your set has successfully reseted!",
+            "message": "Your set has successfully reseted!",
+            "translation": "Your set has successfully reseted!",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Send stickers from any other sets to add them one by one.",
+            "message": "Send stickers from any other sets to add them one by one.",
+            "translation": "Send stickers from any other sets to add them one by one.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Send stickers from any other sets to completely add their sets to your.",
+            "message": "Send stickers from any other sets to completely add their sets to your.",
+            "translation": "Send stickers from any other sets to completely add their sets to your.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "You canceled the process of adding new stickers to your collection.",
+            "message": "You canceled the process of adding new stickers to your collection.",
+            "translation": "You canceled the process of adding new stickers to your collection.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "You canceled the process of adding new sets to yours.",
+            "message": "You canceled the process of adding new sets to yours.",
+            "translation": "You canceled the process of adding new sets to yours.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "You canceled the process of removing the sticker from your collection.",
+            "message": "You canceled the process of removing the sticker from your collection.",
+            "translation": "You canceled the process of removing the sticker from your collection.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "You canceled the process of removing sets from your collection.",
+            "message": "You canceled the process of removing sets from your collection.",
+            "translation": "You canceled the process of removing sets from your collection.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "You canceled the process of resetting your collection.",
+            "message": "You canceled the process of resetting your collection.",
+            "translation": "You canceled the process of resetting your collection.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Nothing to cancel.",
+            "message": "Nothing to cancel.",
+            "translation": "Nothing to cancel.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Nothing to delete, the set is already empty.",
+            "message": "Nothing to delete, the set is already empty.",
+            "translation": "Nothing to delete, the set is already empty.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Send a sticker from your set to remove it.",
+            "message": "Send a sticker from your set to remove it.",
+            "translation": "Send a sticker from your set to remove it.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Send a sticker from your set to remove all of its set.",
+            "message": "Send a sticker from your set to remove all of its set.",
+            "translation": "Send a sticker from your set to remove all of its set.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "This button will help you quickly call your kit to select the sticker you want.",
+            "message": "This button will help you quickly call your kit to select the sticker you want.",
+            "translation": "This button will help you quickly call your kit to select the sticker you want.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "/{CommandAddSticker} - adds stickers one by one to your collection\n/{CommandAddPack} - adds the entire set to your\n/{CommandDeleteSticker} at once - removes the sticker from your set one by one\n/{CommandDeletePack} - deletes the sticker set from your set\n/{CommandReset} - removes all stickers from your set\n/{CommandCancel} - undoes the current operation\n\nTo view and send stickers from your set, simply type `@{Username}` (and space) in any chat.",
+            "message": "/{CommandAddSticker} - adds stickers one by one to your collection\n/{CommandAddPack} - adds the entire set to your\n/{CommandDeleteSticker} at once - removes the sticker from your set one by one\n/{CommandDeletePack} - deletes the sticker set from your set\n/{CommandReset} - removes all stickers from your set\n/{CommandCancel} - undoes the current operation\n\nTo view and send stickers from your set, simply type `@{Username}` (and space) in any chat.",
+            "translation": "/{CommandAddSticker} - adds stickers one by one to your collection\n/{CommandAddPack} - adds the entire set to your\n/{CommandDeleteSticker} at once - removes the sticker from your set one by one\n/{CommandDeletePack} - deletes the sticker set from your set\n/{CommandReset} - removes all stickers from your set\n/{CommandCancel} - undoes the current operation\n\nTo view and send stickers from your set, simply type `@{Username}` (and space) in any chat.",
+            "translatorComment": "Copied from source.",
+            "placeholders": [
+                {
+                    "id": "CommandAddSticker",
+                    "string": "%[1]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "models.CommandAddSticker"
+                },
+                {
+                    "id": "CommandAddPack",
+                    "string": "%[2]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 2,
+                    "expr": "models.CommandAddPack"
+                },
+                {
+                    "id": "CommandDeleteSticker",
+                    "string": "%[3]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 3,
+                    "expr": "models.CommandDeleteSticker"
+                },
+                {
+                    "id": "CommandDeletePack",
+                    "string": "%[4]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 4,
+                    "expr": "models.CommandDeletePack"
+                },
+                {
+                    "id": "CommandReset",
+                    "string": "%[5]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 5,
+                    "expr": "models.CommandReset"
+                },
+                {
+                    "id": "CommandCancel",
+                    "string": "%[6]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 6,
+                    "expr": "models.CommandCancel"
+                },
+                {
+                    "id": "Username",
+                    "string": "%[7]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 7,
+                    "expr": "bot.Bot.Username"
+                }
+            ],
+            "fuzzy": true
+        },
+        {
+            "id": "There is nothing to discard, the set is already empty.",
+            "message": "There is nothing to discard, the set is already empty.",
+            "translation": "There is nothing to discard, the set is already empty.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "This operation will remove *all* stickers from your set and *this can not be undone*.\n\nWrite `{KeyPhrase}` to confirm my intention to zero my brain (oh god why).\nIf you use /{CommandCancel} to cancel the current operation.",
+            "message": "This operation will remove *all* stickers from your set and *this can not be undone*.\n\nWrite `{KeyPhrase}` to confirm my intention to zero my brain (oh god why).\nIf you use /{CommandCancel} to cancel the current operation.",
+            "translation": "This operation will remove *all* stickers from your set and *this can not be undone*.\n\nWrite `{KeyPhrase}` to confirm my intention to zero my brain (oh god why).\nIf you use /{CommandCancel} to cancel the current operation.",
+            "translatorComment": "Copied from source.",
+            "placeholders": [
+                {
+                    "id": "KeyPhrase",
+                    "string": "%[1]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "keyPhrase"
+                },
+                {
+                    "id": "CommandCancel",
+                    "string": "%[2]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 2,
+                    "expr": "models.CommandCancel"
+                }
+            ],
+            "fuzzy": true
+        },
+        {
+            "id": "Hello, I'm @{Username}!\nI can create your personal set of stickers from other sets.\nWithout restrictions and installation. In any chat. Is free.",
+            "message": "Hello, I'm @{Username}!\nI can create your personal set of stickers from other sets.\nWithout restrictions and installation. In any chat. Is free.",
+            "translation": "Hello, I'm @{Username}!\nI can create your personal set of stickers from other sets.\nWithout restrictions and installation. In any chat. Is free.",
+            "translatorComment": "Copied from source.",
+            "placeholders": [
+                {
+                    "id": "Username",
+                    "string": "%[1]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "bot.Bot.Username"
+                }
+            ],
+            "fuzzy": true
+        },
+        {
+            "id": "No stickers found for {Query}",
+            "message": "No stickers found for {Query}",
+            "translation": "No stickers found for {Query}",
+            "translatorComment": "Copied from source.",
+            "placeholders": [
+                {
+                    "id": "Query",
+                    "string": "%[1]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "inlineQuery.Query"
+                }
+            ],
+            "fuzzy": true
+        }
+    ]
+}

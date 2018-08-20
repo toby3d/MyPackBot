@@ -7,9 +7,10 @@ import (
 	"gitlab.com/toby3d/mypackbot/internal/bot"
 	"gitlab.com/toby3d/mypackbot/internal/db"
 	"gitlab.com/toby3d/mypackbot/internal/errors"
-	"gitlab.com/toby3d/mypackbot/internal/i18n"
 	"gitlab.com/toby3d/mypackbot/internal/utils"
 	tg "gitlab.com/toby3d/telegram"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 // InlineQuery checks InlineQuery updates for answer with personal results
@@ -31,8 +32,10 @@ func InlineQuery(inlineQuery *tg.InlineQuery) {
 	}
 
 	log.Ln("Let's preparing answer...")
-	t, err := i18n.SwitchTo(inlineQuery.From.LanguageCode)
-	errors.Check(err)
+	p := message.NewPrinter(message.MatchLanguage(
+		inlineQuery.From.LanguageCode,
+		language.English.String(),
+	))
 
 	log.Ln("INLINE OFFSET:", inlineQuery.Offset)
 	if inlineQuery.Offset == "" {
@@ -54,10 +57,9 @@ func InlineQuery(inlineQuery *tg.InlineQuery) {
 	if len(stickers) == 0 {
 		if offset == 0 && inlineQuery.Query != "" {
 			// If search stickers by emoji return 0 results
-			answer.SwitchPrivateMessageText = t(
-				"button_inline_nothing", map[string]interface{}{
-					"Query": inlineQuery.Query,
-				},
+			answer.SwitchPrivateMessageText = p.Sprintf(
+				"No stickers found for %s",
+				inlineQuery.Query,
 			)
 
 			answer.SwitchPrivateMessageParameter = tg.CommandHelp

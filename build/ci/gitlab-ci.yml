@@ -1,0 +1,56 @@
+image: golang:alpine
+
+stages:
+  - test
+  - review
+  - build
+
+before_script:
+  - apk add --no-cache git build-base bash make
+  - mkdir -p /go/src/gitlab.com/$CI_PROJECT_NAMESPACE /go/src/_/builds
+  - cp -r $CI_PROJECT_DIR /go/src/gitlab.com/$CI_PROJECT_NAMESPACE
+  - ln -s /go/src/gitlab.com/$CI_PROJECT_NAMESPACE /go/src/_/builds/$CI_PROJECT_NAMESPACE
+  - make dep
+
+unit_tests:
+  stage: test
+  script:
+    - make test
+
+.race_detector:
+  stage: test
+  script:
+    - make race
+
+.code_coverage:
+  stage: test
+  script:
+    - make coverage
+  coverage: '/^coverage:\s(\d+(?:\.\d+)?%)/'
+
+lint_code:
+  stage: review
+  script:
+    - go get github.com/golangci/golangci-lint/cmd/golangci-lint github.com/go-critic/go-critic/cmd/gocritic
+    - go install github.com/golangci/golangci-lint/cmd/golangci-lint github.com/go-critic/go-critic/cmd/gocritic
+    - make lint
+  allow_failure: true
+
+stable:
+  stage: build
+  only:
+    - master
+  except:
+    - develop
+  script:
+    - make
+
+nightly:
+  stage: build
+  only:
+    - schedules
+    - develop
+  except:
+    - master
+  script:
+    - make

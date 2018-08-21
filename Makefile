@@ -11,19 +11,23 @@ GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
 all: build
 
 lint: ## Lint the files
+	@golangci-lint run $(PACKAGE_PATH)/...
 	@gocritic check-project $(PACKAGE_PATH)
+
+test: ## Run unittests
+	@go test -short $(PACKAGE_NAME)/test/...
 
 race: dep ## Run data race detector
 	@go test -race -short ${PACKAGE_LIST}
 
 coverage: ## Generate global code coverage report
-	@go test -cover -v -coverpkg=$(PACKAGE_NAME) ${PACKAGE_LIST}
+	@go test -cover -v -coverpkg=$(PACKAGE_NAME)/... ${PACKAGE_LIST}
 
 dep: ## Get the dependencies
-	@go get -v -d -t ${PACKAGE_LIST}
+	@go get -v -d -t $(PACKAGE_NAME)/...
 
-build: dep ## Build the binary file
-	@go build -i -v $(PACKAGE_NAME)
+build: dep ## Build the binary files
+	@go build -i -v $(PACKAGE_NAME)/cmd/...
 
 clean: ## Remove previous build
 	@rm -f $(PROJECT_NAME)

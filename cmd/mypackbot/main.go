@@ -21,12 +21,12 @@ var (
 	)
 	flagConfig = flag.String(
 		"config",
-		filepath.Join(".", "config", "config.yaml"),
+		filepath.Join("./", "configs", "config.yaml"),
 		"set specific path to config",
 	)
 	flagDB = flag.String(
 		"db",
-		filepath.Join(".", "stickers.db"),
+		filepath.Join("./", "stickers.db"),
 		"set specific path to stickers database",
 	)
 )
@@ -34,6 +34,8 @@ var (
 // init prepare configuration and other things for successful start
 func init() {
 	log.Ln("Initializing...")
+	flag.Parse() // Parse flagWebhook
+
 	var err error
 
 	// Preload configuration file
@@ -51,7 +53,6 @@ func init() {
 
 // main function is a general function for work of this bot
 func main() {
-	flag.Parse() // Parse flagWebhook
 
 	channel, err := updates.Channel(*flagWebhook)
 	errors.Check(err)

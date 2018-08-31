@@ -5,7 +5,7 @@
 
 echo "Set variables..."
 
-set CI_PROJECT_NAMESPACE "toby3d"
-set CI_PROJECT_NAME "mypackbot"
+export CI_PROJECT_NAMESPACE "toby3d"
+export CI_PROJECT_NAME "mypackbot"
 
 echo "Variables is set!"

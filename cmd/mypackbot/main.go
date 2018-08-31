@@ -4,6 +4,7 @@ package main
 
 import (
 	"flag"
+	"path/filepath"
 
 	log "github.com/kirillDanshin/dlog"
 	"gitlab.com/toby3d/mypackbot/internal/bot"
@@ -13,9 +14,21 @@ import (
 	"gitlab.com/toby3d/mypackbot/internal/updates"
 )
 
-var flagWebhook = flag.Bool(
-	"webhook", false,
-	"enable work via webhooks (required valid certificates)",
+var (
+	flagWebhook = flag.Bool(
+		"webhook", false,
+		"enable work via webhooks (required valid certificates)",
+	)
+	flagConfig = flag.String(
+		"config",
+		filepath.Join(".", "config", "config.yaml"),
+		"set specific path to config",
+	)
+	flagDB = flag.String(
+		"db",
+		filepath.Join(".", "stickers.db"),
+		"set specific path to stickers database",
+	)
 )
 
 // init prepare configuration and other things for successful start
@@ -24,11 +37,11 @@ func init() {
 	var err error
 
 	// Preload configuration file
-	config.Config, err = config.Open("./configs/config.yaml")
+	config.Config, err = config.Open(*flagConfig)
 	errors.Check(err)
 
 	// Open database or create new one
-	db.DB, err = db.Open("./stickers.db")
+	db.DB, err = db.Open(*flagDB)
 	errors.Check(err)
 
 	// Create bot with credentials from config

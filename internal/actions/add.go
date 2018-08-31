@@ -5,7 +5,6 @@ import (
 	"gitlab.com/toby3d/mypackbot/internal/bot"
 	"gitlab.com/toby3d/mypackbot/internal/db"
 	"gitlab.com/toby3d/mypackbot/internal/errors"
-	"gitlab.com/toby3d/mypackbot/internal/models"
 	"gitlab.com/toby3d/mypackbot/internal/utils"
 	tg "gitlab.com/toby3d/telegram"
 )
@@ -24,7 +23,8 @@ func Add(msg *tg.Message, pack bool) {
 	reply := tg.NewMessage(msg.Chat.ID, p.Sprintf("The sticker was successfully added to your set!"))
 	reply.ParseMode = tg.StyleMarkdown
 
-	if !pack {
+	switch {
+	case !pack:
 		var exist bool
 		sticker := msg.Sticker
 		exist, err = db.DB.AddSticker(msg.From.ID, sticker)
@@ -38,23 +38,27 @@ func Add(msg *tg.Message, pack bool) {
 		_, err = bot.Bot.SendMessage(reply)
 		errors.Check(err)
 		return
-	}
+	case !msg.Sticker.InSet():
+		var exist bool
+		sticker := msg.Sticker
+		exist, err = db.DB.AddSticker(msg.From.ID, sticker)
+		errors.Check(err)
 
-	reply.Text = p.Sprintf(
-		"It seems you're trying to add your own sticker. Use the /%s command for this.",
-		models.CommandAddSticker,
-	)
+		if exist {
+			reply.Text = p.Sprintf("This sticker is already in your collection.")
+		}
 
-	if msg.Sticker.SetName != "" {
+		reply.ReplyMarkup = utils.CancelButton(p)
+		_, err = bot.Bot.SendMessage(reply)
+		errors.Check(err)
+		return
+	case msg.Sticker.InSet():
 		var set *tg.StickerSet
 		set, err = bot.Bot.GetStickerSet(msg.Sticker.SetName)
 		errors.Check(err)
 
 		log.Ln("SetTitle:", set.Title)
-		reply.Text = p.Sprintf(
-			"The set *%s* was successfully added to yours!",
-			set.Title,
-		)
+		reply.Text = p.Sprintf("The set *%s* was successfully added to yours!", set.Title)
 
 		allExists := true
 		for i := range set.Stickers {
@@ -69,10 +73,7 @@ func Add(msg *tg.Message, pack bool) {
 
 		log.Ln("All exists?", allExists)
 		if allExists {
-			reply.Text = p.Sprintf(
-				"All of the *%s* stickers are already in your collection.",
-				set.Title,
-			)
+			reply.Text = p.Sprintf("All of the *%s* stickers are already in your collection.", set.Title)
 		}
 	}
 

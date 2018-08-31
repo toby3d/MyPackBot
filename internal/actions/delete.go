@@ -25,7 +25,8 @@ func Delete(msg *tg.Message, pack bool) {
 	reply.ReplyMarkup = utils.CancelButton(p)
 
 	var notExist bool
-	if pack {
+	switch {
+	case pack && msg.Sticker.InSet():
 		var set *tg.StickerSet
 		set, err = bot.Bot.GetStickerSet(msg.Sticker.SetName)
 		errors.Check(err)
@@ -40,7 +41,7 @@ func Delete(msg *tg.Message, pack bool) {
 		if notExist {
 			reply.Text = p.Sprintf("Probably this set is already removed from yours.")
 		}
-	} else {
+	default:
 		notExist, err = db.DB.DeleteSticker(msg.From.ID, msg.Sticker)
 		if notExist {
 			reply.Text = p.Sprintf("Probably this sticker is already removed from your set.")

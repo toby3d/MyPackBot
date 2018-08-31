@@ -13,7 +13,7 @@ import (
 // DeletePack remove all keys for UserID which contains input SetName
 func (db *DataBase) DeletePack(uid int, sticker *tg.Sticker) (bool, error) {
 	log.Ln("Trying to remove all", sticker.SetName, "sticker from", uid, "user")
-	if sticker.SetName == "" {
+	if !sticker.InSet() {
 		sticker.SetName = models.SetUploaded
 	}
 

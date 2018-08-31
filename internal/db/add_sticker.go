@@ -12,7 +12,7 @@ import (
 // AddSticker add sticker FileID, Emoji and SetName meta for UserID
 func (db *DataBase) AddSticker(uid int, sticker *tg.Sticker) (bool, error) {
 	log.Ln("Trying to add", sticker.FileID, "sticker from", uid, "user")
-	if sticker.SetName == "" {
+	if !sticker.InSet() {
 		sticker.SetName = models.SetUploaded
 	}
 

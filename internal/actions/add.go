@@ -52,7 +52,7 @@ func Add(msg *tg.Message, pack bool) {
 		_, err = bot.Bot.SendMessage(reply)
 		errors.Check(err)
 		return
-	case msg.Sticker.InSet():
+	default:
 		var set *tg.StickerSet
 		set, err = bot.Bot.GetStickerSet(msg.Sticker.SetName)
 		errors.Check(err)

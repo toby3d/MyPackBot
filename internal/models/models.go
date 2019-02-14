@@ -1,6 +1,8 @@
 package models
 
-import tg "gitlab.com/toby3d/telegram"
+import (
+	tg "gitlab.com/toby3d/telegram"
+)
 
 // Commands... represents available and supported bot commands
 const (
@@ -12,20 +14,13 @@ const (
 	CommandReset         = "reset"
 )
 
-// State... represents current state of user action
+// SetUploaded is a mimic set name of uploaded stickers without any parent set
 const (
-	StateNone          = "none"
-	StateAddSticker    = CommandAddSticker
-	StateAddPack       = CommandAddPack
-	StateDeleteSticker = CommandDeleteSticker
-	StateDeletePack    = CommandDeletePack
-	StateReset         = CommandReset
+	SetFavorite = "!"
+	SetUploaded = "?"
 )
 
-// SetUploaded is a mimic set name of uploaded stickers without any parent set
-const SetUploaded = "?"
-
-// AllowedUpdates is
+// AllowedUpdates is a filter list of updates from Telegram
 var AllowedUpdates = []string{
 	tg.UpdateInlineQuery, // For searching and sending stickers
 	tg.UpdateMessage,     // For get commands and messages

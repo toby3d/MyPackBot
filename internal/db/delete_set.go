@@ -2,7 +2,7 @@ package db
 
 import bolt "github.com/etcd-io/bbolt"
 
-func (db *DB) DeleteSticker(s *Sticker) error {
+func (db *DB) DeleteSet(s *Set) error {
 	if db == nil || db.db == nil {
 		return ErrDatabaseClosed
 	}
@@ -18,11 +18,6 @@ func (db *DB) DeleteSticker(s *Sticker) error {
 			return err
 		}
 
-		set, err := getSet(user, s.Set)
-		if err != nil {
-			return err
-		}
-
-		return set.DeleteBucket([]byte(s.ID))
+		return user.DeleteBucket([]byte(s.ID))
 	})
 }

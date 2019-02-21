@@ -16,8 +16,9 @@
 .glide/
 
 # Production files must not be in public repository
-MyPackBot
+vendor/
+mypackbot
 stickers.db
-configs/config.yaml
+configs/production.yaml
 cert.key
 cert.pem

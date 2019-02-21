@@ -8,10 +8,13 @@ import (
 	"gitlab.com/toby3d/mypackbot/internal/errors"
 )
 
-var Config *viper.Viper
+type Reader interface {
+	GetString(string) string
+	GetInt64(string) int64
+}
 
 // Open just open configuration file for parsing some data in other functions
-func Open(path string) (v *viper.Viper, err error) {
+func Open(path string) (*viper.Viper, error) {
 	dlog.Ln("Opening config on path:", path)
 
 	dir, file := filepath.Split(path)
@@ -28,14 +31,12 @@ func Open(path string) (v *viper.Viper, err error) {
 	dlog.Ln("fileName:", fileName)
 	dlog.Ln("fileExt:", fileExt)
 
-	v = viper.New()
-
+	v := viper.New()
 	v.AddConfigPath(dir)
 	v.SetConfigName(fileName)
 	v.SetConfigType(fileExt)
 
 	dlog.Ln("Reading", file)
-	err = v.ReadInConfig()
-
-	return
+	err := v.ReadInConfig()
+	return v, err
 }

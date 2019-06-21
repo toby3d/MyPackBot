@@ -7,5 +7,5 @@ type Store interface {
 	Create(*models.User) error
 	Update(*models.User) error
 	AddSticker(int, string) error
-	RemoveSticker(int, string) error
+	DeleteSticker(int, string) error
 }

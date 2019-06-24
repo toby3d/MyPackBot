@@ -6,13 +6,13 @@ import (
 	bolt "github.com/etcd-io/bbolt"
 )
 
-func New(path string) (*bolt.DB, error) {
+func Open(path string) (*bolt.DB, error) {
 	db, err := bolt.Open(path, os.ModePerm, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = AutoMigrate(db); err != nil {
+	if err = autoMigrate(db); err != nil {
 		_ = db.Close()
 		return nil, err
 	}
@@ -20,7 +20,7 @@ func New(path string) (*bolt.DB, error) {
 	return db, nil
 }
 
-func AutoMigrate(db *bolt.DB) error {
+func autoMigrate(db *bolt.DB) error {
 	return db.Update(func(tx *bolt.Tx) (err error) {
 		if _, err = tx.CreateBucketIfNotExists([]byte("users")); err != nil {
 			return err

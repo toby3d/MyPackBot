@@ -2,6 +2,7 @@ package store
 
 import (
 	"strconv"
+	"time"
 
 	bolt "github.com/etcd-io/bbolt"
 	json "github.com/pquerna/ffjson/ffjson"
@@ -12,6 +13,11 @@ type UserStore struct {
 	db *bolt.DB
 }
 
+var (
+	bktUsers         = []byte("users")
+	bktUsersStickers = []byte("users_stickers")
+)
+
 func NewUserStore(db *bolt.DB) *UserStore {
 	return &UserStore{db: db}
 }
@@ -19,7 +25,7 @@ func NewUserStore(db *bolt.DB) *UserStore {
 func (us *UserStore) GetByID(uid int) (*models.User, error) {
 	var u models.User
 	err := us.db.View(func(tx *bolt.Tx) error {
-		src := tx.Bucket([]byte("users")).Get([]byte(strconv.Itoa(uid)))
+		src := tx.Bucket(bktUsers).Get([]byte(strconv.Itoa(uid)))
 		if src == nil {
 			return nil
 		}
@@ -33,13 +39,14 @@ func (us *UserStore) Create(u *models.User) error {
 		return nil
 	}
 
+	u.StartedAt = time.Now().UTC().UnixNano()
 	src, err := json.MarshalFast(u)
 	if err != nil {
 		return err
 	}
 
 	return us.db.Update(func(tx *bolt.Tx) error {
-		return tx.Bucket([]byte("users")).Put([]byte(strconv.Itoa(u.ID)), src)
+		return tx.Bucket(bktUsers).Put([]byte(strconv.Itoa(u.ID)), src)
 	})
 }
 
@@ -54,7 +61,7 @@ func (us *UserStore) Update(u *models.User) error {
 	}
 
 	return us.db.Update(func(tx *bolt.Tx) error {
-		return tx.Bucket([]byte("users")).Put([]byte(strconv.Itoa(u.ID)), src)
+		return tx.Bucket(bktUsers).Put([]byte(strconv.Itoa(u.ID)), src)
 	})
 }
 
@@ -68,7 +75,7 @@ func (us *UserStore) AddSticker(uid int, sid string) error {
 	}
 
 	return us.db.Update(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket([]byte("users_stickers"))
+		bkt := tx.Bucket(bktUsersStickers)
 		id, err := bkt.NextSequence()
 		if err != nil {
 			return err
@@ -80,7 +87,7 @@ func (us *UserStore) AddSticker(uid int, sid string) error {
 
 func (us *UserStore) DeleteSticker(uid int, sid string) error {
 	return us.db.Update(func(tx *bolt.Tx) error {
-		c := tx.Bucket([]byte("users_stickers")).Cursor()
+		c := tx.Bucket(bktUsersStickers).Cursor()
 		for _, v := c.First(); v != nil; _, v = c.Next() {
 			var us models.UsersStickers
 			if err := json.UnmarshalFast(v, &us); err != nil {

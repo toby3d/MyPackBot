@@ -3,8 +3,10 @@ package models
 
 type (
 	User struct {
-		ID       int    `json:"id"`
-		Language string `json:"language"`
+		ID           int    `json:"id"`
+		LanguageCode string `json:"language_code"`
+		AutoSaving   bool   `json:"auto_saving"`
+		StartedAt    int64  `json:"started_at"`
 	}
 
 	UsersStickers struct {

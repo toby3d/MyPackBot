@@ -2,6 +2,7 @@ package store
 
 import (
 	"strings"
+	"time"
 
 	bolt "github.com/etcd-io/bbolt"
 	json "github.com/pquerna/ffjson/ffjson"
@@ -12,6 +13,8 @@ type StickerStore struct {
 	db *bolt.DB
 }
 
+var bktStickers = []byte("stickers")
+
 func NewStickerStore(db *bolt.DB) *StickerStore {
 	return &StickerStore{db: db}
 }
@@ -19,7 +22,7 @@ func NewStickerStore(db *bolt.DB) *StickerStore {
 func (ss *StickerStore) GetByID(sid string) (*models.Sticker, error) {
 	var s models.Sticker
 	err := ss.db.View(func(tx *bolt.Tx) error {
-		src := tx.Bucket([]byte("stickers")).Get([]byte(sid))
+		src := tx.Bucket(bktStickers).Get([]byte(sid))
 		if src == nil {
 			return nil
 		}
@@ -28,11 +31,9 @@ func (ss *StickerStore) GetByID(sid string) (*models.Sticker, error) {
 	return &s, err
 }
 
-func (ss *StickerStore) GetByUserID(uid int, offset, limit int) ([]models.Sticker, int, error) {
-	var stickers []models.Sticker
-	var count int
-	err := ss.db.View(func(tx *bolt.Tx) error {
-		c := tx.Bucket([]byte("users_stickers")).Cursor()
+func (ss *StickerStore) GetByUserID(uid int, offset, limit int) (stickers []models.Sticker, count int, err error) {
+	err = ss.db.View(func(tx *bolt.Tx) error {
+		c := tx.Bucket(bktUsersStickers).Cursor()
 		for k, v := c.Last(); k != nil; k, v = c.Prev() {
 			var us models.UsersStickers
 			if err := json.UnmarshalFast(v, &us); err != nil {
@@ -67,17 +68,18 @@ func (ss *StickerStore) GetByUserID(uid int, offset, limit int) ([]models.Sticke
 		}
 		return nil
 	})
-	return stickers, count, err
+	return
 }
 
 func (ss *StickerStore) Create(s *models.Sticker) error {
+	s.SavedAt = time.Now().UTC().UnixNano()
 	src, err := json.MarshalFast(s)
 	if err != nil {
 		return err
 	}
 
 	return ss.db.Update(func(tx *bolt.Tx) error {
-		return tx.Bucket([]byte("stickers")).Put([]byte(s.ID), src)
+		return tx.Bucket(bktStickers).Put([]byte(s.ID), src)
 	})
 }
 
@@ -88,21 +90,19 @@ func (ss *StickerStore) Update(s *models.Sticker) error {
 	}
 
 	return ss.db.Update(func(tx *bolt.Tx) error {
-		return tx.Bucket([]byte("stickers")).Put([]byte(s.ID), src)
+		return tx.Bucket(bktStickers).Put([]byte(s.ID), src)
 	})
 }
 
 func (ss *StickerStore) Delete(s *models.Sticker) error {
 	return ss.db.Update(func(tx *bolt.Tx) error {
-		return tx.Bucket([]byte("stickers")).Delete([]byte(s.ID))
+		return tx.Bucket(bktStickers).Delete([]byte(s.ID))
 	})
 }
 
-func (ss *StickerStore) List(offset, limit int) ([]models.Sticker, int, error) {
-	var stickers []models.Sticker
-	var count int
-	err := ss.db.View(func(tx *bolt.Tx) error {
-		c := tx.Bucket([]byte("stickers")).Cursor()
+func (ss *StickerStore) List(offset, limit int) (stickers []models.Sticker, count int, err error) {
+	err = ss.db.View(func(tx *bolt.Tx) error {
+		c := tx.Bucket(bktStickers).Cursor()
 		for k, v := c.Last(); k != nil; k, v = c.Prev() {
 			count++
 			if offset != -1 && offset > 0 {
@@ -125,14 +125,12 @@ func (ss *StickerStore) List(offset, limit int) ([]models.Sticker, int, error) {
 		}
 		return nil
 	})
-	return stickers, count, err
+	return
 }
 
-func (ss *StickerStore) ListByEmoji(emoji string, offset, limit int) ([]models.Sticker, int, error) {
-	var stickers []models.Sticker
-	var count int
-	err := ss.db.View(func(tx *bolt.Tx) error {
-		c := tx.Bucket([]byte("stickers")).Cursor()
+func (ss *StickerStore) ListByEmoji(emoji string, offset, limit int) (stickers []models.Sticker, count int, err error) {
+	err = ss.db.View(func(tx *bolt.Tx) error {
+		c := tx.Bucket(bktStickers).Cursor()
 		for k, v := c.Last(); k != nil; k, v = c.Prev() {
 			var s models.Sticker
 			if err := json.UnmarshalFast(v, &s); err != nil {
@@ -160,14 +158,12 @@ func (ss *StickerStore) ListByEmoji(emoji string, offset, limit int) ([]models.S
 		}
 		return nil
 	})
-	return stickers, count, err
+	return
 }
 
-func (ss *StickerStore) GetSet(setName string, offset, limit int) ([]models.Sticker, int, error) {
-	var stickers []models.Sticker
-	var count int
-	err := ss.db.View(func(tx *bolt.Tx) error {
-		c := tx.Bucket([]byte("stickers")).Cursor()
+func (ss *StickerStore) GetSet(setName string, offset, limit int) (stickers []models.Sticker, count int, err error) {
+	err = ss.db.View(func(tx *bolt.Tx) error {
+		c := tx.Bucket(bktStickers).Cursor()
 		for k, v := c.Last(); k != nil; k, v = c.Prev() {
 			var s models.Sticker
 			if err := json.UnmarshalFast(v, &s); err != nil {
@@ -195,5 +191,5 @@ func (ss *StickerStore) GetSet(setName string, offset, limit int) ([]models.Stic
 		}
 		return nil
 	})
-	return stickers, count, err
+	return
 }

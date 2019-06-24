@@ -13,7 +13,7 @@ func TestGetStickerByID(t *testing.T) {
 
 	store := NewStickerStore(db)
 	s := models.Sticker{
-		ID:      "abc",
+		Model:   models.Model{ID: "abc"},
 		Emoji:   "👍",
 		SetName: "testing",
 	}
@@ -38,22 +38,22 @@ func TestStickersGetByUserID(t *testing.T) {
 	stickerStore := NewStickerStore(db)
 	stickers := []models.Sticker{
 		models.Sticker{
-			ID:      "cba",
+			Model:   models.Model{ID: "cba"},
 			Emoji:   "👌",
 			SetName: "test",
 		},
 		models.Sticker{
-			ID:      "abc",
+			Model:   models.Model{ID: "abc"},
 			Emoji:   "👍",
 			SetName: "testing",
 		},
 		models.Sticker{
-			ID:      "123",
+			Model:   models.Model{ID: "123"},
 			Emoji:   "😺",
 			SetName: "test",
 		},
 		models.Sticker{
-			ID:      "321",
+			Model:   models.Model{ID: "321"},
 			Emoji:   "👌",
 			SetName: "testing",
 		},
@@ -131,6 +131,9 @@ func TestStickersGetByUserID(t *testing.T) {
 			list, count, err := stickerStore.GetByUserID(tc.query, tc.offset, tc.limit)
 			assert.NoError(t, err)
 			assert.Equal(t, tc.expCount, count)
+			for i := range list {
+				list[i].SavedAt = 0
+			}
 			for _, r := range tc.expResult {
 				r := r
 				assert.Contains(t, list, r)
@@ -145,7 +148,7 @@ func TestCreateSticker(t *testing.T) {
 
 	store := NewStickerStore(db)
 	s := models.Sticker{
-		ID:      "abc",
+		Model:   models.Model{ID: "abc"},
 		Emoji:   "👍",
 		SetName: "testing",
 	}
@@ -164,7 +167,7 @@ func TestUpdateSticker(t *testing.T) {
 
 	store := NewStickerStore(db)
 	s := models.Sticker{
-		ID:      "abc",
+		Model:   models.Model{ID: "abc"},
 		Emoji:   "👍",
 		SetName: "testing",
 	}
@@ -175,7 +178,7 @@ func TestUpdateSticker(t *testing.T) {
 	})
 	t.Run("valid", func(t *testing.T) {
 		s2 := models.Sticker{
-			ID:      "abc",
+			Model:   models.Model{ID: "abc"},
 			Emoji:   "👌",
 			SetName: "testing",
 		}
@@ -190,7 +193,7 @@ func TestDeleteSticker(t *testing.T) {
 
 	store := NewStickerStore(db)
 	s := models.Sticker{
-		ID:      "abc",
+		Model:   models.Model{ID: "abc"},
 		Emoji:   "👍",
 		SetName: "testing",
 	}
@@ -211,17 +214,17 @@ func TestStickersList(t *testing.T) {
 	store := NewStickerStore(db)
 	stickers := []models.Sticker{
 		models.Sticker{
-			ID:      "cba",
+			Model:   models.Model{ID: "cba"},
 			Emoji:   "👌",
 			SetName: "testing",
 		},
 		models.Sticker{
-			ID:      "abc",
+			Model:   models.Model{ID: "abc"},
 			Emoji:   "👍",
 			SetName: "testing",
 		},
 		models.Sticker{
-			ID:      "123",
+			Model:   models.Model{ID: "123"},
 			Emoji:   "👋",
 			SetName: "testing",
 		},
@@ -283,6 +286,9 @@ func TestStickersList(t *testing.T) {
 			list, count, err := store.List(tc.offset, tc.limit)
 			assert.NoError(t, err)
 			assert.Equal(t, len(stickers), count)
+			for i := range list {
+				list[i].SavedAt = 0
+			}
 			for _, r := range tc.expResult {
 				r := r
 				assert.Contains(t, list, r)
@@ -298,17 +304,17 @@ func TestStickersListByEmoji(t *testing.T) {
 	store := NewStickerStore(db)
 	stickers := []models.Sticker{
 		models.Sticker{
-			ID:      "cba",
+			Model:   models.Model{ID: "cba"},
 			Emoji:   "👌",
 			SetName: "testing",
 		},
 		models.Sticker{
-			ID:      "abc",
+			Model:   models.Model{ID: "abc"},
 			Emoji:   "👍",
 			SetName: "testing",
 		},
 		models.Sticker{
-			ID:      "123",
+			Model:   models.Model{ID: "123"},
 			Emoji:   "👌",
 			SetName: "testing",
 		},
@@ -360,6 +366,9 @@ func TestStickersListByEmoji(t *testing.T) {
 			list, count, err := store.ListByEmoji(tc.query, tc.offset, tc.limit)
 			assert.NoError(t, err)
 			assert.Equal(t, tc.expCount, count)
+			for i := range list {
+				list[i].SavedAt = 0
+			}
 			for _, r := range tc.expResult {
 				r := r
 				assert.Contains(t, list, r)
@@ -375,22 +384,22 @@ func TestStickersGetSet(t *testing.T) {
 	store := NewStickerStore(db)
 	stickers := []models.Sticker{
 		models.Sticker{
-			ID:      "cba",
+			Model:   models.Model{ID: "cba"},
 			Emoji:   "👌",
 			SetName: "test",
 		},
 		models.Sticker{
-			ID:      "abc",
+			Model:   models.Model{ID: "abc"},
 			Emoji:   "👍",
 			SetName: "testing",
 		},
 		models.Sticker{
-			ID:      "123",
+			Model:   models.Model{ID: "123"},
 			Emoji:   "😺",
 			SetName: "test",
 		},
 		models.Sticker{
-			ID:      "321",
+			Model:   models.Model{ID: "321"},
 			Emoji:   "👌",
 			SetName: "testing",
 		},
@@ -449,6 +458,9 @@ func TestStickersGetSet(t *testing.T) {
 			list, count, err := store.GetSet(tc.query, tc.offset, tc.limit)
 			assert.NoError(t, err)
 			assert.Equal(t, tc.expCount, count)
+			for i := range list {
+				list[i].SavedAt = 0
+			}
 			for _, r := range tc.expResult {
 				r := r
 				assert.Contains(t, list, r)

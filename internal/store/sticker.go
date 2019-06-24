@@ -1,6 +1,7 @@
 package store
 
 import (
+	"sort"
 	"strings"
 	"time"
 
@@ -32,7 +33,7 @@ func (ss *StickerStore) GetByID(sid string) (*models.Sticker, error) {
 }
 
 func (ss *StickerStore) GetByUserID(uid int, offset, limit int) (stickers []models.Sticker, count int, err error) {
-	err = ss.db.View(func(tx *bolt.Tx) error {
+	if err = ss.db.View(func(tx *bolt.Tx) error {
 		c := tx.Bucket(bktUsersStickers).Cursor()
 		for k, v := c.Last(); k != nil; k, v = c.Prev() {
 			var us models.UsersStickers
@@ -67,6 +68,11 @@ func (ss *StickerStore) GetByUserID(uid int, offset, limit int) (stickers []mode
 			stickers = append(stickers, *sticker)
 		}
 		return nil
+	}); err != nil {
+		return
+	}
+	sort.Slice(stickers, func(i, j int) bool {
+		return stickers[i].SavedAt > stickers[j].SavedAt
 	})
 	return
 }
@@ -125,6 +131,9 @@ func (ss *StickerStore) List(offset, limit int) (stickers []models.Sticker, coun
 		}
 		return nil
 	})
+	sort.Slice(stickers, func(i, j int) bool {
+		return stickers[i].SavedAt > stickers[j].SavedAt
+	})
 	return
 }
 
@@ -158,6 +167,9 @@ func (ss *StickerStore) ListByEmoji(emoji string, offset, limit int) (stickers [
 		}
 		return nil
 	})
+	sort.Slice(stickers, func(i, j int) bool {
+		return stickers[i].SavedAt > stickers[j].SavedAt
+	})
 	return
 }
 
@@ -190,6 +202,9 @@ func (ss *StickerStore) GetSet(setName string, offset, limit int) (stickers []mo
 			stickers = append(stickers, s)
 		}
 		return nil
+	})
+	sort.Slice(stickers, func(i, j int) bool {
+		return stickers[i].SavedAt > stickers[j].SavedAt
 	})
 	return
 }

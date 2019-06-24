@@ -17,15 +17,19 @@ func newDB(t *testing.T) (*bolt.DB, func()) {
 	assert.NoError(t, err)
 
 	assert.NoError(t, db.Update(func(tx *bolt.Tx) (err error) {
-		if _, err = tx.CreateBucket([]byte("users")); err != nil {
+		if _, err = tx.CreateBucket(bktUsers); err != nil {
 			return err
 		}
 
-		if _, err = tx.CreateBucket([]byte("stickers")); err != nil {
+		if _, err = tx.CreateBucket(bktStickers); err != nil {
 			return err
 		}
 
-		if _, err = tx.CreateBucket([]byte("users_stickers")); err != nil {
+		if _, err = tx.CreateBucket(bktUsersStickers); err != nil {
+			return err
+		}
+
+		if _, err = tx.CreateBucket(bktChannels); err != nil {
 			return err
 		}
 

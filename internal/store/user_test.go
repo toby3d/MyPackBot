@@ -13,8 +13,8 @@ func TestGetUserByID(t *testing.T) {
 
 	store := NewUserStore(db)
 	u := models.User{
-		ID:       42,
-		Language: "ru",
+		ID:           42,
+		LanguageCode: "ru",
 	}
 	assert.NoError(t, store.Create(&u))
 
@@ -36,8 +36,8 @@ func TestCreateUser(t *testing.T) {
 
 	store := NewUserStore(db)
 	u := models.User{
-		ID:       42,
-		Language: "ru",
+		ID:           42,
+		LanguageCode: "ru",
 	}
 
 	assert.NoError(t, store.Create(&u))
@@ -49,14 +49,14 @@ func TestUpdateUser(t *testing.T) {
 
 	store := NewUserStore(db)
 	s := models.User{
-		ID:       42,
-		Language: "ru",
+		ID:           42,
+		LanguageCode: "ru",
 	}
 	assert.NoError(t, store.Create(&s))
 
 	s2 := models.User{
-		ID:       42,
-		Language: "en",
+		ID:           42,
+		LanguageCode: "en",
 	}
 	assert.NoError(t, store.Update(&s2))
 	assert.NotEqual(t, s2, s)
@@ -68,8 +68,8 @@ func TestUserAddSticker(t *testing.T) {
 
 	store := NewUserStore(db)
 	s := models.User{
-		ID:       42,
-		Language: "ru",
+		ID:           42,
+		LanguageCode: "ru",
 	}
 	assert.NoError(t, store.Create(&s))
 
@@ -82,8 +82,8 @@ func TestUserDeleteSticker(t *testing.T) {
 
 	store := NewUserStore(db)
 	s := models.User{
-		ID:       42,
-		Language: "ru",
+		ID:           42,
+		LanguageCode: "ru",
 	}
 	assert.NoError(t, store.Create(&s))
 

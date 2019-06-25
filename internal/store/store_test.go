@@ -29,10 +29,6 @@ func newDB(t *testing.T) (*bolt.DB, func()) {
 			return err
 		}
 
-		if _, err = tx.CreateBucket(bktChannels); err != nil {
-			return err
-		}
-
 		return nil
 	}))
 	return db, func() {

@@ -22,5 +22,5 @@ func main() {
 		panic(err.Error())
 	}
 
-	_ = bot
+	bot.Run()
 }

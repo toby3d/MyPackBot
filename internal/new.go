@@ -17,6 +17,7 @@ type MyPackBot struct {
 	userStore    user.Store
 	stickerStore sticker.Store
 	config       *viper.Viper
+	updates      tg.UpdatesChannel
 }
 
 func New(path string) (*MyPackBot, error) {
@@ -27,9 +28,10 @@ func New(path string) (*MyPackBot, error) {
 		return nil, err
 	}
 
-	if mpb.db, err = db.New("./stickers.db"); err != nil {
+	if mpb.db, err = db.Open(mpb.config.GetString("database.filepath")); err != nil {
 		return nil, err
 	}
+
 	mpb.userStore = store.NewUserStore(mpb.db)
 	mpb.stickerStore = store.NewStickerStore(mpb.db)
 

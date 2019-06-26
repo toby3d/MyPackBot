@@ -12,7 +12,7 @@ func Open(path string) (*bolt.DB, error) {
 		return nil, err
 	}
 
-	if err = autoMigrate(db); err != nil {
+	if err = AutoMigrate(db); err != nil {
 		_ = db.Close()
 		return nil, err
 	}
@@ -20,7 +20,7 @@ func Open(path string) (*bolt.DB, error) {
 	return db, nil
 }
 
-func autoMigrate(db *bolt.DB) error {
+func AutoMigrate(db *bolt.DB) error {
 	return db.Update(func(tx *bolt.Tx) (err error) {
 		if _, err = tx.CreateBucketIfNotExists([]byte("users")); err != nil {
 			return err
@@ -31,6 +31,10 @@ func autoMigrate(db *bolt.DB) error {
 		}
 
 		if _, err = tx.CreateBucketIfNotExists([]byte("users_stickers")); err != nil {
+			return err
+		}
+
+		if _, err = tx.CreateBucketIfNotExists([]byte("sets")); err != nil {
 			return err
 		}
 

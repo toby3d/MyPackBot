@@ -32,30 +32,43 @@ func (e *Events) CallbackQuery(b *tg.Bot, cc *tg.CallbackQuery) error {
 	parts := strings.Split(cc.Data, ":")
 	switch parts[0] {
 	case "set":
-		set, err := b.GetStickerSet(parts[2])
-		if err != nil {
-			return err
-		}
-
 		switch parts[1] {
 		case "import":
-			for _, sticker := range set.Stickers {
-				sticker := sticker
-				s, err := e.store.GetOrCreateSticker(&models.Sticker{
-					Model: models.Model{
-						ID:      sticker.FileID,
-						SavedAt: time.Now().UTC().Unix(),
-					},
-					Emoji:   sticker.Emoji,
-					SetName: sticker.SetName,
-				})
+			set := e.store.GetSet(parts[2])
+			if set == nil {
+				tgSet, err := b.GetStickerSet(parts[2])
 				if err != nil {
-					continue
+					_, err = b.AnswerCallbackQuery(answer)
+					return err
 				}
 
-				if err = e.store.AddSticker(user.ID, s.ID); err != nil {
-					continue
+				if set, err = e.store.GetOrCreateSet(&models.Set{
+					Name:  tgSet.Name,
+					Title: tgSet.Title,
+				}); err != nil {
+					_, err = b.AnswerCallbackQuery(answer)
+					return err
 				}
+
+				go func() {
+					for _, tgSticker := range tgSet.Stickers {
+						sticker, err := e.store.GetOrCreateSticker(&models.Sticker{
+							Model: models.Model{
+								ID:      tgSticker.FileID,
+								SavedAt: time.Now().UTC().Unix(),
+							},
+							Emoji:   tgSticker.Emoji,
+							SetName: set.Name,
+						})
+						if err != nil {
+							continue
+						}
+
+						if err = e.store.AddSticker(user.ID, sticker.ID); err != nil {
+							continue
+						}
+					}
+				}()
 			}
 			answer.Text = p.Sprintf("📥 All stickers of %s set has been added!", set.Title)
 		}

@@ -15,18 +15,20 @@ type Store struct {
 	stickers      []models.Sticker
 	users         []models.User
 	usersStickers []models.UsersStickers
+	sets          []models.Set
 }
 
 var (
+	bktSets          = []byte("sets")
 	bktStickers      = []byte("stickers")
 	bktUsers         = []byte("users")
 	bktUsersStickers = []byte("users_stickers")
 )
 
-func New(db *bolt.DB) (*Store, error) {
+func New(dataBase *bolt.DB) (*Store, error) {
 	var store Store
-	store.db = db
-	err := db.View(func(tx *bolt.Tx) error {
+	store.db = dataBase
+	err := store.db.View(func(tx *bolt.Tx) error {
 		return tx.ForEach(func(name []byte, b *bolt.Bucket) (err error) {
 			switch string(name) {
 			case string(bktUsers):
@@ -54,6 +56,15 @@ func New(db *bolt.DB) (*Store, error) {
 						return err
 					}
 					store.usersStickers = append(store.usersStickers, us)
+					return nil
+				})
+			case string(bktSets):
+				return b.ForEach(func(k, v []byte) error {
+					var s models.Set
+					if err := json.UnmarshalFast(v, &s); err != nil {
+						return err
+					}
+					store.sets = append(store.sets, s)
 					return nil
 				})
 			default:
@@ -85,6 +96,27 @@ func (s *Store) GetOrCreateUser(src *models.User) (*models.User, error) {
 	return s.GetUser(src.ID), nil
 }
 
+func (s *Store) GetSet(setName string) *models.Set {
+	for _, set := range s.sets {
+		set := set
+		if set.Name != setName {
+			continue
+		}
+		return &set
+	}
+	return nil
+}
+
+func (s *Store) GetOrCreateSet(src *models.Set) (*models.Set, error) {
+	if set := s.GetSet(src.Name); set != nil {
+		return set, nil
+	}
+	if err := s.CreateSet(src); err != nil {
+		return nil, err
+	}
+	return s.GetSet(src.Name), nil
+}
+
 func (s *Store) GetSticker(sid string) *models.Sticker {
 	for _, s := range s.stickers {
 		s := s
@@ -104,6 +136,26 @@ func (s *Store) GetOrCreateSticker(src *models.Sticker) (*models.Sticker, error)
 		return nil, err
 	}
 	return s.GetSticker(src.ID), nil
+}
+
+func (s *Store) GetUsers(offset, limit int) (users []models.User, count int) {
+	for _, u := range s.users {
+		u := u
+		count++
+		if offset != -1 && offset > 0 {
+			offset--
+			continue
+		}
+		if limit != -1 && limit > 0 {
+			limit--
+		}
+		if limit == 0 {
+			continue
+		}
+
+		users = append(users, u)
+	}
+	return
 }
 
 func (s *Store) GetStickers(offset, limit int) (stickers []models.Sticker, count int) {
@@ -229,6 +281,32 @@ func (s *Store) GetUserStickersBySet(setName string, uid, offset, limit int) (st
 	return
 }
 
+func (s *Store) CreateSet(set *models.Set) error {
+	tx, err := s.db.Begin(true)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if s.GetSet(set.Name) != nil {
+		return tx.Rollback()
+	}
+
+	src, err := json.MarshalFast(set)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err = tx.Bucket(bktSets).Put([]byte(set.Name), src); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	s.sets = append(s.sets, *set)
+	return tx.Commit()
+}
+
 func (s *Store) CreateUser(user *models.User) error {
 	tx, err := s.db.Begin(true)
 	if err != nil {
@@ -289,6 +367,10 @@ func (s *Store) UpdateUser(user *models.User) error {
 }
 
 func (s *Store) UpdateSticker(sticker *models.Sticker) error {
+	return nil
+}
+
+func (s *Store) UpdateSet(user *models.User) error {
 	return nil
 }
 
@@ -387,6 +469,42 @@ func (s *Store) DeleteSticker(sid string) error {
 			continue
 		}
 		s.usersStickers = append(s.usersStickers[:i], s.usersStickers[i+1:]...)
+	}
+
+	return tx.Commit()
+}
+
+func (s *Store) DeleteSet(setName string) error {
+	tx, err := s.db.Begin(true)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if s.GetSet(setName) == nil {
+		tx.Rollback()
+		return nil
+	}
+
+	if err = tx.Bucket(bktSets).Delete([]byte(setName)); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	stickers, _ := s.GetStickersBySet(setName, -1, -1)
+	for _, sticker := range stickers {
+		sticker := sticker
+		if err = s.DeleteSticker(sticker.ID); err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	for i := range s.sets {
+		if s.sets[i].Name != setName {
+			continue
+		}
+		s.sets = append(s.sets[:i], s.sets[i+1:]...)
 	}
 
 	return tx.Commit()

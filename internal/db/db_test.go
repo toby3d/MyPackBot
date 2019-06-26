@@ -14,7 +14,7 @@ func TestOpen(t *testing.T) {
 		assert.Error(t, err)
 
 		t.Run("automigrate", func(t *testing.T) {
-			assert.Panics(t, func() { autoMigrate(db) })
+			assert.Panics(t, func() { AutoMigrate(db) })
 		})
 	})
 	t.Run("valid", func(t *testing.T) {
@@ -30,7 +30,7 @@ func TestOpen(t *testing.T) {
 		}()
 
 		t.Run("automigrate", func(t *testing.T) {
-			assert.NoError(t, autoMigrate(db))
+			assert.NoError(t, AutoMigrate(db))
 		})
 	})
 }

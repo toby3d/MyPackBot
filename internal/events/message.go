@@ -27,17 +27,18 @@ func (e *Events) Message(b *tg.Bot, m *tg.Message) error {
 
 	switch {
 	case m.IsSticker():
-		if _, err = e.store.GetOrCreateSticker(&models.Sticker{
+		sticker, err := e.store.GetOrCreateSticker(&models.Sticker{
 			Model: models.Model{
 				ID:      m.Sticker.FileID,
 				SavedAt: m.Time().UTC().Unix(),
 			},
 			Emoji:   m.Sticker.Emoji,
 			SetName: m.Sticker.SetName,
-		}); err != nil {
+		})
+		if err != nil {
 			return err
 		}
-		if err = e.store.AddSticker(user.ID, m.Sticker.FileID); err != nil {
+		if err = e.store.AddSticker(user.ID, sticker.ID); err != nil {
 			return err
 		}
 
@@ -47,26 +48,36 @@ func (e *Events) Message(b *tg.Bot, m *tg.Message) error {
 		reply.DisableWebPagePreview = true
 
 		if m.Sticker.InSet() {
-			set, err := b.GetStickerSet(m.Sticker.SetName)
-			if err != nil {
-				return err
-			}
-
-			go func() {
-				for _, s := range set.Stickers {
-					s := s
-					if _, err := e.store.GetOrCreateSticker(&models.Sticker{
-						Model: models.Model{
-							ID:      s.FileID,
-							SavedAt: time.Now().UTC().Unix(),
-						},
-						Emoji:   s.Emoji,
-						SetName: s.SetName,
-					}); err != nil {
-						continue
-					}
+			set := e.store.GetSet(m.Sticker.SetName)
+			if set == nil {
+				tgSet, err := b.GetStickerSet(m.Sticker.SetName)
+				if err != nil {
+					return err
 				}
-			}()
+
+				if set, err = e.store.GetOrCreateSet(&models.Set{
+					Name:  tgSet.Name,
+					Title: tgSet.Title,
+				}); err != nil {
+					return err
+				}
+
+				go func() {
+					for _, tgSticker := range tgSet.Stickers {
+						tgSticker := tgSticker
+						if _, err := e.store.GetOrCreateSticker(&models.Sticker{
+							Model: models.Model{
+								ID:      tgSticker.FileID,
+								SavedAt: time.Now().UTC().Unix(),
+							},
+							Emoji:   tgSticker.Emoji,
+							SetName: set.Name,
+						}); err != nil {
+							continue
+						}
+					}
+				}()
+			}
 
 			reply.ReplyMarkup = tg.NewInlineKeyboardMarkup(
 				tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButton(

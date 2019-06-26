@@ -4,4 +4,19 @@ telegram:
     set: https://toby3d.github.io
     listen: /bot
     serve: 0.0.0.0:2368
-  channel: -1000000000000
+    allowed_updates:
+      - inline_query
+      - message
+      - channel_post
+      - callback_query
+  long_poll:
+    limit: 100
+    offset: 0
+    timeout: 1
+    allowed_updates:
+      - inline_query
+      - message
+      - channel_post
+      - callback_query
+database:
+  filepath: ./development.db

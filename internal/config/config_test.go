@@ -17,7 +17,7 @@ func TestOpen(t *testing.T) {
 		assert.Nil(t, cfg)
 	})
 	t.Run("valid", func(t *testing.T) {
-		cfg, err := Open(filepath.Join(testDir, "configs", "example.yaml"))
+		cfg, err := Open(filepath.Join(testDir, "configs", "config.example.yaml"))
 		assert.NoError(t, err)
 		assert.NotNil(t, cfg)
 	})

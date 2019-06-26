@@ -1,11 +1,11 @@
 package config
 
 import (
+	"errors"
 	"path/filepath"
 
 	"github.com/kirillDanshin/dlog"
 	"github.com/spf13/viper"
-	"gitlab.com/toby3d/mypackbot/internal/errors"
 )
 
 type Reader interface {

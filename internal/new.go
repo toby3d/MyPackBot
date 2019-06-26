@@ -1,23 +1,18 @@
 package internal
 
 import (
-	bolt "github.com/etcd-io/bbolt"
 	"github.com/spf13/viper"
 	"gitlab.com/toby3d/mypackbot/internal/config"
 	"gitlab.com/toby3d/mypackbot/internal/db"
-	"gitlab.com/toby3d/mypackbot/internal/models/sticker"
-	"gitlab.com/toby3d/mypackbot/internal/models/user"
 	"gitlab.com/toby3d/mypackbot/internal/store"
 	tg "gitlab.com/toby3d/telegram"
 )
 
 type MyPackBot struct {
-	bot          *tg.Bot
-	db           *bolt.DB
-	userStore    user.Store
-	stickerStore sticker.Store
-	config       *viper.Viper
-	updates      tg.UpdatesChannel
+	bot     *tg.Bot
+	store   *store.Store
+	config  *viper.Viper
+	updates tg.UpdatesChannel
 }
 
 func New(path string) (*MyPackBot, error) {
@@ -28,14 +23,18 @@ func New(path string) (*MyPackBot, error) {
 		return nil, err
 	}
 
-	if mpb.db, err = db.Open(mpb.config.GetString("database.filepath")); err != nil {
+	dataBase, err := db.Open(mpb.config.GetString("database.filepath"))
+	if err != nil {
 		return nil, err
 	}
 
-	mpb.userStore = store.NewUserStore(mpb.db)
-	mpb.stickerStore = store.NewStickerStore(mpb.db)
+	if mpb.store, err = store.New(dataBase); err != nil {
+		dataBase.Close()
+		return nil, err
+	}
 
 	if mpb.bot, err = tg.New(mpb.config.GetString("telegram.token")); err != nil {
+		dataBase.Close()
 		return nil, err
 	}
 

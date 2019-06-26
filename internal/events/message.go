@@ -81,7 +81,7 @@ func (e *Events) Message(b *tg.Bot, m *tg.Message) error {
 
 			reply.ReplyMarkup = tg.NewInlineKeyboardMarkup(
 				tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButton(
-					p.Sprintf("📥 Import all %s stickers", set.Title), "set:import:"+set.Name,
+					p.Sprintf("📥 Import all %s stickers", set.Title), "import_set:"+set.Name,
 				)),
 			)
 			reply.Text = p.Sprintf(

@@ -58,23 +58,25 @@ func AutoMigrate(srcPath string, dst *bolt.DB) error {
 		return err
 	}
 
-	userStore := store.NewUserStore(dst)
-	stickerStore := store.NewStickerStore(dst)
+	newStore, err := store.New(dst)
+	if err != nil {
+		return err
+	}
 
 	for _, u := range users {
-		if err = userStore.Create(&u); err != nil {
+		if err = newStore.CreateUser(&u); err != nil {
 			return err
 		}
 	}
 
 	for _, s := range stickers {
-		if err = stickerStore.Create(&s); err != nil {
+		if err = newStore.CreateSticker(&s); err != nil {
 			return err
 		}
 	}
 
 	for sid, uid := range usersStickers {
-		if err = userStore.AddSticker(uid, sid); err != nil {
+		if err = newStore.AddSticker(uid, sid); err != nil {
 			return err
 		}
 	}

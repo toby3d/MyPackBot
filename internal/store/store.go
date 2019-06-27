@@ -4,6 +4,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	bolt "github.com/etcd-io/bbolt"
 	json "github.com/pquerna/ffjson/ffjson"
@@ -136,6 +137,16 @@ func (s *Store) GetOrCreateSticker(src *models.Sticker) (*models.Sticker, error)
 		return nil, err
 	}
 	return s.GetSticker(src.ID), nil
+}
+
+func (s *Store) GetUserSticker(uid int, sid string) *models.Sticker {
+	for _, us := range s.usersStickers {
+		us := us
+		if us.UserID == uid && us.StickerID == sid {
+			return s.GetSticker(sid)
+		}
+	}
+	return nil
 }
 
 func (s *Store) GetUsers(offset, limit int) (users []models.User, count int) {
@@ -363,7 +374,47 @@ func (s *Store) CreateSticker(sticker *models.Sticker) error {
 }
 
 func (s *Store) UpdateUser(user *models.User) error {
-	return nil
+	tx, err := s.db.Begin(true)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	oldState := s.GetUser(user.ID)
+	if oldState == nil {
+		user.StartedAt = time.Now().UTC().Unix()
+		if user.LanguageCode == "" {
+			user.LanguageCode = "en"
+		}
+		err = s.CreateUser(user)
+		tx.Rollback()
+		return err
+	}
+
+	user.StartedAt = oldState.StartedAt
+	if user.LanguageCode == "" {
+		user.LanguageCode = oldState.LanguageCode
+	}
+
+	src, err := json.MarshalFast(user)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err = tx.Bucket(bktUsers).Put([]byte(strconv.Itoa(user.ID)), src); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	for i := range s.users {
+		if s.users[i].ID != user.ID {
+			continue
+		}
+		s.users[i] = *user
+	}
+
+	return tx.Commit()
 }
 
 func (s *Store) UpdateSticker(sticker *models.Sticker) error {

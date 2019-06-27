@@ -6,3 +6,5 @@ type Sticker struct {
 	Emoji   string `json:"emoji"`
 	SetName string `json:"set_name"`
 }
+
+func (s *Sticker) InSet() bool { return s.SetName != "" }

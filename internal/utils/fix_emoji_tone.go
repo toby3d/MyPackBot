@@ -5,20 +5,24 @@ import (
 	"golang.org/x/text/transform"
 )
 
-// Skin colors for remove
-var bannedSkins = []rune{127995, 127996, 127997, 127998, 127999}
+//nolint:gochecknoglobals
+var (
+	// Skin colors for remove
+	bannedSkins = []rune{'🏻', '🏼', '🏽', '🏾', '🏿'}
 
-// Transformer for remove skin colors
-var skinRemover = runes.Remove(runes.Predicate(func(r rune) bool {
-	for _, skin := range bannedSkins {
-		if r != skin {
-			continue
+	// Transformer for remove skin colors
+	skinRemover = runes.Remove(runes.Predicate(func(r rune) bool {
+		for _, skin := range bannedSkins {
+			if r != skin {
+				continue
+			}
+			return true
 		}
-		return true
-	}
-	return false
-}))
+		return false
+	}))
+)
 
+// FixEmojiTone remove any skin tone from input emoji.
 func FixEmojiTone(raw string) (string, error) {
 	result, _, err := transform.String(skinRemover, raw)
 	return result, err

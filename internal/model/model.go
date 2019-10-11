@@ -3,31 +3,31 @@ package model
 type (
 	// User represent a simple bot user
 	User struct {
-		ID           int    `json:"id"`
 		CreatedAt    int64  `json:"created_at"`
-		UpdatedAt    int64  `json:"updated_at"`
-		LastSeen     int64  `json:"last_seen"`
+		ID           int    `json:"id"`
 		LanguageCode string `json:"language_code"`
+		LastSeen     int64  `json:"last_seen"`
+		UpdatedAt    int64  `json:"updated_at"`
 	}
 
 	Users []*User
 
 	Sticker struct {
-		ID         string `json:"id"`
-		SetName    string `json:"set_name"`
 		CreatedAt  int64  `json:"created_at"`
+		Emoji      string `json:"emoji"`
+		ID         string `json:"id"`
 		IsAnimated bool   `json:"is_animated"`
-		Hits       int    `json:"hits"`
+		SetName    string `json:"set_name"`
 	}
 
 	Stickers []*Sticker
 
 	UserSticker struct {
-		UserID    int    `json:"user_id"`
-		Hits      int    `json:"hits"`
 		CreatedAt int64  `json:"created_at"`
+		Emojis    string `json:"emojis"`
+		SetName   string `json:"set_name"`
 		StickerID string `json:"sticker_id"`
-		Emoji     string `json:"emoji"`
+		UserID    int    `json:"user_id"`
 	}
 
 	UserStickers []*UserSticker
@@ -51,6 +51,17 @@ func (stickers Stickers) GetByID(id string) *Sticker {
 		return stickers[i]
 	}
 	return nil
+}
+
+func (stickers Stickers) GetSet(name string) (Stickers, int) {
+	set := make(Stickers, 0)
+	for i := range stickers {
+		if stickers[i].SetName != name {
+			continue
+		}
+		set = append(set, stickers[i])
+	}
+	return set, len(set)
 }
 
 func (userStickers UserStickers) GetByID(uid int, sid string) *UserSticker {

@@ -5,6 +5,7 @@ PACKAGE_NAME := gitlab.com/$(PROJECT_PATH)
 PACKAGE_PATH := $(GOPATH)/src/$(PACKAGE_NAME)
 PACKAGE_LIST := $(shell go list $(PACKAGE_NAME)/... | grep -v /vendor/)
 GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
+GIT_COMMIT := $(shell git rev-list -1 HEAD)
 
 .PHONY: all lint test rase coverage dep build clean
 
@@ -27,7 +28,7 @@ dep: ## Get the dependencies
 	@go get -v -d -t $(PACKAGE_NAME)/...
 
 build: dep ## Build the binary files
-	@go build -i -v $(PACKAGE_NAME)/cmd/...
+	@go build -ldflags "-X main.gitCommit=$(GIT_COMMIT)" -i -v $(PACKAGE_NAME)/cmd/...
 
 clean: ## Remove previous build
 	@rm -f $(PROJECT_NAME)

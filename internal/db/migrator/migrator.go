@@ -6,7 +6,7 @@ import (
 
 	bolt "github.com/etcd-io/bbolt"
 	bunt "github.com/tidwall/buntdb"
-	"gitlab.com/toby3d/mypackbot/internal/models"
+	"gitlab.com/toby3d/mypackbot/internal/model"
 	"gitlab.com/toby3d/mypackbot/internal/store"
 )
 
@@ -16,8 +16,8 @@ func AutoMigrate(srcPath string, dst *bolt.DB) error {
 		return err
 	}
 
-	users := make(map[int]models.User)
-	stickers := make(map[string]models.Sticker)
+	users := make(map[int]model.User)
+	stickers := make(map[string]model.Sticker)
 	usersStickers := make(map[string]int)
 	if err = db.View(func(tx *bunt.Tx) error {
 		return tx.AscendKeys("*", func(k, v string) bool {
@@ -29,10 +29,9 @@ func AutoMigrate(srcPath string, dst *bolt.DB) error {
 
 			switch {
 			case parts[2] == "state":
-				users[uid] = models.User{
+				users[uid] = model.User{
 					ID:           uid,
 					LanguageCode: "en",
-					AutoSaving:   true,
 				}
 			case parts[2] == "set":
 				setName := parts[3]
@@ -40,8 +39,8 @@ func AutoMigrate(srcPath string, dst *bolt.DB) error {
 					setName = ""
 				}
 
-				stickers[parts[5]] = models.Sticker{
-					Model:   models.Model{ID: parts[5]},
+				stickers[parts[5]] = model.Sticker{
+					Model:   model.Model{ID: parts[5]},
 					Emoji:   v,
 					SetName: setName,
 				}
@@ -64,18 +63,21 @@ func AutoMigrate(srcPath string, dst *bolt.DB) error {
 	}
 
 	for _, u := range users {
+		u := u
 		if err = newStore.CreateUser(&u); err != nil {
 			return err
 		}
 	}
 
 	for _, s := range stickers {
+		s := s
 		if err = newStore.CreateSticker(&s); err != nil {
 			return err
 		}
 	}
 
 	for sid, uid := range usersStickers {
+		sid, uid := sid, uid
 		if err = newStore.AddSticker(uid, sid); err != nil {
 			return err
 		}

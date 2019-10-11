@@ -2,27 +2,28 @@ package internal
 
 import (
 	"github.com/kirillDanshin/dlog"
-	"gitlab.com/toby3d/mypackbot/internal/events"
-	"gitlab.com/toby3d/telegram"
+	"gitlab.com/toby3d/mypackbot/internal/event"
+	tg "gitlab.com/toby3d/telegram"
 )
 
 func (mpb *MyPackBot) Run() error {
+	var updates tg.UpdatesChannel
 	switch {
-	/* TODO
-	case mpb.config.IsSet("telegram.webhook"):
-		set := http.AcquireURI()
-		defer http.ReleaseURI(set)
+	/*
+		case mpb.config.IsSet("telegram.webhook"):
+			set := http.AcquireURI()
+			defer http.ReleaseURI(set)
 
-		cfg := mpb.config.Sub("telegram.webhook")
-		mpb.updates = mpb.bot.NewWebhookChannel(
-			set,
-			&telegram.SetWebhookParameters{
-				AllowedUpdates: cfg.GetStringSlice("allowed_updates"),
-			},
-			cfg.GetString("certificate"),
-			cfg.GetString("key"),
-			cfg.GetString("serve"),
-		)
+			cfg := mpb.config.Sub("telegram.webhook")
+			updates = mpb.bot.NewWebhookChannel(
+				set,
+				&tg.SetWebhookParameters{
+					AllowedUpdates: cfg.GetStringSlice("allowed_updates"),
+				},
+				cfg.GetString("certificate"),
+				cfg.GetString("key"),
+				cfg.GetString("serve"),
+			)
 	*/
 	case mpb.config.IsSet("telegram.long_poll"):
 		if _, err := mpb.bot.DeleteWebhook(); err != nil {
@@ -30,7 +31,7 @@ func (mpb *MyPackBot) Run() error {
 		}
 
 		cfg := mpb.config.Sub("telegram.long_poll")
-		mpb.updates = mpb.bot.NewLongPollingChannel(&telegram.GetUpdatesParameters{
+		updates = mpb.bot.NewLongPollingChannel(&tg.GetUpdatesParameters{
 			AllowedUpdates: cfg.GetStringSlice("allowed_updates"),
 			Limit:          cfg.GetInt("limit"),
 			Offset:         cfg.GetInt("offset"),
@@ -38,18 +39,18 @@ func (mpb *MyPackBot) Run() error {
 		})
 	}
 
-	e := events.New(mpb.store)
-	for update := range mpb.updates {
+	e := event.NewEvent(mpb.bot, mpb.store)
+	for update := range updates {
 		var err error
 		switch {
 		case update.IsMessage():
-			err = e.Message(mpb.bot, update.Message)
+			err = e.Message(update.Message)
 		case update.IsCallbackQuery():
-			err = e.CallbackQuery(mpb.bot, update.CallbackQuery)
+			err = e.CallbackQuery(update.CallbackQuery)
 		case update.IsInlineQuery():
-			err = e.InlineQuery(mpb.bot, update.InlineQuery)
-		case update.IsChosenInlineResult():
-			err = e.ChosenInlineResult(mpb.bot, update.ChosenInlineResult)
+			err = e.InlineQuery(update.InlineQuery)
+		// case update.IsChosenInlineResult():
+		// 	err = e.ChosenInlineResult(update.ChosenInlineResult)
 		default:
 			dlog.D(update)
 		}

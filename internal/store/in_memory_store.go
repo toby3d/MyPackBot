@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	store "gitlab.com/toby3d/mypackbot/internal/model/store"
@@ -30,7 +31,7 @@ func (store *InMemoryStore) Users() store.UsersManager { return store.users }
 
 func (store *InMemoryStore) Stickers() store.StickersManager { return store.stickers }
 
-func (store *InMemoryStore) AddSticker(u *model.User, s *model.Sticker, emoji string) (err error) {
+func (store *InMemoryStore) AddSticker(u *model.User, s *model.Sticker) (err error) {
 	var us *model.UserSticker
 	if us, err = store.GetSticker(u, s); err != nil {
 		return err
@@ -41,16 +42,39 @@ func (store *InMemoryStore) AddSticker(u *model.User, s *model.Sticker, emoji st
 
 	store.mutex.Lock()
 	store.userStickers = append(store.userStickers, &model.UserSticker{
-		UserID:    u.ID,
+		CreatedAt: time.Now().UTC().Unix(),
+		Emojis:    s.Emoji,
+		SetName:   s.SetName,
 		StickerID: s.ID,
-		Emoji:     emoji,
-		Hits:      0,
+		UserID:    u.ID,
 	})
 	sort.Slice(store.userStickers, func(i, j int) bool {
-		return store.userStickers[i].UserID < store.userStickers[j].UserID ||
-			store.userStickers[i].StickerID < store.userStickers[j].StickerID
+		return store.userStickers[i].SetName < store.userStickers[j].SetName ||
+			store.userStickers[i].CreatedAt < store.userStickers[j].CreatedAt
 	})
 	store.mutex.Unlock()
+
+	return err
+}
+
+func (store *InMemoryStore) AddStickersSet(u *model.User, setName string) (err error) {
+	if u, err = store.Users().GetOrCreate(u); err != nil {
+		return err
+	}
+
+	set, _ := store.stickers.GetSet(setName)
+	for _, s := range set {
+		var us *model.UserSticker
+		if us, err = store.GetSticker(u, s); err != nil {
+			return err
+		}
+		if us != nil {
+			continue
+		}
+		if err = store.AddSticker(u, s); err != nil {
+			return err
+		}
+	}
 
 	return err
 }
@@ -75,12 +99,12 @@ func (store *InMemoryStore) GetStickersList(u *model.User, offset, limit int, qu
 	store.mutex.RLock()
 	for i := range store.userStickers {
 		if store.userStickers[i].UserID != u.ID ||
-			(query != "" && !strings.ContainsAny(store.userStickers[i].Emoji, query)) {
+			(query != "" && !strings.ContainsAny(store.userStickers[i].Emojis, query)) {
 			continue
 		}
 
 		count++
-		if count < offset || count > limit {
+		if (offset != 0 && count <= offset) || count > offset+limit {
 			continue
 		}
 
@@ -136,24 +160,32 @@ func (store *InMemoryStore) RemoveSticker(u *model.User, s *model.Sticker) (err 
 		break
 	}
 	sort.Slice(store.userStickers, func(i, j int) bool {
-		si := store.userStickers[i]
-		sj := store.userStickers[j]
-		return store.Stickers().Get(si.StickerID).SetName < store.Stickers().Get(sj.StickerID).SetName ||
-			si.UserID < sj.UserID || si.StickerID < sj.StickerID
+		return store.userStickers[i].SetName < store.userStickers[j].SetName ||
+			store.userStickers[i].CreatedAt < store.userStickers[j].CreatedAt
 	})
 	store.mutex.Unlock()
 
 	return err
 }
 
-func (store *InMemoryStore) HitSticker(u *model.User, s *model.Sticker) (err error) {
-	var us *model.UserSticker
-	if us, err = store.GetSticker(u, s); err != nil {
+func (store *InMemoryStore) RemoveStickersSet(u *model.User, setName string) (err error) {
+	if u, err = store.Users().GetOrCreate(u); err != nil {
 		return err
 	}
-	if us == nil {
-		return errors.New("sticker not exists in this user")
+
+	set, _ := store.stickers.GetSet(setName)
+	for _, s := range set {
+		var us *model.UserSticker
+		if us, err = store.GetSticker(u, s); err != nil {
+			return err
+		}
+		if us == nil {
+			continue
+		}
+		if err = store.RemoveSticker(u, s); err != nil {
+			return err
+		}
 	}
 
-	return store.stickers.Hit(us.StickerID)
+	return err
 }

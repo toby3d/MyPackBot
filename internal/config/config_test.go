@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+//nolint:gochecknoglobals
 var testDir = filepath.Join(os.Getenv("GOPATH"), "src", "gitlab.com", "toby3d", "mypackbot")
 
 func TestOpen(t *testing.T) {

@@ -3,6 +3,7 @@ package migrator
 import (
 	"strconv"
 	"strings"
+	"time"
 
 	bolt "github.com/etcd-io/bbolt"
 	bunt "github.com/tidwall/buntdb"
@@ -27,22 +28,28 @@ func AutoMigrate(srcPath string, dst *bolt.DB) error {
 				return true
 			}
 
+			timeStamp := time.Now().UTC().Unix()
 			switch {
 			case parts[2] == "state":
 				users[uid] = model.User{
 					ID:           uid,
 					LanguageCode: "en",
+					CreatedAt:    timeStamp,
+					UpdatedAt:    timeStamp,
+					LastSeen:     timeStamp,
 				}
 			case parts[2] == "set":
 				setName := parts[3]
 				if setName == "?" {
-					setName = ""
+					setName = "uploaded_by_mypackbot"
 				}
 
 				stickers[parts[5]] = model.Sticker{
-					Model:   model.Model{ID: parts[5]},
-					Emoji:   v,
-					SetName: setName,
+					ID:         parts[5],
+					Emoji:      v,
+					SetName:    setName,
+					CreatedAt:  timeStamp,
+					IsAnimated: false,
 				}
 
 				usersStickers[parts[5]] = uid
@@ -57,28 +64,24 @@ func AutoMigrate(srcPath string, dst *bolt.DB) error {
 		return err
 	}
 
-	newStore, err := store.New(dst)
-	if err != nil {
-		return err
-	}
-
+	newStore := store.NewInMemoryStore()
 	for _, u := range users {
 		u := u
-		if err = newStore.CreateUser(&u); err != nil {
+		if _, err = newStore.Users().GetOrCreate(&u); err != nil {
 			return err
 		}
 	}
 
 	for _, s := range stickers {
 		s := s
-		if err = newStore.CreateSticker(&s); err != nil {
+		if _, err = newStore.Stickers().GetOrCreate(&s); err != nil {
 			return err
 		}
 	}
 
 	for sid, uid := range usersStickers {
 		sid, uid := sid, uid
-		if err = newStore.AddSticker(uid, sid); err != nil {
+		if err = newStore.AddSticker(&model.User{ID: uid}, &model.Sticker{ID: sid}); err != nil {
 			return err
 		}
 	}

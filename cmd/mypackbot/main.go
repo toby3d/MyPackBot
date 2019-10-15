@@ -1,4 +1,4 @@
-//go:generate gotext -srclang=en update -out=./cmd/mypackbot/i18n_gen.go -lang=en,ru
+//go:generate gotext -srclang=en update -out=./i18n_gen.go -lang=en,ru .
 package main
 
 import (

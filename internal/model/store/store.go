@@ -18,9 +18,9 @@ type (
 	UsersManager interface {
 		Create(*model.User) error
 		Get(int) *model.User
-		Update(*model.User) error
-		Remove(int) error
 		GetOrCreate(*model.User) (*model.User, error)
+		Remove(int) error
+		Update(*model.User) error
 	}
 
 	StickersManager interface {

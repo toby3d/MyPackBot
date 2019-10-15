@@ -10,13 +10,17 @@ import (
 	tg "gitlab.com/toby3d/telegram"
 )
 
+var replacer = strings.NewReplacer(
+	"personal:true", "",
+	"personal:false", "",
+)
+
 func (event *Event) InlineQuery(i *tg.InlineQuery) (err error) {
 	answer := tg.NewAnswerInlineQuery(i.ID)
 	answer.IsPersonal = !strings.Contains(i.Query, "personal:false")
 	answer.CacheTime = 1
 	if i.HasQuery() {
-		i.Query = strings.Trim(i.Query, "personal:false")
-		i.Query = strings.Trim(i.Query, "personal:true")
+		i.Query = replacer.Replace(i.Query)
 		i.Query, _ = utils.FixEmojiTone(i.Query)
 		i.Query = strings.TrimSpace(i.Query)
 	}

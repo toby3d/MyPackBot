@@ -17,7 +17,7 @@
 
 # Production files must not be in public repository
 vendor/
-mypackbot
+/mypackbot
 stickers.db
 configs/production.yaml
 cert.key

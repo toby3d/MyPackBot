@@ -4,6 +4,7 @@ import (
 	"gitlab.com/toby3d/mypackbot/internal/middleware"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	tg "gitlab.com/toby3d/telegram"
+	"golang.org/x/text/language/display"
 	"golang.org/x/text/message"
 )
 
@@ -30,7 +31,7 @@ func (event *Event) Commands(m *tg.Message) error {
 	case m.IsCommandEqual(tg.CommandHelp):
 		return event.HelpCommand(p, m)
 	case m.IsCommandEqual(tg.CommandSettings):
-		return event.SettingsCommand(p, m)
+		return event.SettingsCommand(u, p, m)
 	default:
 		return event.UnknownCommand(p, m)
 	}
@@ -50,16 +51,32 @@ func (event *Event) HelpCommand(p *message.Printer, m *tg.Message) (err error) {
 	return err
 }
 
-func (event *Event) SettingsCommand(p *message.Printer, m *tg.Message) (err error) {
-	reply := tg.NewMessage(m.Chat.ID, p.Sprintf("settings-command__text"))
+func (event *Event) UnknownCommand(p *message.Printer, m *tg.Message) (err error) {
+	reply := tg.NewMessage(m.Chat.ID, p.Sprintf("unknown-command__text"))
 	reply.ReplyToMessageID = m.ID
 	_, err = event.bot.SendMessage(reply)
 	return err
 }
 
-func (event *Event) UnknownCommand(p *message.Printer, m *tg.Message) (err error) {
-	reply := tg.NewMessage(m.Chat.ID, p.Sprintf("unknown-command__text"))
+func (event *Event) SettingsCommand(u *model.User, p *message.Printer, m *tg.Message) (err error) {
+	reply := tg.NewMessage(m.Chat.ID, p.Sprintf("settings-command__text"))
 	reply.ReplyToMessageID = m.ID
+	markup := tg.NewInlineKeyboardMarkup()
+
+	// TODO(toby3d): Split on multiple columns
+	supportedLanguages := message.DefaultCatalog.Languages()
+	for _, supportedLanguage := range supportedLanguages {
+		base, _ := supportedLanguage.Base()
+		text := "☑️ "
+		if base.String() == u.LanguageCode {
+			text = "✅ "
+		}
+		text = text + display.Self.Name(supportedLanguage)
+		markup.InlineKeyboard = append(markup.InlineKeyboard, tg.NewInlineKeyboardRow(
+			tg.NewInlineKeyboardButton(text, "language:"+base.String()),
+		))
+	}
+	reply.ReplyMarkup = markup
 	_, err = event.bot.SendMessage(reply)
 	return err
 }

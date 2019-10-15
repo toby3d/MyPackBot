@@ -1,0 +1,140 @@
+{
+    "language": "en",
+    "messages": [
+        {
+            "id": "callback__text_add-single",
+            "message": "callback__text_add-single",
+            "translation": "📲 Sticker from {SetName} set has been imported!",
+            "placeholders": [
+                {
+                    "id": "SetName",
+                    "string": "%[1]v",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "c.Message.ReplyToMessage.Sticker.SetName"
+                }
+            ]
+        },
+        {
+            "id": "sticker__button_remove-single",
+            "message": "sticker__button_remove-single",
+            "translation": "🔥 Remove sticker"
+        },
+        {
+            "id": "callback__text_add-set",
+            "message": "callback__text_add-set",
+            "translation": "📲 Set {SetName} has been imported!",
+            "placeholders": [
+                {
+                    "id": "SetName",
+                    "string": "%[1]v",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "c.Message.ReplyToMessage.Sticker.SetName"
+                }
+            ]
+        },
+        {
+            "id": "sticker__button_remove-set",
+            "message": "sticker__button_remove-set",
+            "translation": "🔥 Remove set"
+        },
+        {
+            "id": "callback__text_remove-single",
+            "message": "callback__text_remove-single",
+            "translation": "🔥 Sticker has been removed!"
+        },
+        {
+            "id": "sticker__button_add-single",
+            "message": "sticker__button_add-single",
+            "translation": "📙 Import sticker"
+        },
+        {
+            "id": "callback__text_remove-set",
+            "message": "callback__text_remove-set",
+            "translation": "🔥 Set {SetName} has been removed!",
+            "placeholders": [
+                {
+                    "id": "SetName",
+                    "string": "%[1]v",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "c.Message.ReplyToMessage.Sticker.SetName"
+                }
+            ]
+        },
+        {
+            "id": "sticker__button_add-set",
+            "message": "sticker__button_add-set",
+            "translation": "📚 Import set"
+        },
+        {
+            "id": "callback__text_language-same",
+            "message": "callback__text_language-same",
+            "translation": "🐞 This language is already selected"
+        },
+        {
+            "id": "settings-command__text",
+            "message": "settings-command__text",
+            "translation": "⚙️ Settings"
+        },
+        {
+            "id": "callback__text_language",
+            "message": "callback__text_language",
+            "translation": "👋🏻 Hello!"
+        },
+        {
+            "id": "inline__not-found_switch-text",
+            "message": "inline__not-found_switch-text",
+            "translation": "🤷🏻‍♂️ Stickers not found"
+        },
+        {
+            "id": "inline__found_switch-text",
+            "message": "inline__found_switch-text",
+            "translation": "🕵🏻️‍♂️ Found {Count} stickers",
+            "placeholders": [
+                {
+                    "id": "Count",
+                    "string": "%[1]v",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 1,
+                    "expr": "count"
+                }
+            ]
+        },
+        {
+            "id": "start__text",
+            "message": "start__text",
+            "translation": "👋🏻 Hello, {FullName}!",
+            "placeholders": [
+                {
+                    "id": "FullName",
+                    "string": "%[1]v",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "m.From.FullName()"
+                }
+            ]
+        },
+        {
+            "id": "help__text",
+            "message": "help__text",
+            "translation": "Helo"
+        },
+        {
+            "id": "unknown-command__text",
+            "message": "unknown-command__text",
+            "translation": "🤷🏻‍♂️ Unknown command"
+        },
+        {
+            "id": "sticker__text",
+            "message": "sticker__text",
+            "translation": "🤔 What to do with this sticker?"
+        }
+    ]
+}

@@ -7,6 +7,9 @@ import (
 	"gitlab.com/toby3d/mypackbot/internal/middleware"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	tg "gitlab.com/toby3d/telegram"
+	"golang.org/x/text/language"
+	"golang.org/x/text/language/display"
+	"golang.org/x/text/message"
 )
 
 func (event *Event) CallbackQuery(c *tg.CallbackQuery) error {
@@ -31,6 +34,8 @@ func (event *Event) CallbackQuery(c *tg.CallbackQuery) error {
 		case "set":
 			return event.CallbackRemoveStickerSet(u, c)
 		}
+	case "language":
+		return event.CallbackSwitchLanguage(u, c, parts[1])
 	}
 	return nil
 }
@@ -188,6 +193,57 @@ func (event *Event) CallbackRemoveStickerSet(u *model.User, c *tg.CallbackQuery)
 		return
 	}
 
+	_, err = event.bot.AnswerCallbackQuery(answer)
+	return err
+}
+
+func (event *Event) CallbackSwitchLanguage(u *model.User, c *tg.CallbackQuery, lang string) (err error) {
+	answer := tg.NewAnswerCallbackQuery(c.ID)
+	p := message.NewPrinter(language.Make(u.LanguageCode))
+	if u.LanguageCode == lang {
+		answer.Text = p.Sprintf("callback__text_language-same")
+		_, err = event.bot.AnswerCallbackQuery(answer)
+		return err
+	}
+
+	timeStamp := time.Now().UTC().Unix()
+	if err = event.store.Users().Update(&model.User{
+		ID:           u.ID,
+		LanguageCode: lang,
+		CreatedAt:    u.CreatedAt,
+		LastSeen:     timeStamp,
+		UpdatedAt:    timeStamp,
+	}); err != nil {
+		answer.Text = "🐞 " + err.Error()
+		_, err = event.bot.AnswerCallbackQuery(answer)
+		return err
+	}
+	u = event.store.Users().Get(u.ID)
+	p = message.NewPrinter(language.Make(u.LanguageCode))
+
+	for i := range c.Message.ReplyMarkup.InlineKeyboard {
+		for j := range c.Message.ReplyMarkup.InlineKeyboard[i] {
+			parts := strings.Split(c.Message.ReplyMarkup.InlineKeyboard[i][j].CallbackData, ":")
+			languageName := display.Self.Name(language.Make(parts[1]))
+			text := "☑️" + languageName
+			if parts[1] == u.LanguageCode {
+				text = "✅" + languageName
+			}
+			c.Message.ReplyMarkup.InlineKeyboard[i][j].Text = text
+		}
+	}
+
+	if _, err = event.bot.EditMessageText(&tg.EditMessageTextParameters{
+		ChatID:          c.Message.Chat.ID,
+		InlineMessageID: c.InlineMessageID,
+		MessageID:       c.Message.ID,
+		ReplyMarkup:     c.Message.ReplyMarkup,
+		Text:            p.Sprintf("settings-command__text"),
+	}); err != nil {
+		return
+	}
+
+	answer.Text = p.Sprintf("callback__text_language")
 	_, err = event.bot.AnswerCallbackQuery(answer)
 	return err
 }

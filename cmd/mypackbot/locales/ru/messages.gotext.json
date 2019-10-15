@@ -1,0 +1,140 @@
+{
+    "language": "ru",
+    "messages": [
+        {
+            "id": "callback__text_add-single",
+            "message": "callback__text_add-single",
+            "translation": "📲 Стикер из набора {SetName} импортирован!",
+            "placeholders": [
+                {
+                    "id": "SetName",
+                    "string": "%[1]v",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "c.Message.ReplyToMessage.Sticker.SetName"
+                }
+            ]
+        },
+        {
+            "id": "sticker__button_remove-single",
+            "message": "sticker__button_remove-single",
+            "translation": "🔥 Убрать стикер"
+        },
+        {
+            "id": "callback__text_add-set",
+            "message": "callback__text_add-set",
+            "translation": "📲 Набор {SetName} импортирован!",
+            "placeholders": [
+                {
+                    "id": "SetName",
+                    "string": "%[1]v",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "c.Message.ReplyToMessage.Sticker.SetName"
+                }
+            ]
+        },
+        {
+            "id": "sticker__button_remove-set",
+            "message": "sticker__button_remove-set",
+            "translation": "🔥 Убрать набор"
+        },
+        {
+            "id": "callback__text_remove-single",
+            "message": "callback__text_remove-single",
+            "translation": "🔥 Стикер удалён"
+        },
+        {
+            "id": "sticker__button_add-single",
+            "message": "sticker__button_add-single",
+            "translation": "📙 Импортировать стикер"
+        },
+        {
+            "id": "callback__text_remove-set",
+            "message": "callback__text_remove-set",
+            "translation": "🔥 Набор {SetName} удалён",
+            "placeholders": [
+                {
+                    "id": "SetName",
+                    "string": "%[1]v",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "c.Message.ReplyToMessage.Sticker.SetName"
+                }
+            ]
+        },
+        {
+            "id": "sticker__button_add-set",
+            "message": "sticker__button_add-set",
+            "translation": "📚 Импортировать набор"
+        },
+        {
+            "id": "callback__text_language-same",
+            "message": "callback__text_language-same",
+            "translation": "🐞 Этот язык уже выбран"
+        },
+        {
+            "id": "settings-command__text",
+            "message": "settings-command__text",
+            "translation": "⚙️ Настройки"
+        },
+        {
+            "id": "callback__text_language",
+            "message": "callback__text_language",
+            "translation": "👋🏻 Привет!"
+        },
+        {
+            "id": "inline__not-found_switch-text",
+            "message": "inline__not-found_switch-text",
+            "translation": "🤷🏻‍♂️ Ничего не найдено"
+        },
+        {
+            "id": "inline__found_switch-text",
+            "message": "inline__found_switch-text",
+            "translation": "🕵🏻️‍♂️ Найдено {Count} стикеров",
+            "placeholders": [
+                {
+                    "id": "Count",
+                    "string": "%[1]v",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 1,
+                    "expr": "count"
+                }
+            ]
+        },
+        {
+            "id": "start__text",
+            "message": "start__text",
+            "translation": "👋🏻 Привет, {FullName}!",
+            "placeholders": [
+                {
+                    "id": "FullName",
+                    "string": "%[1]v",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "m.From.FullName()"
+                }
+            ]
+        },
+        {
+            "id": "help__text",
+            "message": "help__text",
+            "translation": "Помощь"
+        },
+        {
+            "id": "unknown-command__text",
+            "message": "unknown-command__text",
+            "translation": "🤷🏻‍♂️ Неизвестная команда"
+        },
+        {
+            "id": "sticker__text",
+            "message": "sticker__text",
+            "translation": "🤔 Что делать с этим стикером?"
+        }
+    ]
+}

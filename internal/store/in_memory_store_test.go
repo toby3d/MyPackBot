@@ -70,23 +70,19 @@ func TestInMemoryStore(t *testing.T) {
 	s := model.Sticker{
 		ID:      "abc",
 		SetName: "testing",
+		Emoji:   "👨‍💻💻",
 	}
 
 	store := NewInMemoryStore()
 	assert.Error(t, store.RemoveSticker(&u, &s))
 
-	assert.Error(t, store.HitSticker(&u, &s))
-	assert.NoError(t, store.AddSticker(&u, &s, "👨‍💻💻"))
-	assert.Error(t, store.AddSticker(&u, &s, "👨‍💻💻"))
-
-	assert.NoError(t, store.HitSticker(&u, &s))
-	assert.NoError(t, store.HitSticker(&u, &s))
+	assert.NoError(t, store.AddSticker(&u, &s))
+	assert.Error(t, store.AddSticker(&u, &s))
 
 	stickers, count := store.GetStickersList(&u, 0, 50, "")
 	assert.Equal(t, 1, count)
 	assert.Len(t, stickers, 1)
 	assert.Contains(t, stickers, &s)
-	assert.Equal(t, 2, stickers[0].Hits)
 
 	stickers, count = store.GetStickersList(&u, 0, 50, "🐱")
 	assert.Equal(t, 0, count)

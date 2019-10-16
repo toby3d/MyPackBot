@@ -12,7 +12,7 @@
                     "type": "string",
                     "underlyingType": "string",
                     "argNum": 1,
-                    "expr": "c.Message.ReplyToMessage.Sticker.SetName"
+                    "expr": "call.Message.ReplyToMessage.Sticker.SetName"
                 }
             ]
         },
@@ -24,15 +24,15 @@
         {
             "id": "callback__text_add-set",
             "message": "callback__text_add-set",
-            "translation": "📲 Набор {SetName} импортирован!",
+            "translation": "📲 Набор {Title} импортирован!",
             "placeholders": [
                 {
-                    "id": "SetName",
+                    "id": "Title",
                     "string": "%[1]v",
                     "type": "string",
                     "underlyingType": "string",
                     "argNum": 1,
-                    "expr": "c.Message.ReplyToMessage.Sticker.SetName"
+                    "expr": "set.Title"
                 }
             ]
         },
@@ -62,7 +62,7 @@
                     "type": "string",
                     "underlyingType": "string",
                     "argNum": 1,
-                    "expr": "c.Message.ReplyToMessage.Sticker.SetName"
+                    "expr": "s.SetName"
                 }
             ]
         },
@@ -70,21 +70,6 @@
             "id": "sticker__button_add-set",
             "message": "sticker__button_add-set",
             "translation": "📚 Импортировать набор"
-        },
-        {
-            "id": "callback__text_language-same",
-            "message": "callback__text_language-same",
-            "translation": "🐞 Этот язык уже выбран"
-        },
-        {
-            "id": "settings-command__text",
-            "message": "settings-command__text",
-            "translation": "⚙️ Настройки"
-        },
-        {
-            "id": "callback__text_language",
-            "message": "callback__text_language",
-            "translation": "👋🏻 Привет!"
         },
         {
             "id": "inline__not-found_switch-text",
@@ -117,7 +102,7 @@
                     "type": "string",
                     "underlyingType": "string",
                     "argNum": 1,
-                    "expr": "m.From.FullName()"
+                    "expr": "msg.From.FullName()"
                 }
             ]
         },
@@ -135,6 +120,16 @@
             "id": "sticker__text",
             "message": "sticker__text",
             "translation": "🤔 Что делать с этим стикером?"
+        },
+        {
+            "id": "birthday__message_text",
+            "message": "birthday__message_text",
+            "translation": "🥳 4 Ноября? Это день рождения @toby3d!\n\nЕсли тебе нравится этот бот, то почему бы не отправить ему поздравление вместе с небольшим подарком? Это несказанно осчастливит его!"
+        },
+        {
+            "id": "birthday__button_text-donate",
+            "message": "birthday__button_text-donate",
+            "translation": "💸 Сделать пожертвование!"
         }
     ]
 }

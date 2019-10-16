@@ -1,8 +1,12 @@
 package internal
 
 import (
+	"context"
+	"time"
+
 	"github.com/kirillDanshin/dlog"
-	"gitlab.com/toby3d/mypackbot/internal/event"
+	"gitlab.com/toby3d/mypackbot/internal/handler"
+	"gitlab.com/toby3d/mypackbot/internal/middleware"
 	tg "gitlab.com/toby3d/telegram"
 )
 
@@ -39,22 +43,17 @@ func (mpb *MyPackBot) Run() error {
 		})
 	}
 
-	e := event.NewEvent(mpb.bot, mpb.store)
+	h := handler.NewHandler(mpb.bot, mpb.store)
+	bDay := time.Date(0, time.November, 4, 0, 0, 0, 0, time.UTC)
+	chain := middleware.Chain{
+		middleware.AcquireUser(mpb.store.Users()),
+		middleware.AcquirePrinter(),
+		middleware.AcquireSticker(mpb.bot, mpb.store.Stickers()),
+		middleware.Birthday(mpb.bot, mpb.store.Users(), bDay),
+		middleware.UpdateLastSeen(mpb.store.Users()),
+	}
 	for update := range updates {
-		var err error
-		switch {
-		case update.IsMessage():
-			err = e.Message(update.Message)
-		case update.IsCallbackQuery():
-			err = e.CallbackQuery(update.CallbackQuery)
-		case update.IsInlineQuery():
-			err = e.InlineQuery(update.InlineQuery)
-		// case update.IsChosenInlineResult():
-		// 	err = e.ChosenInlineResult(update.ChosenInlineResult)
-		default:
-			dlog.D(update)
-		}
-		if err != nil {
+		if err := chain.UpdateHandler(h.UpdateHandler)(context.Background(), &update); err != nil {
 			dlog.Ln("ERROR:", err.Error())
 		}
 	}

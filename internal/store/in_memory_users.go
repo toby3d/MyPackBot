@@ -50,6 +50,10 @@ func (store *InMemoryUsersStore) Update(u *model.User) error {
 		return store.Create(u)
 	}
 
+	if u.UpdatedAt <= 0 {
+		u.UpdatedAt = time.Now().UTC().Unix()
+	}
+
 	store.mutex.Lock()
 	for i := range store.users {
 		if store.users[i].ID != u.ID {

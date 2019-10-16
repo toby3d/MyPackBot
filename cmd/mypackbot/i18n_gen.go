@@ -36,56 +36,59 @@ func init() {
 }
 
 var messageKeyToIndex = map[string]int{
+	"birthday__button_text-donate":  15,
+	"birthday__message_text":        14,
 	"callback__text_add-set":        2,
 	"callback__text_add-single":     0,
-	"callback__text_language":       10,
-	"callback__text_language-same":  8,
 	"callback__text_remove-set":     6,
 	"callback__text_remove-single":  4,
-	"help__text":                    14,
-	"inline__found_switch-text":     12,
-	"inline__not-found_switch-text": 11,
-	"settings-command__text":        9,
-	"start__text":                   13,
+	"help__text":                    11,
+	"inline__found_switch-text":     9,
+	"inline__not-found_switch-text": 8,
+	"start__text":                   10,
 	"sticker__button_add-set":       7,
 	"sticker__button_add-single":    5,
 	"sticker__button_remove-set":    3,
 	"sticker__button_remove-single": 1,
-	"sticker__text":                 16,
-	"unknown-command__text":         15,
+	"sticker__text":                 13,
+	"unknown-command__text":         12,
 }
 
-var enIndex = []uint32{ // 18 elements
+var enIndex = []uint32{ // 17 elements
 	0x00000000, 0x0000002f, 0x00000043, 0x00000065,
 	0x00000075, 0x00000094, 0x000000a8, 0x000000c9,
-	0x000000d9, 0x00000100, 0x00000110, 0x00000120,
-	0x00000145, 0x0000016f, 0x00000186, 0x0000018b,
-	0x000001ad, 0x000001d0,
-} // Size: 96 bytes
+	0x000000d9, 0x000000fe, 0x00000128, 0x0000013f,
+	0x00000144, 0x00000166, 0x00000189, 0x0000022f,
+	0x00000245,
+} // Size: 92 bytes
 
-const enData string = "" + // Size: 464 bytes
+const enData string = "" + // Size: 581 bytes
 	"\x02📲 Sticker from %[1]v set has been imported!\x02🔥 Remove sticker\x02📲" +
 	" Set %[1]v has been imported!\x02🔥 Remove set\x02🔥 Sticker has been remo" +
 	"ved!\x02📙 Import sticker\x02🔥 Set %[1]v has been removed!\x02📚 Import se" +
-	"t\x02🐞 This language is already selected\x02⚙️ Settings\x02👋🏻 Hello!\x02" +
-	"🤷🏻\u200d♂️ Stickers not found\x02🕵🏻️\u200d♂️ Found %[1]v stickers\x02" +
-	"👋🏻 Hello, %[1]v!\x02Helo\x02🤷🏻\u200d♂️ Unknown command\x02🤔 What to d" +
-	"o with this sticker?"
+	"t\x02🤷🏻\u200d♂️ Stickers not found\x02🕵🏻️\u200d♂️ Found %[1]v stickers" +
+	"\x02👋🏻 Hello, %[1]v!\x02Helo\x02🤷🏻\u200d♂️ Unknown command\x02🤔 What to " +
+	"do with this sticker?\x02🥳 4 November? It's a @toby3d birthday!\x0a\x0aI" +
+	"f you like this bot, then why not send him a congratulation along with a" +
+	" small gift? This will make him incredibly happy!\x02💸 Make a donation!"
 
-var ruIndex = []uint32{ // 18 elements
+var ruIndex = []uint32{ // 17 elements
 	0x00000000, 0x00000044, 0x00000063, 0x00000093,
 	0x000000b0, 0x000000cf, 0x000000fc, 0x0000011f,
-	0x0000014a, 0x00000175, 0x0000018f, 0x000001a6,
-	0x000001d9, 0x00000214, 0x00000232, 0x0000023f,
-	0x00000277, 0x000002ae,
-} // Size: 96 bytes
+	0x0000014a, 0x0000017d, 0x000001b8, 0x000001d6,
+	0x000001e3, 0x0000021b, 0x00000252, 0x00000385,
+	0x000003b5,
+} // Size: 92 bytes
 
-const ruData string = "" + // Size: 686 bytes
+const ruData string = "" + // Size: 949 bytes
 	"\x02📲 Стикер из набора %[1]v импортирован!\x02🔥 Убрать стикер\x02📲 Набор" +
 	" %[1]v импортирован!\x02🔥 Убрать набор\x02🔥 Стикер удалён\x02📙 Импортиро" +
-	"вать стикер\x02🔥 Набор %[1]v удалён\x02📚 Импортировать набор\x02🐞 Этот " +
-	"язык уже выбран\x02⚙️ Настройки\x02👋🏻 Привет!\x02🤷🏻\u200d♂️ Ничего не н" +
-	"айдено\x02🕵🏻️\u200d♂️ Найдено %[1]v стикеров\x02👋🏻 Привет, %[1]v!\x02По" +
-	"мощь\x02🤷🏻\u200d♂️ Неизвестная команда\x02🤔 Что делать с этим стикером?"
+	"вать стикер\x02🔥 Набор %[1]v удалён\x02📚 Импортировать набор\x02🤷🏻" +
+	"\u200d♂️ Ничего не найдено\x02🕵🏻️\u200d♂️ Найдено %[1]v стикеров\x02👋🏻 П" +
+	"ривет, %[1]v!\x02Помощь\x02🤷🏻\u200d♂️ Неизвестная команда\x02🤔 Что дела" +
+	"ть с этим стикером?\x02🥳 4 Ноября? Это день рождения @toby3d!\x0a\x0aЕс" +
+	"ли тебе нравится этот бот, то почему бы не отправить ему поздравление в" +
+	"месте с небольшим подарком? Это несказанно осчастливит его!\x02💸 Сделат" +
+	"ь пожертвование!"
 
-	// Total table size 1342 bytes (1KiB); checksum: D59659D7
+	// Total table size 1714 bytes (1KiB); checksum: 845B0821

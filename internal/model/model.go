@@ -1,23 +1,28 @@
 package model
 
+import (
+	"context"
+
+	tg "gitlab.com/toby3d/telegram"
+)
+
 type (
-	// User represent a simple bot user
 	User struct {
-		CreatedAt    int64  `json:"created_at"`
 		ID           int    `json:"id"`
 		LanguageCode string `json:"language_code"`
-		LastSeen     int64  `json:"last_seen"`
+		CreatedAt    int64  `json:"created_at"`
 		UpdatedAt    int64  `json:"updated_at"`
+		LastSeen     int64  `json:"last_seen"`
 	}
 
 	Users []*User
 
 	Sticker struct {
-		CreatedAt  int64  `json:"created_at"`
-		Emoji      string `json:"emoji"`
 		ID         string `json:"id"`
-		IsAnimated bool   `json:"is_animated"`
+		Emoji      string `json:"emoji"`
 		SetName    string `json:"set_name"`
+		IsAnimated bool   `json:"is_animated"`
+		CreatedAt  int64  `json:"created_at"`
 	}
 
 	Stickers []*Sticker
@@ -31,6 +36,8 @@ type (
 	}
 
 	UserStickers []*UserSticker
+
+	UpdateFunc func(context.Context, *tg.Update) error
 )
 
 func (users Users) GetByID(id int) *User {

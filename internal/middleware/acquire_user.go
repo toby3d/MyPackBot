@@ -25,10 +25,11 @@ func AcquireUser(us store.UsersManager) Interceptor {
 		}
 
 		u, err := us.GetOrCreate(&model.User{
-			ID:           from.ID,
+			ID:        from.ID,
+			CreatedAt: timeStamp,
+			UpdatedAt: timeStamp,
+
 			LanguageCode: from.LanguageCode,
-			CreatedAt:    timeStamp,
-			UpdatedAt:    timeStamp,
 			LastSeen:     timeStamp,
 		})
 		if err != nil {

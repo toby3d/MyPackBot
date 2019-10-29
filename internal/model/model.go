@@ -8,34 +8,52 @@ import (
 
 type (
 	User struct {
-		ID           int    `json:"id"`
+		ID        int   `json:"id"`
+		CreatedAt int64 `json:"created_at"`
+		UpdatedAt int64 `json:"updated_at"`
+
 		LanguageCode string `json:"language_code"`
-		CreatedAt    int64  `json:"created_at"`
-		UpdatedAt    int64  `json:"updated_at"`
 		LastSeen     int64  `json:"last_seen"`
 	}
 
 	Users []*User
 
 	Sticker struct {
-		ID         string `json:"id"`
-		Emoji      string `json:"emoji"`
-		SetName    string `json:"set_name"`
+		ID        string `json:"id"`
+		CreatedAt int64  `json:"created_at"`
+
+		Width      int    `json:"width"`
+		Height     int    `json:"height"`
 		IsAnimated bool   `json:"is_animated"`
-		CreatedAt  int64  `json:"created_at"`
+		SetName    string `json:"set_name"`
+		Emoji      string `json:"emoji"`
 	}
 
 	Stickers []*Sticker
 
 	UserSticker struct {
-		CreatedAt int64  `json:"created_at"`
-		Emojis    string `json:"emojis"`
-		SetName   string `json:"set_name"`
 		StickerID string `json:"sticker_id"`
 		UserID    int    `json:"user_id"`
+		CreatedAt int64  `json:"created_at"`
+
+		SetName string `json:"set_name"`
+		Emojis  string `json:"emojis"`
 	}
 
 	UserStickers []*UserSticker
+
+	/* TODO(toby3d)
+	StickerSet struct {
+		Name      string `json:"name"`
+		CreatedAt int64  `json:"created_at"`
+
+		Title      string   `json:"title"`
+		IsAnimated bool     `json:"is_animated"`
+		Stickers   []string `json:"stickers"`
+	}
+
+	Sets []*StickerSet
+	*/
 
 	UpdateFunc func(context.Context, *tg.Update) error
 )

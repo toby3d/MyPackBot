@@ -37,6 +37,7 @@ func (h *Handler) commandStart(ctx context.Context, msg *tg.Message) (err error)
 	p, _ := ctx.Value("printer").(*message.Printer)
 	reply := tg.NewMessage(msg.Chat.ID, p.Sprintf("start__text", msg.From.FullName()))
 	reply.ReplyToMessageID = msg.ID
+	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
 	_, err = h.bot.SendMessage(reply)
 	return err
 }

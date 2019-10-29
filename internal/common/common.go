@@ -11,4 +11,6 @@ const (
 	DataSeparator     string = "@"
 	DataSet           string = "set"
 	DataSticker       string = "sticker"
+
+	SetNameUploaded string = "uploaded_by_mypackbot"
 )

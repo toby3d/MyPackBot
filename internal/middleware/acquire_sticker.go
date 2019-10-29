@@ -2,7 +2,9 @@ package middleware
 
 import (
 	"context"
+	"strings"
 
+	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	"gitlab.com/toby3d/mypackbot/internal/model/store"
 	tg "gitlab.com/toby3d/telegram"
@@ -19,10 +21,12 @@ func AcquireSticker(bot *tg.Bot, store store.StickersManager) Interceptor {
 
 			s = &model.Sticker{
 				ID:         update.Message.Sticker.FileID,
+				CreatedAt:  update.Message.Date,
+				Width:      update.Message.Sticker.Width,
+				Height:     update.Message.Sticker.Height,
 				IsAnimated: update.Message.Sticker.IsAnimated,
 				SetName:    update.Message.Sticker.SetName,
 				Emoji:      update.Message.Sticker.Emoji,
-				CreatedAt:  update.Message.Date,
 			}
 		case update.IsCallbackQuery():
 			if !update.CallbackQuery.Message.IsReply() ||
@@ -32,16 +36,21 @@ func AcquireSticker(bot *tg.Bot, store store.StickersManager) Interceptor {
 
 			s = &model.Sticker{
 				ID:         update.CallbackQuery.Message.ReplyToMessage.Sticker.FileID,
+				CreatedAt:  update.CallbackQuery.Message.ReplyToMessage.Date,
+				Width:      update.CallbackQuery.Message.ReplyToMessage.Sticker.Width,
+				Height:     update.CallbackQuery.Message.ReplyToMessage.Sticker.Height,
 				IsAnimated: update.CallbackQuery.Message.ReplyToMessage.Sticker.IsAnimated,
 				SetName:    update.CallbackQuery.Message.ReplyToMessage.Sticker.SetName,
 				Emoji:      update.CallbackQuery.Message.ReplyToMessage.Sticker.Emoji,
-				CreatedAt:  update.CallbackQuery.Message.ReplyToMessage.Date,
 			}
 		default:
 			return next(ctx, update)
 		}
+		if s.SetName == "" {
+			s.SetName = common.SetNameUploaded
+		}
 
-		if s.SetName != "" {
+		if s.SetName != "" && !strings.EqualFold(s.SetName, common.SetNameUploaded) {
 			go func() {
 				set, err := bot.GetStickerSet(s.SetName)
 				if err != nil {
@@ -51,10 +60,12 @@ func AcquireSticker(bot *tg.Bot, store store.StickersManager) Interceptor {
 				for _, sticker := range set.Stickers {
 					store.GetOrCreate(&model.Sticker{
 						ID:         sticker.FileID,
+						CreatedAt:  s.CreatedAt,
+						Width:      s.Width,
+						Height:     s.Height,
 						IsAnimated: sticker.IsAnimated,
 						SetName:    set.Name,
 						Emoji:      sticker.Emoji,
-						CreatedAt:  s.CreatedAt,
 					})
 				}
 			}()

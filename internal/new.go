@@ -29,3 +29,11 @@ func New(path string) (*MyPackBot, error) {
 
 	return &mpb, nil
 }
+
+func (mpb *MyPackBot) Bot() *tg.Bot {
+	return mpb.bot
+}
+
+func (mpb *MyPackBot) Store() storemodel.Manager {
+	return mpb.store
+}

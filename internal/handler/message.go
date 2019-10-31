@@ -77,7 +77,7 @@ func (h *Handler) isSticker(ctx context.Context, msg *tg.Message) error {
 			tg.NewInlineKeyboardButton(p.Sprintf("sticker__button_add-set"), common.DataAddSet),
 		)
 	}
-	if us != nil {
+	if us.StickerID != "" && us.UserID != 0 {
 		markup = tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButton(
 			p.Sprintf("sticker__button_remove-single"),
 			common.DataRemoveSticker,

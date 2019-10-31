@@ -12,16 +12,17 @@ import (
 
 func AcquireSticker(bot *tg.Bot, store store.StickersManager) Interceptor {
 	return func(ctx context.Context, update *tg.Update, next model.UpdateFunc) (err error) {
-		var s *model.Sticker
+		s := new(model.Sticker)
 		switch {
 		case update.IsMessage():
 			if !update.Message.IsSticker() {
 				return next(ctx, update)
 			}
 
-			s = &model.Sticker{
+			*s = model.Sticker{
 				ID:         update.Message.Sticker.FileID,
 				CreatedAt:  update.Message.Date,
+				UpdatedAt:  update.Message.Date,
 				Width:      update.Message.Sticker.Width,
 				Height:     update.Message.Sticker.Height,
 				IsAnimated: update.Message.Sticker.IsAnimated,
@@ -34,9 +35,10 @@ func AcquireSticker(bot *tg.Bot, store store.StickersManager) Interceptor {
 				return next(ctx, update)
 			}
 
-			s = &model.Sticker{
+			*s = model.Sticker{
 				ID:         update.CallbackQuery.Message.ReplyToMessage.Sticker.FileID,
 				CreatedAt:  update.CallbackQuery.Message.ReplyToMessage.Date,
+				UpdatedAt:  update.CallbackQuery.Message.ReplyToMessage.Date,
 				Width:      update.CallbackQuery.Message.ReplyToMessage.Sticker.Width,
 				Height:     update.CallbackQuery.Message.ReplyToMessage.Sticker.Height,
 				IsAnimated: update.CallbackQuery.Message.ReplyToMessage.Sticker.IsAnimated,
@@ -58,21 +60,23 @@ func AcquireSticker(bot *tg.Bot, store store.StickersManager) Interceptor {
 				}
 
 				for _, sticker := range set.Stickers {
-					store.GetOrCreate(&model.Sticker{
+					if _, err = store.GetOrCreate(&model.Sticker{
 						ID:         sticker.FileID,
 						CreatedAt:  s.CreatedAt,
+						UpdatedAt:  s.UpdatedAt,
 						Width:      s.Width,
 						Height:     s.Height,
 						IsAnimated: sticker.IsAnimated,
 						SetName:    set.Name,
 						Emoji:      sticker.Emoji,
-					})
+					}); err != nil {
+						continue
+					}
 				}
 			}()
 		}
 
-		s, err = store.GetOrCreate(s)
-		if err != nil {
+		if s, err = store.GetOrCreate(s); err != nil {
 			return err
 		}
 

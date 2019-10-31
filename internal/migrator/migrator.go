@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kirillDanshin/dlog"
 	bunt "github.com/tidwall/buntdb"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	"gitlab.com/toby3d/mypackbot/internal/model/store"
@@ -13,9 +12,9 @@ import (
 )
 
 type AutoMigrateConfig struct {
-	FromPath string
-	ToConn   store.Manager
-	Bot      *tg.Bot
+	OldDB *bunt.DB
+	NewDB store.Manager
+	Bot   *tg.Bot
 }
 
 const (
@@ -25,14 +24,7 @@ const (
 	uploadedSetName string = "?"
 )
 
-func AutoMigrate(cfg AutoMigrateConfig) error {
-	// NOTE(toby3d): open old buntdb database
-	db, err := bunt.Open(cfg.FromPath)
-	if err != nil {
-		dlog.Ln("ERROR:", err.Error())
-		return err
-	}
-
+func AutoMigrate(cfg AutoMigrateConfig) (err error) {
 	// NOTE(toby3d): preparing temp-stores for migrating
 	users := make(map[int]*model.User)   // NOTE(toby3d): users[userId]*User
 	sets := make(map[string]struct{})    // NOTE(toby3d): sets[setName]
@@ -40,8 +32,8 @@ func AutoMigrate(cfg AutoMigrateConfig) error {
 	userStickers := make(map[int]string) // NOTE(toby3d): userStickers[userId]fileId
 
 	// NOTE(toby3d): read every key in buntdb database
-	if err = db.View(func(tx *bunt.Tx) error {
-		return tx.AscendKeys("*", func(k, v string) bool {
+	if err = cfg.OldDB.View(func(tx *bunt.Tx) error {
+		return tx.AscendKeys("user:*", func(k, v string) bool {
 			// NOTE(toby3d): split key name on parts
 			parts := strings.Split(k, ":")
 			// NOTE(toby3d): this part always contains user/chat id
@@ -50,20 +42,15 @@ func AutoMigrate(cfg AutoMigrateConfig) error {
 				return true
 			}
 
-			// NOTE(toby3d): get now timestamp
-			timeStamp := time.Now().UTC().Unix()
-
 			// NOTE(toby3d): we don't modify and force save this data to a new store because keys may be
 			// duplicated
 
 			if _, ok := users[uid]; !ok {
+				users[uid] = new(model.User)
 				users[uid] = &model.User{
-					ID:        uid,
-					CreatedAt: timeStamp,
-					UpdatedAt: timeStamp,
-
+					ID:           uid,
 					LanguageCode: "en",
-					LastSeen:     timeStamp,
+					LastSeen:     time.Now().UTC().Unix(),
 				}
 			}
 
@@ -88,17 +75,17 @@ func AutoMigrate(cfg AutoMigrateConfig) error {
 	}); err != nil {
 		return err
 	}
+
 	// NOTE(toby3d): close old database
-	if err = db.Close(); err != nil {
+	if err = cfg.OldDB.Close(); err != nil {
 		return err
 	}
 
 	// NOTE(toby3d): STEP 1: migrate users
 	for _, u := range users {
-		if _, err = cfg.ToConn.Users().GetOrCreate(u); err != nil {
+		if _, err = cfg.NewDB.Users().GetOrCreate(u); err != nil {
 			continue
 		}
-		dlog.Ln("MIGRATOR: user", u.ID, "successfuly migrated")
 	}
 
 	// NOTE(toby3d): STEP 2: migrate sets
@@ -109,9 +96,8 @@ func AutoMigrate(cfg AutoMigrateConfig) error {
 		}
 
 		for _, sticker := range set.Stickers {
-			if _, err = cfg.ToConn.Stickers().GetOrCreate(&model.Sticker{
+			if _, err = cfg.NewDB.Stickers().GetOrCreate(&model.Sticker{
 				ID:         sticker.FileID,
-				CreatedAt:  time.Now().UTC().Unix(),
 				Width:      sticker.Width,
 				Height:     sticker.Height,
 				IsAnimated: sticker.IsAnimated,
@@ -120,21 +106,19 @@ func AutoMigrate(cfg AutoMigrateConfig) error {
 			}); err != nil {
 				continue
 			}
-			dlog.Ln("MIGRATOR: sticker", sticker.FileID, "successfuly migrated")
 		}
 	}
 
 	// NOTE(toby3d): STEP 3: import sets to users
 	for uid, sets := range userSets {
 		for _, setName := range sets {
-			u, err := cfg.ToConn.Users().GetOrCreate(users[uid])
+			u, err := cfg.NewDB.Users().GetOrCreate(users[uid])
 			if err != nil || u == nil {
 				continue
 			}
-			if err = cfg.ToConn.AddStickersSet(u, setName); err != nil {
+			if err = cfg.NewDB.AddStickersSet(u, setName); err != nil {
 				continue
 			}
-			dlog.Ln("MIGRATOR: set", setName, "successfuly assigned to", u.ID)
 		}
 	}
 
@@ -152,7 +136,6 @@ func AutoMigrate(cfg AutoMigrateConfig) error {
 			}); err != nil {
 				continue
 			}
-			dlog.Ln("MIGRATOR: sticker", fileID, "successfuly sended to", uid)
 			if count == len(userStickers) {
 				ticker.Stop()
 			}

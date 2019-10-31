@@ -74,6 +74,9 @@ func (h *Handler) callbackAddSet(ctx context.Context, call *tg.CallbackQuery) (e
 	for i := range set.Stickers {
 		if s, err = h.store.Stickers().GetOrCreate(&model.Sticker{
 			CreatedAt:  call.Message.Date,
+			UpdatedAt:  call.Message.Date,
+			Width:      set.Stickers[i].Width,
+			Height:     set.Stickers[i].Height,
 			Emoji:      set.Stickers[i].Emoji,
 			ID:         set.Stickers[i].FileID,
 			IsAnimated: set.Stickers[i].IsAnimated,
@@ -84,9 +87,7 @@ func (h *Handler) callbackAddSet(ctx context.Context, call *tg.CallbackQuery) (e
 			return err
 		}
 		if err = h.store.AddSticker(u, s); err != nil {
-			answer.Text = "🐞 " + err.Error()
-			_, err = h.bot.AnswerCallbackQuery(answer)
-			return err
+			continue
 		}
 	}
 

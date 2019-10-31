@@ -14,3 +14,9 @@ const (
 
 	SetNameUploaded string = "uploaded_by_mypackbot"
 )
+
+var (
+	BucketStickers      = []byte("stickers")
+	BucketUsers         = []byte("users")
+	BucketUsersStickers = []byte("users_stickers")
+)

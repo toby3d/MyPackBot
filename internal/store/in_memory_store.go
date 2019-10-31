@@ -143,7 +143,7 @@ func (store *InMemoryStore) GetStickersSet(u *model.User, offset, limit int, set
 }
 
 func (store *InMemoryStore) RemoveSticker(u *model.User, s *model.Sticker) (err error) {
-	var us *model.UserSticker
+	us := new(model.UserSticker)
 	if us, err = store.GetSticker(u, s); err != nil {
 		return err
 	}

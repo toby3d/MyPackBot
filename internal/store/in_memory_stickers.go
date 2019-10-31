@@ -24,7 +24,7 @@ func NewInMemoryStickersStore() *InMemoryStickersStore {
 
 func (store *InMemoryStickersStore) Create(s *model.Sticker) error {
 	if store.Get(s.ID) != nil {
-		return errors.New("user already exists")
+		return errors.New("sticker already exists")
 	}
 	if s.CreatedAt == 0 {
 		s.CreatedAt = time.Now().UTC().Unix()

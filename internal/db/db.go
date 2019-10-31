@@ -4,6 +4,7 @@ import (
 	"os"
 
 	bolt "github.com/etcd-io/bbolt"
+	"gitlab.com/toby3d/mypackbot/internal/common"
 )
 
 func Open(path string) (*bolt.DB, error) {
@@ -16,28 +17,20 @@ func Open(path string) (*bolt.DB, error) {
 		_ = db.Close()
 		return nil, err
 	}
-
 	return db, nil
 }
 
 func AutoMigrate(db *bolt.DB) error {
 	return db.Update(func(tx *bolt.Tx) (err error) {
-		if _, err = tx.CreateBucketIfNotExists([]byte("users")); err != nil {
-			return err
+		for _, bkt := range [][]byte{
+			common.BucketUsers,
+			common.BucketStickers,
+			common.BucketUsersStickers,
+		} {
+			if _, err = tx.CreateBucketIfNotExists(bkt); err != nil {
+				return err
+			}
 		}
-
-		if _, err = tx.CreateBucketIfNotExists([]byte("stickers")); err != nil {
-			return err
-		}
-
-		if _, err = tx.CreateBucketIfNotExists([]byte("users_stickers")); err != nil {
-			return err
-		}
-
-		if _, err = tx.CreateBucketIfNotExists([]byte("sets")); err != nil {
-			return err
-		}
-
 		return nil
 	})
 }

@@ -21,6 +21,7 @@ type (
 	Sticker struct {
 		ID        string `json:"id"`
 		CreatedAt int64  `json:"created_at"`
+		UpdatedAt int64  `json:"updated_at"`
 
 		Width      int    `json:"width"`
 		Height     int    `json:"height"`

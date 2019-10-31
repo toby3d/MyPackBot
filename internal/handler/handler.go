@@ -13,10 +13,10 @@ type Handler struct {
 	store store.Manager
 }
 
-func NewHandler(b *tg.Bot, s store.Manager) *Handler {
+func NewHandler(bot *tg.Bot, store store.Manager) *Handler {
 	return &Handler{
-		bot:   b,
-		store: s,
+		bot:   bot,
+		store: store,
 	}
 }
 

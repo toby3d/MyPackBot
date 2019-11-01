@@ -30,6 +30,10 @@ func (store *UsersStore) Create(u *model.User) error {
 		u.UpdatedAt = now
 	}
 
+	if u.LastSeen <= 0 {
+		u.LastSeen = now
+	}
+
 	src, err := json.ConfigFastest.Marshal(u)
 	if err != nil {
 		return err

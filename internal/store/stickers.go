@@ -69,7 +69,7 @@ func (store *StickersStore) GetList(offset, limit int, query string) (model.Stic
 				return err
 			}
 
-			if !strings.ContainsAny(s.Emoji, query) {
+			if query != "" && !strings.ContainsAny(s.Emoji, query) {
 				return nil
 			}
 

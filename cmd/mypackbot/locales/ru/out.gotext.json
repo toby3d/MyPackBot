@@ -4,17 +4,7 @@
         {
             "id": "callback__text_add-single",
             "message": "callback__text_add-single",
-            "translation": "📲 Стикер из набора {SetName} импортирован!",
-            "placeholders": [
-                {
-                    "id": "SetName",
-                    "string": "%[1]v",
-                    "type": "string",
-                    "underlyingType": "string",
-                    "argNum": 1,
-                    "expr": "call.Message.ReplyToMessage.Sticker.SetName"
-                }
-            ]
+            "translation": "📲 Этот стикер импортирован!"
         },
         {
             "id": "sticker__button_remove-single",

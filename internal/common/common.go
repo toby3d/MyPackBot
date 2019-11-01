@@ -1,7 +1,10 @@
 //nolint: gochecknoglobals
 package common
 
-import "gitlab.com/toby3d/mypackbot/internal/model"
+import (
+	"github.com/Masterminds/semver"
+	"gitlab.com/toby3d/mypackbot/internal/model"
+)
 
 const (
 	DataAdd           string = "add"
@@ -25,6 +28,8 @@ const (
 	ContextSticker model.ContextKey = "sticker"
 	ContextUser    model.ContextKey = "user"
 )
+
+var Version = semver.MustParse("2.0.0")
 
 var (
 	BucketStickers      = []byte("stickers")

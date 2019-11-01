@@ -23,11 +23,11 @@ func NewHandler(bot *tg.Bot, store store.Manager) *Handler {
 func (h *Handler) UpdateHandler(ctx context.Context, upd *tg.Update) (err error) {
 	switch {
 	case upd.IsMessage():
-		err = h.isMessage(ctx, upd.Message)
+		err = h.IsMessage(ctx, upd.Message)
 	case upd.IsCallbackQuery():
-		err = h.isCallbackQuery(ctx, upd.CallbackQuery)
+		err = h.IsCallbackQuery(ctx, upd.CallbackQuery)
 	case upd.IsInlineQuery():
-		err = h.isInlineQuery(ctx, upd.InlineQuery)
+		err = h.IsInlineQuery(ctx, upd.InlineQuery)
 	default:
 		dlog.D(upd)
 	}

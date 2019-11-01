@@ -4,17 +4,7 @@
         {
             "id": "callback__text_add-single",
             "message": "callback__text_add-single",
-            "translation": "📲 Sticker from {SetName} set has been imported!",
-            "placeholders": [
-                {
-                    "id": "SetName",
-                    "string": "%[1]v",
-                    "type": "string",
-                    "underlyingType": "string",
-                    "argNum": 1,
-                    "expr": "call.Message.ReplyToMessage.Sticker.SetName"
-                }
-            ]
+            "translation": "📲 This sticker has been imported!"
         },
         {
             "id": "sticker__button_remove-single",

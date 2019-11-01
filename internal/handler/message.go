@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"strings"
 
 	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
@@ -9,34 +10,34 @@ import (
 	"golang.org/x/text/message"
 )
 
-func (h *Handler) isMessage(ctx context.Context, msg *tg.Message) (err error) {
+func (h *Handler) IsMessage(ctx context.Context, msg *tg.Message) (err error) {
 	switch {
 	case msg.IsCommand():
-		err = h.isCommand(ctx, msg)
+		err = h.IsCommand(ctx, msg)
 	case msg.IsSticker():
-		err = h.isSticker(ctx, msg)
+		err = h.IsSticker(ctx, msg)
 	}
 
 	return err
 }
 
-func (h *Handler) isCommand(ctx context.Context, msg *tg.Message) (err error) {
+func (h *Handler) IsCommand(ctx context.Context, msg *tg.Message) (err error) {
 	switch {
 	case msg.IsCommandEqual(tg.CommandStart):
-		err = h.commandStart(ctx, msg)
+		err = h.CommandStart(ctx, msg)
 	case msg.IsCommandEqual(tg.CommandHelp):
-		err = h.commandHelp(ctx, msg)
+		err = h.CommandHelp(ctx, msg)
 	case msg.IsCommandEqual(tg.CommandSettings):
 		fallthrough
 	default:
-		err = h.commandUnknown(ctx, msg)
+		err = h.CommandUnknown(ctx, msg)
 	}
 
 	return err
 }
 
-func (h *Handler) commandStart(ctx context.Context, msg *tg.Message) (err error) {
-	p, _ := ctx.Value("printer").(*message.Printer)
+func (h *Handler) CommandStart(ctx context.Context, msg *tg.Message) (err error) {
+	p, _ := ctx.Value(common.ContextPrinter).(*message.Printer)
 
 	reply := tg.NewMessage(msg.Chat.ID, p.Sprintf("start__text", msg.From.FullName()))
 	reply.ReplyToMessageID = msg.ID
@@ -47,8 +48,8 @@ func (h *Handler) commandStart(ctx context.Context, msg *tg.Message) (err error)
 	return err
 }
 
-func (h *Handler) commandHelp(ctx context.Context, msg *tg.Message) (err error) {
-	p, _ := ctx.Value("printer").(*message.Printer)
+func (h *Handler) CommandHelp(ctx context.Context, msg *tg.Message) (err error) {
+	p, _ := ctx.Value(common.ContextPrinter).(*message.Printer)
 
 	reply := tg.NewMessage(msg.Chat.ID, p.Sprintf("help__text"))
 	reply.ReplyToMessageID = msg.ID
@@ -58,8 +59,8 @@ func (h *Handler) commandHelp(ctx context.Context, msg *tg.Message) (err error) 
 	return err
 }
 
-func (h *Handler) commandUnknown(ctx context.Context, msg *tg.Message) (err error) {
-	p, _ := ctx.Value("printer").(*message.Printer)
+func (h *Handler) CommandUnknown(ctx context.Context, msg *tg.Message) (err error) {
+	p, _ := ctx.Value(common.ContextPrinter).(*message.Printer)
 
 	reply := tg.NewMessage(msg.Chat.ID, p.Sprintf("unknown-command__text"))
 	reply.ReplyToMessageID = msg.ID
@@ -69,10 +70,10 @@ func (h *Handler) commandUnknown(ctx context.Context, msg *tg.Message) (err erro
 	return err
 }
 
-func (h *Handler) isSticker(ctx context.Context, msg *tg.Message) error {
-	u, _ := ctx.Value("user").(*model.User)
-	p, _ := ctx.Value("printer").(*message.Printer)
-	s, _ := ctx.Value("sticker").(*model.Sticker)
+func (h *Handler) IsSticker(ctx context.Context, msg *tg.Message) error {
+	u, _ := ctx.Value(common.ContextUser).(*model.User)
+	p, _ := ctx.Value(common.ContextPrinter).(*message.Printer)
+	s, _ := ctx.Value(common.ContextSticker).(*model.Sticker)
 
 	us, err := h.store.GetSticker(u, s)
 	if err != nil {
@@ -83,14 +84,14 @@ func (h *Handler) isSticker(ctx context.Context, msg *tg.Message) error {
 		tg.NewInlineKeyboardButton(p.Sprintf("sticker__button_add-single"), common.DataAddSticker),
 	))
 
-	if s.SetName != "" {
+	if !strings.EqualFold(s.SetName, common.SetNameUploaded) {
 		markup.InlineKeyboard[0] = append(
 			markup.InlineKeyboard[0],
 			tg.NewInlineKeyboardButton(p.Sprintf("sticker__button_add-set"), common.DataAddSet),
 		)
 	}
 
-	if us.StickerID != "" && us.UserID != 0 {
+	if us != nil {
 		markup = tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButton(
 			p.Sprintf("sticker__button_remove-single"),
 			common.DataRemoveSticker,

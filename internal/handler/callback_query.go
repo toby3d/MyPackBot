@@ -9,28 +9,28 @@ import (
 	"golang.org/x/text/message"
 )
 
-func (h *Handler) isCallbackQuery(ctx context.Context, call *tg.CallbackQuery) (err error) {
+func (h *Handler) IsCallbackQuery(ctx context.Context, call *tg.CallbackQuery) (err error) {
 	switch call.Data {
 	case common.DataAddSticker:
-		err = h.callbackAddSticker(ctx, call)
+		err = h.CallbackAddSticker(ctx, call)
 	case common.DataAddSet:
-		err = h.callbackAddSet(ctx, call)
+		err = h.CallbackAddSet(ctx, call)
 	case common.DataRemoveSticker:
-		err = h.callbackRemoveSticker(ctx, call)
+		err = h.CallbackRemoveSticker(ctx, call)
 	case common.DataRemoveSet:
-		err = h.callbackRemoveSet(ctx, call)
+		err = h.CallbackRemoveSet(ctx, call)
 	}
 
 	return err
 }
 
-func (h *Handler) callbackAddSticker(ctx context.Context, call *tg.CallbackQuery) (err error) {
-	u, _ := ctx.Value("user").(*model.User)
-	p, _ := ctx.Value("printer").(*message.Printer)
-	s, _ := ctx.Value("sticker").(*model.Sticker)
+func (h *Handler) CallbackAddSticker(ctx context.Context, call *tg.CallbackQuery) (err error) {
+	u, _ := ctx.Value(common.ContextUser).(*model.User)
+	p, _ := ctx.Value(common.ContextPrinter).(*message.Printer)
+	s, _ := ctx.Value(common.ContextSticker).(*model.Sticker)
 
 	answer := tg.NewAnswerCallbackQuery(call.ID)
-	answer.Text = p.Sprintf("callback__text_add-single", call.Message.ReplyToMessage.Sticker.SetName)
+	answer.Text = p.Sprintf("callback__text_add-single")
 
 	if err = h.store.AddSticker(u, s); err != nil {
 		answer.Text = "🐞 " + err.Error()
@@ -63,10 +63,10 @@ func (h *Handler) callbackAddSticker(ctx context.Context, call *tg.CallbackQuery
 	return err
 }
 
-func (h *Handler) callbackAddSet(ctx context.Context, call *tg.CallbackQuery) (err error) {
-	u, _ := ctx.Value("user").(*model.User)
-	p, _ := ctx.Value("printer").(*message.Printer)
-	s, _ := ctx.Value("sticker").(*model.Sticker)
+func (h *Handler) CallbackAddSet(ctx context.Context, call *tg.CallbackQuery) (err error) {
+	u, _ := ctx.Value(common.ContextUser).(*model.User)
+	p, _ := ctx.Value(common.ContextPrinter).(*message.Printer)
+	s, _ := ctx.Value(common.ContextSticker).(*model.Sticker)
 	answer := tg.NewAnswerCallbackQuery(call.ID)
 
 	set, err := h.bot.GetStickerSet(s.SetName)
@@ -125,10 +125,10 @@ func (h *Handler) callbackAddSet(ctx context.Context, call *tg.CallbackQuery) (e
 	return err
 }
 
-func (h *Handler) callbackRemoveSticker(ctx context.Context, call *tg.CallbackQuery) (err error) {
-	u, _ := ctx.Value("user").(*model.User)
-	p, _ := ctx.Value("printer").(*message.Printer)
-	s, _ := ctx.Value("sticker").(*model.Sticker)
+func (h *Handler) CallbackRemoveSticker(ctx context.Context, call *tg.CallbackQuery) (err error) {
+	u, _ := ctx.Value(common.ContextUser).(*model.User)
+	p, _ := ctx.Value(common.ContextPrinter).(*message.Printer)
+	s, _ := ctx.Value(common.ContextSticker).(*model.Sticker)
 
 	answer := tg.NewAnswerCallbackQuery(call.ID)
 	answer.Text = p.Sprintf("callback__text_remove-single")
@@ -164,10 +164,10 @@ func (h *Handler) callbackRemoveSticker(ctx context.Context, call *tg.CallbackQu
 	return err
 }
 
-func (h *Handler) callbackRemoveSet(ctx context.Context, call *tg.CallbackQuery) (err error) {
-	u, _ := ctx.Value("user").(*model.User)
-	p, _ := ctx.Value("printer").(*message.Printer)
-	s, _ := ctx.Value("sticker").(*model.Sticker)
+func (h *Handler) CallbackRemoveSet(ctx context.Context, call *tg.CallbackQuery) (err error) {
+	u, _ := ctx.Value(common.ContextUser).(*model.User)
+	p, _ := ctx.Value(common.ContextPrinter).(*message.Printer)
+	s, _ := ctx.Value(common.ContextSticker).(*model.Sticker)
 
 	answer := tg.NewAnswerCallbackQuery(call.ID)
 	answer.Text = p.Sprintf("callback__text_remove-set", s.SetName)

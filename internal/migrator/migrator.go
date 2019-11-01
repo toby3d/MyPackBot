@@ -1,15 +1,20 @@
 package migrator
 
 import (
+	"context"
 	"strconv"
 	"strings"
 	"time"
 
 	bunt "github.com/tidwall/buntdb"
+	"gitlab.com/toby3d/mypackbot/internal/common"
+	"gitlab.com/toby3d/mypackbot/internal/handler"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	"gitlab.com/toby3d/mypackbot/internal/model/store"
 	"gitlab.com/toby3d/mypackbot/internal/utils"
 	tg "gitlab.com/toby3d/telegram"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 type (
@@ -69,24 +74,48 @@ func AutoMigrate(cfg AutoMigrateConfig) (err error) {
 	}
 
 	count := 0
-	ticker := time.NewTicker(500 * time.Millisecond)
+	ticker := time.NewTicker(100 * time.Millisecond)
+	h := handler.NewHandler(cfg.Bot, cfg.NewDB)
+
+	message.SetString(language.English, "sticker__text", "🤔 This custom/uploaded sticker has been imported from previous version of the bot. You can add it to your pack by clicking on the button below. If the button does not work - please try to click it later when the migration process is completed.")
+	message.SetString(language.Russian, "sticker__text", "🤔 Этот загруженый стикер был импортирован с прошлой версии бота. Ты можешь добавить его к себе нажав на кнопку ниже. Если кнопка не работает - пожалуйста, попробуй нажать её позже, когда процесс миграции завершится.")
+	message.SetString(language.English, "sticker__button_add-single", "📙 Import this sticker")
+	message.SetString(language.Russian, "sticker__button_add-single", "📙 Импортировать этот стикер")
+	matcher := language.NewMatcher([]language.Tag{language.English, language.Russian})
 
 	for uid, fileID := range data.userStickers { // NOTE(toby3d): STEP 4: send uploaded stickers directly to users
-		for {
-			<-ticker.C
-			count++
+		count++
 
-			if _, err = cfg.Bot.SendSticker(&tg.SendStickerParameters{
-				ChatID:              int64(uid),
-				Sticker:             fileID,
-				DisableNotification: true,
-			}); err != nil {
-				continue
-			}
+		if count > len(data.userStickers) {
+			ticker.Stop()
+			break
+		}
 
-			if count == len(data.userStickers) {
-				ticker.Stop()
-			}
+		<-ticker.C
+
+		reply, err := cfg.Bot.SendSticker(&tg.SendStickerParameters{
+			ChatID:              int64(uid),
+			Sticker:             fileID,
+			DisableNotification: true,
+		})
+		if err != nil {
+			continue
+		}
+
+		u := cfg.NewDB.Users().Get(uid)
+		s := utils.ConvertStickerToModel(reply.Sticker)
+		s.CreatedAt = reply.Date
+		s.UpdatedAt = reply.Date
+
+		ctx := context.Background()
+		tag, _, _ := matcher.Match(language.Make(u.LanguageCode))
+		printer := message.NewPrinter(tag)
+		ctx = context.WithValue(ctx, common.ContextPrinter, printer)
+		ctx = context.WithValue(ctx, common.ContextUser, u)
+		ctx = context.WithValue(ctx, common.ContextSticker, s)
+
+		if err = h.IsSticker(ctx, reply); err != nil {
+			continue
 		}
 	}
 
@@ -95,6 +124,11 @@ func AutoMigrate(cfg AutoMigrateConfig) (err error) {
 
 func importOldData(db *bunt.DB) (*tempData, error) {
 	data := new(tempData)
+	data.users = make(map[int]*model.User)
+	data.sets = make(map[string]struct{})
+	data.userSets = make(map[int][]string)
+	data.userStickers = make(map[int]string)
+
 	err := db.View(func(tx *bunt.Tx) error {
 		// NOTE(toby3d): read every key in buntdb database
 		return tx.AscendKeys("user:*", func(k, v string) bool {
@@ -114,7 +148,6 @@ func importOldData(db *bunt.DB) (*tempData, error) {
 				data.users[uid] = &model.User{
 					ID:           uid,
 					LanguageCode: "en",
-					LastSeen:     time.Now().UTC().Unix(),
 				}
 			}
 

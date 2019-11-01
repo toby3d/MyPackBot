@@ -26,14 +26,16 @@ func (store *InMemoryStickersStore) Create(s *model.Sticker) error {
 	if store.Get(s.ID) != nil {
 		return errors.New("sticker already exists")
 	}
+
 	if s.CreatedAt == 0 {
 		s.CreatedAt = time.Now().UTC().Unix()
 	}
 
 	store.mutex.Lock()
 	store.stickers = append(store.stickers, s)
+
 	sort.Slice(store.stickers, func(i, j int) bool {
-		return store.stickers[i].CreatedAt < store.stickers[i].CreatedAt
+		return store.stickers[i].CreatedAt < store.stickers[j].CreatedAt
 	})
 	store.mutex.Unlock()
 
@@ -43,11 +45,12 @@ func (store *InMemoryStickersStore) Create(s *model.Sticker) error {
 func (store *InMemoryStickersStore) Get(sid string) *model.Sticker {
 	store.mutex.RLock()
 	defer store.mutex.RUnlock()
+
 	return store.stickers.GetByID(sid)
 }
 
 func (store *InMemoryStickersStore) GetList(offset, limit int, query string) (model.Stickers, int) {
-	var count int
+	count := 0
 	stickers := make(model.Stickers, 0, limit)
 
 	store.mutex.RLock()
@@ -57,6 +60,7 @@ func (store *InMemoryStickersStore) GetList(offset, limit int, query string) (mo
 		}
 
 		count++
+
 		if count <= offset || count > offset+limit {
 			continue
 		}
@@ -71,6 +75,7 @@ func (store *InMemoryStickersStore) GetList(offset, limit int, query string) (mo
 func (store *InMemoryStickersStore) GetSet(name string) (model.Stickers, int) {
 	store.mutex.RLock()
 	defer store.mutex.RUnlock()
+
 	return store.stickers.GetSet(name)
 }
 
@@ -84,6 +89,7 @@ func (store *InMemoryStickersStore) Update(s *model.Sticker) error {
 		if store.stickers[i].ID != s.ID {
 			continue
 		}
+
 		store.stickers[i] = s
 	}
 	store.mutex.Unlock()
@@ -101,11 +107,14 @@ func (store *InMemoryStickersStore) Remove(sid string) error {
 		if store.stickers[i].ID != sid {
 			continue
 		}
+
 		store.stickers = store.stickers[:i+copy(store.stickers[i:], store.stickers[i+1:])]
+
 		break
 	}
+
 	sort.Slice(store.stickers, func(i, j int) bool {
-		return store.stickers[i].CreatedAt < store.stickers[i].CreatedAt
+		return store.stickers[i].CreatedAt < store.stickers[j].CreatedAt
 	})
 	store.mutex.Unlock()
 
@@ -116,8 +125,10 @@ func (store *InMemoryStickersStore) GetOrCreate(s *model.Sticker) (*model.Sticke
 	if sticker := store.Get(s.ID); sticker != nil {
 		return sticker, nil
 	}
+
 	if err := store.Create(s); err != nil {
 		return nil, err
 	}
+
 	return store.Get(s.ID), nil
 }

@@ -21,9 +21,11 @@ func (count UpdateHandler) Intercept(middleware Interceptor) UpdateHandler {
 
 func (chain Chain) UpdateHandler(handler model.UpdateFunc) model.UpdateFunc {
 	current := UpdateHandler(handler)
+
 	for i := len(chain) - 1; i >= 0; i-- {
 		m := chain[i]
 		current = current.Intercept(m)
 	}
+
 	return model.UpdateFunc(current)
 }

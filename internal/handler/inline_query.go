@@ -11,16 +11,23 @@ import (
 	"golang.org/x/text/message"
 )
 
+//nolint: gochecknoglobals
+var replacer = strings.NewReplacer(
+	"personal:true", "",
+	"personal:false", "",
+)
+
 func (h *Handler) isInlineQuery(ctx context.Context, inline *tg.InlineQuery) (err error) {
 	u, _ := ctx.Value("user").(*model.User)
 	p, _ := ctx.Value("printer").(*message.Printer)
+	offset, _ := strconv.Atoi(inline.Offset)
 
 	answer := tg.NewAnswerInlineQuery(inline.ID)
 	answer.IsPersonal = !strings.Contains(inline.Query, "personal:false")
 	answer.CacheTime = 1
+
 	if inline.HasQuery() {
-		inline.Query = strings.Trim(inline.Query, "personal:true")
-		inline.Query = strings.Trim(inline.Query, "personal:false")
+		replacer.Replace(inline.Query)
 		inline.Query = strings.TrimSpace(inline.Query)
 		inline.Query, _ = utils.FixEmojiTone(inline.Query)
 	}
@@ -28,8 +35,8 @@ func (h *Handler) isInlineQuery(ctx context.Context, inline *tg.InlineQuery) (er
 	answer.SwitchPrivateMessageText = p.Sprintf("inline__not-found_switch-text")
 	answer.SwitchPrivateMessageParameter = "from_inline"
 
-	offset, _ := strconv.Atoi(inline.Offset)
 	stickers, count := h.store.GetStickersList(u, offset, 50, inline.Query)
+
 	if !answer.IsPersonal {
 		stickers, count = h.store.Stickers().GetList(offset, 50, inline.Query)
 	}
@@ -41,11 +48,13 @@ func (h *Handler) isInlineQuery(ctx context.Context, inline *tg.InlineQuery) (er
 	answer.SwitchPrivateMessageText = p.Sprintf("inline__found_switch-text", count)
 	answer.SwitchPrivateMessageParameter = "from_inline"
 
-	answer.Results = make([]interface{}, len(stickers), len(stickers))
+	answer.Results = make([]interface{}, len(stickers))
+
 	for i := range stickers {
 		answer.Results[i] = tg.NewInlineQueryResultCachedSticker(stickers[i].ID, stickers[i].ID)
 	}
 
 	_, err = h.bot.AnswerInlineQuery(answer)
+
 	return err
 }

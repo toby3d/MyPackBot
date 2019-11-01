@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	"gitlab.com/toby3d/mypackbot/internal/model/store"
 	tg "gitlab.com/toby3d/telegram"
@@ -36,6 +37,6 @@ func AcquireUser(us store.UsersManager) Interceptor {
 			return err
 		}
 
-		return next(context.WithValue(ctx, "user", u), update)
+		return next(context.WithValue(ctx, common.ContextUser, u), update)
 	}
 }

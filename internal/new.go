@@ -29,6 +29,7 @@ func New(path string) (*MyPackBot, error) {
 	}
 
 	mpb.store = store.NewStore(conn)
+
 	if mpb.bot, err = tg.New(mpb.config.GetString("telegram.token")); err != nil {
 		return nil, err
 	}

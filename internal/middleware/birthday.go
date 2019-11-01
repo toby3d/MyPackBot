@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	"gitlab.com/toby3d/mypackbot/internal/model/store"
 	tg "gitlab.com/toby3d/telegram"
@@ -16,7 +17,7 @@ func Birthday(bot *tg.Bot, us store.UsersManager, bday time.Time) Interceptor {
 			return next(ctx, update)
 		}
 
-		u, _ := ctx.Value("user").(*model.User)
+		u, _ := ctx.Value(common.ContextUser).(*model.User)
 		lastSeen := time.Unix(u.LastSeen, 0)
 		date := update.Message.Time()
 		before := time.Date(date.Year(), bday.Month(), bday.Day(), 0, 0, 0, 0, time.UTC)
@@ -24,12 +25,13 @@ func Birthday(bot *tg.Bot, us store.UsersManager, bday time.Time) Interceptor {
 		if date.Before(before) || date.After(after) || lastSeen.After(before) {
 			return next(ctx, update)
 		}
+
 		// NOTE(toby3d): do this middleware only after sending all previous messages
 		if err = next(ctx, update); err != nil {
 			return err
 		}
 
-		p, _ := ctx.Value("printer").(*message.Printer)
+		p, _ := ctx.Value(common.ContextPrinter).(*message.Printer)
 		reply := tg.NewMessage(update.Message.Chat.ID, p.Sprintf("birthday__message_text"))
 		reply.DisableNotification = false
 		reply.DisableWebPagePreview = false

@@ -15,9 +15,9 @@ func Open(path string) (*bolt.DB, error) {
 
 	if err = AutoMigrate(db); err != nil {
 		_ = db.Close()
-		return nil, err
 	}
-	return db, nil
+
+	return db, err
 }
 
 func AutoMigrate(db *bolt.DB) error {

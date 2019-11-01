@@ -16,6 +16,7 @@ type Reader interface {
 func Open(path string) (*viper.Viper, error) {
 	dir, file := filepath.Split(path)
 	ext := filepath.Ext(file)
+
 	if file == "" || ext == "" {
 		return nil, errors.New("invalid path to config file")
 	}
@@ -29,5 +30,6 @@ func Open(path string) (*viper.Viper, error) {
 	v.SetConfigType(fileExt)
 
 	err := v.ReadInConfig()
+
 	return v, err
 }

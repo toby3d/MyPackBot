@@ -1,14 +1,32 @@
 package store
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
+	bolt "github.com/etcd-io/bbolt"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/toby3d/mypackbot/internal/db"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 )
 
-func TestInMemoryUsersStore(t *testing.T) {
+func initDB(t *testing.T) (*bolt.DB, func()) {
+	dbPath := filepath.Join(os.Getenv("GOPATH"), "src", "gitlab.com", "toby3d", "mypackbot", "test", "testing.db")
+	dataBase, err := db.Open(dbPath)
+
+	if !assert.NoError(t, err) {
+		assert.FailNow(t, err.Error())
+	}
+
+	return dataBase, func() {
+		assert.NoError(t, dataBase.Close())
+		assert.NoError(t, os.RemoveAll(dbPath))
+	}
+}
+
+func TestUsersStore(t *testing.T) {
 	u := model.User{
 		ID:           42,
 		CreatedAt:    time.Now().UTC().Unix(),
@@ -17,7 +35,10 @@ func TestInMemoryUsersStore(t *testing.T) {
 		LastSeen:     time.Now().UTC().Unix(),
 	}
 
-	store := NewInMemoryUsersStore()
+	dataBase, release := initDB(t)
+	defer release()
+
+	store := NewUsersStore(dataBase)
 	assert.Nil(t, store.Get(u.ID))
 	assert.NoError(t, store.Create(&u))
 	assert.Equal(t, &u, store.Get(u.ID))
@@ -36,7 +57,7 @@ func TestInMemoryUsersStore(t *testing.T) {
 	assert.NotEqual(t, &u, store.Get(u.ID))
 }
 
-func TestInMemoryStickersStore(t *testing.T) {
+func TestStickersStore(t *testing.T) {
 	s := model.Sticker{
 		ID:         "abc",
 		SetName:    "testing",
@@ -44,7 +65,10 @@ func TestInMemoryStickersStore(t *testing.T) {
 		CreatedAt:  time.Now().UTC().Unix(),
 	}
 
-	store := NewInMemoryStickersStore()
+	dataBase, release := initDB(t)
+	defer release()
+
+	store := NewStickersStore(dataBase)
 	assert.Nil(t, store.Get(s.ID))
 	assert.NoError(t, store.Create(&s))
 	assert.Equal(t, &s, store.Get(s.ID))
@@ -53,19 +77,6 @@ func TestInMemoryStickersStore(t *testing.T) {
 	assert.Error(t, store.Remove(s.ID))
 	assert.NoError(t, store.Update(&s))
 	assert.Equal(t, &s, store.Get(s.ID))
-
-	list, count := store.GetList(0, 50, "")
-	assert.Contains(t, list, &s)
-	assert.NotZero(t, count)
-
-	list, count = store.GetSet("debug")
-	assert.Empty(t, list)
-	assert.Zero(t, count)
-
-	list, count = store.GetSet("testing")
-	assert.NotEmpty(t, list)
-	assert.NotZero(t, count)
-
 	assert.NoError(t, store.Update(&model.Sticker{
 		ID:         s.ID,
 		SetName:    "debug",
@@ -75,7 +86,7 @@ func TestInMemoryStickersStore(t *testing.T) {
 	assert.NotEqual(t, &s, store.Get(s.ID))
 }
 
-func TestInMemoryStore(t *testing.T) {
+func TestStore(t *testing.T) {
 	u := model.User{
 		ID:           42,
 		LanguageCode: "en",
@@ -86,7 +97,10 @@ func TestInMemoryStore(t *testing.T) {
 		Emoji:   "\u200d💻",
 	}
 
-	store := NewInMemoryStore()
+	dataBase, release := initDB(t)
+	defer release()
+
+	store := NewStore(dataBase)
 	assert.Error(t, store.RemoveSticker(&u, &s))
 
 	assert.NoError(t, store.AddSticker(&u, &s))

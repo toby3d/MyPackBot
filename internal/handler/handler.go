@@ -31,5 +31,6 @@ func (h *Handler) UpdateHandler(ctx context.Context, upd *tg.Update) (err error)
 	default:
 		dlog.D(upd)
 	}
+
 	return err
 }

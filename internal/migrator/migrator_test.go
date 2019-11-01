@@ -18,13 +18,14 @@ func TestAutoMigrate(t *testing.T) {
 
 	oldDB, err := bunt.Open(oldPath)
 	assert.NoError(t, err)
-	defer oldDB.Close()
 
 	newDB, err := db.Open(newPath)
 	assert.NoError(t, err)
+
 	defer func() {
-		newDB.Close()
-		os.Remove(newPath)
+		assert.NoError(t, oldDB.Close())
+		assert.NoError(t, newDB.Close())
+		assert.NoError(t, os.Remove(newPath))
 	}()
 
 	assert.NoError(t, AutoMigrate(AutoMigrateConfig{

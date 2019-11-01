@@ -12,24 +12,25 @@ import (
 
 func (mpb *MyPackBot) Run() error {
 	var updates tg.UpdatesChannel
-	switch {
-	/*
-		case mpb.config.IsSet("telegram.webhook"):
-			set := http.AcquireURI()
-			defer http.ReleaseURI(set)
+	//nolint: godox
+	/* TODO(toby3d)
+	if mpb.config.IsSet("telegram.webhook") {
+		set := http.AcquireURI()
+		defer http.ReleaseURI(set)
 
-			cfg := mpb.config.Sub("telegram.webhook")
-			updates = mpb.bot.NewWebhookChannel(
-				set,
-				&tg.SetWebhookParameters{
-					AllowedUpdates: cfg.GetStringSlice("allowed_updates"),
-				},
-				cfg.GetString("certificate"),
-				cfg.GetString("key"),
-				cfg.GetString("serve"),
-			)
+		cfg := mpb.config.Sub("telegram.webhook")
+		updates = mpb.bot.NewWebhookChannel(
+			set,
+			&tg.SetWebhookParameters{
+				AllowedUpdates: cfg.GetStringSlice("allowed_updates"),
+			},
+			cfg.GetString("certificate"),
+			cfg.GetString("key"),
+			cfg.GetString("serve"),
+		)
+	}
 	*/
-	case mpb.config.IsSet("telegram.long_poll"):
+	if mpb.config.IsSet("telegram.long_poll") {
 		if _, err := mpb.bot.DeleteWebhook(); err != nil {
 			return err
 		}
@@ -52,10 +53,13 @@ func (mpb *MyPackBot) Run() error {
 		middleware.Birthday(mpb.bot, mpb.store.Users(), bDay),
 		middleware.UpdateLastSeen(mpb.store.Users()),
 	}
+
 	for update := range updates {
+		update := update
 		if err := chain.UpdateHandler(h.UpdateHandler)(context.Background(), &update); err != nil {
 			dlog.Ln("ERROR:", err.Error())
 		}
 	}
+
 	return nil
 }

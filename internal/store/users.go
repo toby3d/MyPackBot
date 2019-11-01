@@ -11,13 +11,9 @@ import (
 	"gitlab.com/toby3d/mypackbot/internal/model"
 )
 
-type UsersStore struct {
-	conn *bolt.DB
-}
+type UsersStore struct{ conn *bolt.DB }
 
-func NewUsersStore(conn *bolt.DB) *UsersStore {
-	return &UsersStore{conn: conn}
-}
+func NewUsersStore(conn *bolt.DB) *UsersStore { return &UsersStore{conn: conn} }
 
 func (store *UsersStore) Create(u *model.User) error {
 	if store.Get(u.ID) != nil {
@@ -25,9 +21,11 @@ func (store *UsersStore) Create(u *model.User) error {
 	}
 
 	now := time.Now().UTC().Unix()
+
 	if u.CreatedAt <= 0 {
 		u.CreatedAt = now
 	}
+
 	if u.UpdatedAt <= 0 {
 		u.UpdatedAt = now
 	}
@@ -44,12 +42,15 @@ func (store *UsersStore) Create(u *model.User) error {
 
 func (store *UsersStore) Get(uid int) *model.User {
 	u := new(model.User)
+
 	if err := store.conn.View(func(tx *bolt.Tx) error {
 		src := tx.Bucket(common.BucketUsers).Get([]byte(strconv.Itoa(uid)))
+
 		return json.ConfigFastest.Unmarshal(src, u)
 	}); err != nil {
 		return nil
 	}
+
 	return u
 }
 
@@ -78,7 +79,27 @@ func (store *UsersStore) Remove(uid int) error {
 	}
 
 	return store.conn.Update(func(tx *bolt.Tx) error {
-		return tx.Bucket(common.BucketUsers).Delete([]byte(strconv.Itoa(uid)))
+		bkt := tx.Bucket(common.BucketUsers)
+
+		if err := bkt.Delete([]byte(strconv.Itoa(uid))); err != nil {
+			return err
+		}
+
+		bkt = tx.Bucket(common.BucketUsersStickers)
+
+		return bkt.ForEach(func(key, val []byte) error {
+			us := new(model.UserSticker)
+
+			if err := json.Unmarshal(val, us); err != nil {
+				return err
+			}
+
+			if us.UserID != uid {
+				return nil
+			}
+
+			return bkt.Delete(key)
+		})
 	})
 }
 
@@ -86,8 +107,10 @@ func (store *UsersStore) GetOrCreate(u *model.User) (*model.User, error) {
 	if user := store.Get(u.ID); user != nil {
 		return user, nil
 	}
+
 	if err := store.Create(u); err != nil {
 		return nil, err
 	}
+
 	return store.Get(u.ID), nil
 }

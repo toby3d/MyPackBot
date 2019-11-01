@@ -1,4 +1,5 @@
 //go:generate gotext -srclang=en update -out=./i18n_gen.go -lang=en,ru .
+//nolint: gochecknoglobals
 package main
 
 import (

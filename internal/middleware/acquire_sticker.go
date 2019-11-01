@@ -2,76 +2,52 @@ package middleware
 
 import (
 	"context"
-	"strings"
 
 	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	"gitlab.com/toby3d/mypackbot/internal/model/store"
+	"gitlab.com/toby3d/mypackbot/internal/utils"
 	tg "gitlab.com/toby3d/telegram"
 )
 
 func AcquireSticker(bot *tg.Bot, store store.StickersManager) Interceptor {
 	return func(ctx context.Context, update *tg.Update, next model.UpdateFunc) (err error) {
-		s := new(model.Sticker)
+		var s *model.Sticker
 		switch {
 		case update.IsMessage():
 			if !update.Message.IsSticker() {
 				return next(ctx, update)
 			}
 
-			*s = model.Sticker{
-				ID:         update.Message.Sticker.FileID,
-				CreatedAt:  update.Message.Date,
-				UpdatedAt:  update.Message.Date,
-				Width:      update.Message.Sticker.Width,
-				Height:     update.Message.Sticker.Height,
-				IsAnimated: update.Message.Sticker.IsAnimated,
-				SetName:    update.Message.Sticker.SetName,
-				Emoji:      update.Message.Sticker.Emoji,
-			}
+			s = utils.ConvertStickerToModel(update.Message.Sticker)
+			s.CreatedAt = update.Message.Date
+			s.UpdatedAt = update.Message.Date
 		case update.IsCallbackQuery():
-			if !update.CallbackQuery.Message.IsReply() ||
-				!update.CallbackQuery.Message.ReplyToMessage.IsSticker() {
+			if !update.CallbackQuery.Message.ReplyToMessage.IsSticker() ||
+				!update.CallbackQuery.Message.IsReply() {
 				return next(ctx, update)
 			}
 
-			*s = model.Sticker{
-				ID:         update.CallbackQuery.Message.ReplyToMessage.Sticker.FileID,
-				CreatedAt:  update.CallbackQuery.Message.ReplyToMessage.Date,
-				UpdatedAt:  update.CallbackQuery.Message.ReplyToMessage.Date,
-				Width:      update.CallbackQuery.Message.ReplyToMessage.Sticker.Width,
-				Height:     update.CallbackQuery.Message.ReplyToMessage.Sticker.Height,
-				IsAnimated: update.CallbackQuery.Message.ReplyToMessage.Sticker.IsAnimated,
-				SetName:    update.CallbackQuery.Message.ReplyToMessage.Sticker.SetName,
-				Emoji:      update.CallbackQuery.Message.ReplyToMessage.Sticker.Emoji,
-			}
+			s = utils.ConvertStickerToModel(update.CallbackQuery.Message.ReplyToMessage.Sticker)
+			s.CreatedAt = update.CallbackQuery.Message.ReplyToMessage.Date
+			s.UpdatedAt = update.CallbackQuery.Message.ReplyToMessage.Date
 		default:
 			return next(ctx, update)
 		}
-		if s.SetName == "" {
-			s.SetName = common.SetNameUploaded
-		}
 
-		if s.SetName != "" && !strings.EqualFold(s.SetName, common.SetNameUploaded) {
+		if s.SetName != "" {
 			go func() {
 				set, err := bot.GetStickerSet(s.SetName)
 				if err != nil {
 					return
 				}
 
-				for _, sticker := range set.Stickers {
-					if _, err = store.GetOrCreate(&model.Sticker{
-						ID:         sticker.FileID,
-						CreatedAt:  s.CreatedAt,
-						UpdatedAt:  s.UpdatedAt,
-						Width:      s.Width,
-						Height:     s.Height,
-						IsAnimated: sticker.IsAnimated,
-						SetName:    set.Name,
-						Emoji:      sticker.Emoji,
-					}); err != nil {
-						continue
-					}
+				for _, setSticker := range set.Stickers {
+					setSticker := setSticker
+					sticker := utils.ConvertStickerToModel(&setSticker)
+					sticker.CreatedAt = s.CreatedAt
+					sticker.UpdatedAt = s.UpdatedAt
+					_, _ = store.GetOrCreate(sticker)
 				}
 			}()
 		}
@@ -80,6 +56,6 @@ func AcquireSticker(bot *tg.Bot, store store.StickersManager) Interceptor {
 			return err
 		}
 
-		return next(context.WithValue(ctx, "sticker", s), update)
+		return next(context.WithValue(ctx, common.ContextSticker, s), update)
 	}
 }

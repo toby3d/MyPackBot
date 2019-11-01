@@ -43,59 +43,65 @@ type (
 
 	UserStickers []*UserSticker
 
-	/* TODO(toby3d)
-	StickerSet struct {
-		Name      string `json:"name"`
-		CreatedAt int64  `json:"created_at"`
-
-		Title      string   `json:"title"`
-		IsAnimated bool     `json:"is_animated"`
-		Stickers   []string `json:"stickers"`
-	}
-
-	Sets []*StickerSet
-	*/
-
 	UpdateFunc func(context.Context, *tg.Update) error
+
+	ContextKey string
 )
 
 func (users Users) GetByID(id int) *User {
+	var u *User
+
 	for i := range users {
 		if users[i].ID != id {
 			continue
 		}
-		return users[i]
+
+		u = users[i]
+
+		break
 	}
-	return nil
+
+	return u
 }
 
 func (stickers Stickers) GetByID(id string) *Sticker {
+	var s *Sticker
+
 	for i := range stickers {
 		if stickers[i].ID != id {
 			continue
 		}
-		return stickers[i]
+
+		s = stickers[i]
 	}
-	return nil
+
+	return s
 }
 
 func (stickers Stickers) GetSet(name string) (Stickers, int) {
 	set := make(Stickers, 0)
+
 	for i := range stickers {
 		if stickers[i].SetName != name {
 			continue
 		}
+
 		set = append(set, stickers[i])
 	}
+
 	return set, len(set)
 }
 
 func (userStickers UserStickers) GetByID(uid int, sid string) *UserSticker {
+	var us *UserSticker
+
 	for i := range userStickers {
 		if userStickers[i].UserID != uid || userStickers[i].StickerID != sid {
 			continue
 		}
-		return userStickers[i]
+
+		us = userStickers[i]
 	}
-	return nil
+
+	return us
 }

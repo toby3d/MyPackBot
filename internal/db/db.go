@@ -22,11 +22,7 @@ func Open(path string) (*bolt.DB, error) {
 
 func AutoMigrate(db *bolt.DB) error {
 	return db.Update(func(tx *bolt.Tx) (err error) {
-		for _, bkt := range [][]byte{
-			common.BucketUsers,
-			common.BucketStickers,
-			common.BucketUsersStickers,
-		} {
+		for _, bkt := range common.Buckets {
 			if _, err = tx.CreateBucketIfNotExists(bkt); err != nil {
 				return err
 			}

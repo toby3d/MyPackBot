@@ -35,4 +35,5 @@ var (
 	BucketStickers      = []byte("stickers")
 	BucketUsers         = []byte("users")
 	BucketUsersStickers = []byte("users_stickers")
+	Buckets             = [...][]byte{BucketStickers, BucketUsers, BucketUsersStickers}
 )

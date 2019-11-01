@@ -27,7 +27,9 @@ func (h *Handler) IsCommand(ctx context.Context, msg *tg.Message) (err error) {
 		err = h.CommandStart(ctx, msg)
 	case msg.IsCommandEqual(tg.CommandHelp):
 		err = h.CommandHelp(ctx, msg)
-	case msg.IsCommandEqual(tg.CommandSettings):
+	case msg.IsCommandEqual(tg.CommandSettings),
+		msg.IsCommandEqual("addSticker"), msg.IsCommandEqual("addPack"), msg.IsCommandEqual("delSticker"),
+		msg.IsCommandEqual("delPack"), msg.IsCommandEqual("reset"), msg.IsCommandEqual("cancel"):
 		fallthrough
 	default:
 		err = h.CommandUnknown(ctx, msg)
@@ -53,6 +55,7 @@ func (h *Handler) CommandHelp(ctx context.Context, msg *tg.Message) (err error) 
 
 	reply := tg.NewMessage(msg.Chat.ID, p.Sprintf("help__text"))
 	reply.ReplyToMessageID = msg.ID
+	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
 
 	_, err = h.bot.SendMessage(reply)
 
@@ -64,6 +67,7 @@ func (h *Handler) CommandUnknown(ctx context.Context, msg *tg.Message) (err erro
 
 	reply := tg.NewMessage(msg.Chat.ID, p.Sprintf("unknown-command__text"))
 	reply.ReplyToMessageID = msg.ID
+	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
 
 	_, err = h.bot.SendMessage(reply)
 

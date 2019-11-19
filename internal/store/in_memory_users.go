@@ -1,11 +1,11 @@
 package store
 
 import (
-	"errors"
 	"sort"
 	"sync"
 	"time"
 
+	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 )
 
@@ -23,7 +23,7 @@ func NewInMemoryUsersStore() *InMemoryUsersStore {
 
 func (store *InMemoryUsersStore) Create(u *model.User) error {
 	if store.Get(u.ID) != nil {
-		return errors.New("user already exists")
+		return common.ErrUserExist
 	}
 
 	if u.CreatedAt == 0 {
@@ -70,7 +70,7 @@ func (store *InMemoryUsersStore) Update(u *model.User) error {
 
 func (store *InMemoryUsersStore) Remove(uid int) error {
 	if store.Get(uid) == nil {
-		return errors.New("user already removed or not exists")
+		return common.ErrUserNotExist
 	}
 
 	store.mutex.Lock()

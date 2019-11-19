@@ -12,19 +12,15 @@ var (
 
 	// Transformer for remove skin colors
 	skinRemover = runes.Remove(runes.Predicate(func(r rune) bool {
-		var ok bool
-
 		for _, skin := range bannedSkins {
 			if r != skin {
 				continue
 			}
 
-			ok = true
-
-			break
+			return true
 		}
 
-		return ok
+		return false
 	}))
 )
 

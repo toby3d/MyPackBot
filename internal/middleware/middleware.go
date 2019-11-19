@@ -11,9 +11,7 @@ type (
 )
 
 func (count UpdateHandler) Intercept(middleware Interceptor) UpdateHandler {
-	return func(ctx *model.Context) error {
-		return middleware(ctx, model.UpdateFunc(count))
-	}
+	return func(ctx *model.Context) error { return middleware(ctx, model.UpdateFunc(count)) }
 }
 
 func (chain Chain) UpdateHandler(handler model.UpdateFunc) model.UpdateFunc {

@@ -1,31 +1,32 @@
 package middleware
 
 import (
+	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	"gitlab.com/toby3d/mypackbot/internal/model/store"
-	"gitlab.com/toby3d/mypackbot/internal/utils"
 	tg "gitlab.com/toby3d/telegram"
 )
 
-func AcquireSticker(bot *tg.Bot, store store.StickersManager) Interceptor {
+func AcquireSticker(store store.StickersManager) Interceptor {
 	return func(ctx *model.Context, next model.UpdateFunc) (err error) {
 		ctx.Sticker = new(model.Sticker)
+
 		switch {
 		case ctx.IsMessage():
 			if !ctx.Message.IsSticker() {
 				return next(ctx)
 			}
 
-			ctx.Sticker = utils.ConvertStickerToModel(ctx.Message.Sticker)
+			ctx.Sticker = stickerToModel(ctx.Message.Sticker)
 			ctx.Sticker.CreatedAt = ctx.Message.Date
 			ctx.Sticker.UpdatedAt = ctx.Message.Date
 		case ctx.IsCallbackQuery():
-			if !ctx.CallbackQuery.Message.ReplyToMessage.IsSticker() ||
-				!ctx.CallbackQuery.Message.IsReply() {
+			if !ctx.CallbackQuery.Message.IsReply() ||
+				!ctx.CallbackQuery.Message.ReplyToMessage.IsSticker() {
 				return next(ctx)
 			}
 
-			ctx.Sticker = utils.ConvertStickerToModel(ctx.CallbackQuery.Message.ReplyToMessage.Sticker)
+			ctx.Sticker = stickerToModel(ctx.CallbackQuery.Message.ReplyToMessage.Sticker)
 			ctx.Sticker.CreatedAt = ctx.CallbackQuery.Message.ReplyToMessage.Date
 			ctx.Sticker.UpdatedAt = ctx.CallbackQuery.Message.ReplyToMessage.Date
 		default:
@@ -34,14 +35,14 @@ func AcquireSticker(bot *tg.Bot, store store.StickersManager) Interceptor {
 
 		if ctx.Sticker.SetName != "" {
 			go func() {
-				set, err := bot.GetStickerSet(ctx.Sticker.SetName)
+				set, err := ctx.GetStickerSet(ctx.Sticker.SetName)
 				if err != nil {
 					return
 				}
 
 				for _, setSticker := range set.Stickers {
 					setSticker := setSticker
-					sticker := utils.ConvertStickerToModel(&setSticker)
+					sticker := stickerToModel(&setSticker)
 					sticker.CreatedAt = ctx.Sticker.CreatedAt
 					sticker.UpdatedAt = ctx.Sticker.UpdatedAt
 					_, _ = store.GetOrCreate(sticker)
@@ -55,4 +56,20 @@ func AcquireSticker(bot *tg.Bot, store store.StickersManager) Interceptor {
 
 		return next(ctx)
 	}
+}
+
+func stickerToModel(s *tg.Sticker) *model.Sticker {
+	sticker := new(model.Sticker)
+	sticker.ID = s.FileID
+	sticker.Emoji = s.Emoji
+	sticker.Width = s.Width
+	sticker.Height = s.Height
+	sticker.IsAnimated = s.IsAnimated
+	sticker.SetName = s.SetName
+
+	if sticker.SetName == "" {
+		sticker.SetName = common.SetNameUploaded
+	}
+
+	return sticker
 }

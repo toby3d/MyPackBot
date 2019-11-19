@@ -8,7 +8,7 @@ import (
 )
 
 func UpdateLastSeen(us store.UsersManager) Interceptor {
-	return func(ctx *model.Context, next model.UpdateFunc) error {
+	return func(ctx *model.Context, next model.UpdateFunc) (err error) {
 		timeStamp := time.Now().UTC().Unix()
 
 		switch {
@@ -23,7 +23,7 @@ func UpdateLastSeen(us store.UsersManager) Interceptor {
 		}
 
 		ctx.User.LastSeen = timeStamp
-		if err := us.Update(ctx.User); err != nil {
+		if err = us.Update(ctx.User); err != nil {
 			return err
 		}
 

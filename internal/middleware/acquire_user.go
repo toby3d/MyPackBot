@@ -8,7 +8,9 @@ import (
 )
 
 func AcquireUser(us store.UsersManager) Interceptor {
-	return func(ctx *model.Context, next model.UpdateFunc) error {
+	return func(ctx *model.Context, next model.UpdateFunc) (err error) {
+		ctx.User = new(model.User)
+
 		switch {
 		case ctx.IsMessage():
 			ctx.User.ID = ctx.Message.From.ID
@@ -31,7 +33,6 @@ func AcquireUser(us store.UsersManager) Interceptor {
 			ctx.User.LastSeen = ctx.CallbackQuery.Message.Date
 		}
 
-		var err error
 		if ctx.User, err = us.GetOrCreate(ctx.User); err != nil {
 			return err
 		}

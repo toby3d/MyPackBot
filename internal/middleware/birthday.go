@@ -7,7 +7,7 @@ import (
 	tg "gitlab.com/toby3d/telegram"
 )
 
-func Birthday(bot *tg.Bot, bday time.Time) Interceptor {
+func Birthday(bday time.Time) Interceptor {
 	return func(ctx *model.Context, next model.UpdateFunc) (err error) {
 		if !ctx.IsMessage() {
 			return next(ctx)
@@ -26,18 +26,18 @@ func Birthday(bot *tg.Bot, bday time.Time) Interceptor {
 			return err
 		}
 
-		reply := tg.NewMessage(ctx.Message.Chat.ID, ctx.Printer.Sprintf("🥳 4 November? It's a @toby3d birthday!\n\nIf you like this bot, then why not send him a congratulation along with a small gift? This will make him incredibly happy!"))
+		reply := tg.NewMessage(ctx.Message.Chat.ID, ctx.T().Sprintf("🥳 4 November? It's a @toby3d birthday!\n\nIf you like this bot, then why not send him a congratulation along with a small gift? This will make him incredibly happy!"))
 		if date.After(bday.AddDate(0, 0, 1)) {
-			reply.Text = ctx.Printer.Sprintf("☺️ Oh, you missed @toby3d birthday on November 4th!\n\nIf you like this bot, why not send him some birthday greetings and a little birthday gift? It is not yet too late to make him happy!")
+			reply.Text = ctx.T().Sprintf("☺️ Oh, you missed @toby3d birthday on November 4th!\n\nIf you like this bot, why not send him some birthday greetings and a little birthday gift? It is not yet too late to make him happy!")
 		}
 		reply.DisableNotification = false
 		reply.DisableWebPagePreview = false
 		reply.ParseMode = tg.StyleMarkdown
 		reply.ReplyMarkup = tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonURL(
-			ctx.Printer.Sprintf("💸 Make a donation!"), "https://toby3d.me/donate",
+			ctx.T().Sprintf("💸 Make a donation!"), "https://toby3d.me/donate",
 		)))
 
-		if _, err = bot.SendMessage(reply); err != nil {
+		if _, err = ctx.SendMessage(reply); err != nil {
 			return err
 		}
 

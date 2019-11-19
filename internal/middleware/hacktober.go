@@ -7,7 +7,7 @@ import (
 	tg "gitlab.com/toby3d/telegram"
 )
 
-func Hacktober(bot *tg.Bot, month time.Month) Interceptor {
+func Hacktober(month time.Month) Interceptor {
 	return func(ctx *model.Context, next model.UpdateFunc) (err error) {
 		if !ctx.IsMessage() {
 			return next(ctx)
@@ -27,15 +27,16 @@ func Hacktober(bot *tg.Bot, month time.Month) Interceptor {
 			return err
 		}
 
-		reply := tg.NewMessage(ctx.Message.Chat.ID, ctx.Printer.Sprintf("🕺 HacktoberFest is here!\n\nIf you are a beginner or already an experienced golang-developer, now is a great time to help improve the quality of the code of this bot. Choose issue to your taste and offer your PR!"))
+		reply := tg.NewMessage(ctx.Message.Chat.ID, ctx.T().Sprintf("🕺 HacktoberFest is here!\n\nIf you are a beginner or already an experienced golang-developer, now is a great time to help improve the quality of the code of this bot. Choose issue to your taste and offer your PR!"))
 		reply.DisableNotification = false
 		reply.DisableWebPagePreview = false
 		reply.ParseMode = tg.StyleMarkdown
 		reply.ReplyMarkup = tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonURL(
-			ctx.Printer.Sprintf("🔧 Let's hack!"), "https://gitlab.com/toby3d/mypackbot/issues?label_name%5B%5D=hacktoberfest",
+			ctx.T().Sprintf("🔧 Let's hack!"),
+			"https://gitlab.com/toby3d/mypackbot/issues?label_name%5B%5D=hacktoberfest",
 		)))
 
-		if _, err = bot.SendMessage(reply); err != nil {
+		if _, err = ctx.SendMessage(reply); err != nil {
 			return err
 		}
 

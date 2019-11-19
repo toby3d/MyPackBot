@@ -4,19 +4,14 @@ import (
 	"github.com/kirillDanshin/dlog"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	"gitlab.com/toby3d/mypackbot/internal/model/store"
-	tg "gitlab.com/toby3d/telegram"
 )
 
 type Handler struct {
-	bot   *tg.Bot
 	store store.Manager
 }
 
-func NewHandler(bot *tg.Bot, store store.Manager) *Handler {
-	return &Handler{
-		bot:   bot,
-		store: store,
-	}
+func NewHandler(store store.Manager) *Handler {
+	return &Handler{store: store}
 }
 
 func (h *Handler) UpdateHandler(ctx *model.Context) (err error) {

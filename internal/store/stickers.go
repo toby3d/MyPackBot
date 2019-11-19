@@ -1,7 +1,6 @@
 package store
 
 import (
-	"errors"
 	"strings"
 	"time"
 
@@ -17,7 +16,7 @@ func NewStickersStore(conn *bolt.DB) *StickersStore { return &StickersStore{conn
 
 func (store *StickersStore) Create(s *model.Sticker) error {
 	if store.Get(s.ID) != nil {
-		return errors.New("stickers already exists")
+		return common.ErrStickerExist
 	}
 
 	now := time.Now().UTC().Unix()
@@ -139,7 +138,7 @@ func (store *StickersStore) Update(s *model.Sticker) error {
 
 func (store *StickersStore) Remove(sid string) error {
 	if store.Get(sid) == nil {
-		return errors.New("sticker already removed or not exists")
+		return common.ErrStickerNotExist
 	}
 
 	return store.conn.Update(func(tx *bolt.Tx) error {

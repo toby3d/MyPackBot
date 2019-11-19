@@ -1,13 +1,11 @@
 package migrator
 
 import (
-	"context"
 	"strconv"
 	"strings"
 	"time"
 
 	bunt "github.com/tidwall/buntdb"
-	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/handler"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	"gitlab.com/toby3d/mypackbot/internal/model/store"
@@ -37,22 +35,47 @@ const (
 	uploadedSetName string = "?"
 )
 
+func setStrings() (err error) {
+	if err = message.SetString(language.English, "sticker__text", "🤔 This custom/uploaded sticker has been imported from previous version of the bot. You can add it to your pack by clicking on the button below. If the button does not work - please try to click it later when the migration process is completed."); err != nil {
+		return err
+	}
+
+	if err = message.SetString(language.Russian, "sticker__text", "🤔 Этот загруженый стикер был импортирован с прошлой версии бота. Ты можешь добавить его к себе нажав на кнопку ниже. Если кнопка не работает - пожалуйста, попробуй нажать её позже, когда процесс миграции завершится."); err != nil {
+		return err
+	}
+
+	if err = message.SetString(language.English, "sticker__button_add-single", "📙 Import this sticker"); err != nil {
+		return err
+	}
+
+	if err = message.SetString(language.Russian, "sticker__button_add-single", "📙 Импортировать этот стикер"); err != nil {
+		return err
+	}
+
+	return err
+}
+
 func AutoMigrate(cfg AutoMigrateConfig) (err error) {
+	if err = setStrings(); err != nil {
+		return err
+	}
+
 	// NOTE(toby3d): preparing temp-stores for migrating
 	data, err := importOldData(cfg.OldDB)
 	if err != nil {
 		return err
 	}
 
-	for _, u := range data.users { // NOTE(toby3d): STEP 1: migrate users
+	for uid, u := range data.users { // NOTE(toby3d): STEP 1: migrate users
 		if _, err = cfg.NewDB.Users().GetOrCreate(u); err != nil {
-			continue
+			delete(data.users, uid)
 		}
 	}
 
 	for setName := range data.sets { // NOTE(toby3d): STEP 2: migrate sets
 		set, err := cfg.Bot.GetStickerSet(setName)
 		if err != nil {
+			delete(data.sets, setName)
 			continue
 		}
 
@@ -75,13 +98,8 @@ func AutoMigrate(cfg AutoMigrateConfig) (err error) {
 
 	count := 0
 	ticker := time.NewTicker(100 * time.Millisecond)
-	h := handler.NewHandler(cfg.Bot, cfg.NewDB)
-
-	message.SetString(language.English, "sticker__text", "🤔 This custom/uploaded sticker has been imported from previous version of the bot. You can add it to your pack by clicking on the button below. If the button does not work - please try to click it later when the migration process is completed.")
-	message.SetString(language.Russian, "sticker__text", "🤔 Этот загруженый стикер был импортирован с прошлой версии бота. Ты можешь добавить его к себе нажав на кнопку ниже. Если кнопка не работает - пожалуйста, попробуй нажать её позже, когда процесс миграции завершится.")
-	message.SetString(language.English, "sticker__button_add-single", "📙 Import this sticker")
-	message.SetString(language.Russian, "sticker__button_add-single", "📙 Импортировать этот стикер")
 	matcher := language.NewMatcher([]language.Tag{language.English, language.Russian})
+	h := handler.NewHandler(cfg.Bot, cfg.NewDB)
 
 	for uid, fileID := range data.userStickers { // NOTE(toby3d): STEP 4: send uploaded stickers directly to users
 		count++
@@ -93,7 +111,10 @@ func AutoMigrate(cfg AutoMigrateConfig) (err error) {
 
 		<-ticker.C
 
-		reply, err := cfg.Bot.SendSticker(&tg.SendStickerParameters{
+		ctx := new(model.Context)
+		ctx.Update = new(tg.Update)
+
+		ctx.Update.Message, err = cfg.Bot.SendSticker(&tg.SendStickerParameters{
 			ChatID:              int64(uid),
 			Sticker:             fileID,
 			DisableNotification: true,
@@ -102,21 +123,14 @@ func AutoMigrate(cfg AutoMigrateConfig) (err error) {
 			continue
 		}
 
-		u := cfg.NewDB.Users().Get(uid)
-		s := utils.ConvertStickerToModel(reply.Sticker)
-		s.CreatedAt = reply.Date
-		s.UpdatedAt = reply.Date
+		ctx.User = cfg.NewDB.Users().Get(uid)
+		ctx.Sticker = utils.ConvertStickerToModel(ctx.Message.Sticker)
+		ctx.Sticker.CreatedAt = ctx.Message.Date
+		ctx.Sticker.UpdatedAt = ctx.Message.Date
+		tag, _, _ := matcher.Match(language.Make(ctx.User.LanguageCode))
+		ctx.Printer = message.NewPrinter(tag)
 
-		ctx := context.Background()
-		tag, _, _ := matcher.Match(language.Make(u.LanguageCode))
-		printer := message.NewPrinter(tag)
-		ctx = context.WithValue(ctx, common.ContextPrinter, printer)
-		ctx = context.WithValue(ctx, common.ContextUser, u)
-		ctx = context.WithValue(ctx, common.ContextSticker, s)
-
-		if err = h.IsSticker(ctx, reply); err != nil {
-			continue
-		}
+		_ = h.IsSticker(ctx)
 	}
 
 	return nil

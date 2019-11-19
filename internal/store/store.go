@@ -1,7 +1,6 @@
 package store
 
 import (
-	"errors"
 	"strconv"
 	"strings"
 	"time"
@@ -39,7 +38,7 @@ func (store *Store) AddSticker(u *model.User, s *model.Sticker) (err error) {
 	}
 
 	if us != nil {
-		return errors.New("sticker already added to this user")
+		return common.ErrUserStickerExist
 	}
 
 	src, err := json.ConfigFastest.Marshal(&model.UserSticker{
@@ -198,7 +197,7 @@ func (store *Store) RemoveSticker(u *model.User, s *model.Sticker) (err error) {
 	}
 
 	if us == nil {
-		return errors.New("sticker already removed in this user")
+		return common.ErrUserStickerNotExist
 	}
 
 	return store.conn.Update(func(tx *bolt.Tx) error {

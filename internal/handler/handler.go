@@ -1,9 +1,8 @@
 package handler
 
 import (
-	"context"
-
 	"github.com/kirillDanshin/dlog"
+	"gitlab.com/toby3d/mypackbot/internal/model"
 	"gitlab.com/toby3d/mypackbot/internal/model/store"
 	tg "gitlab.com/toby3d/telegram"
 )
@@ -20,16 +19,16 @@ func NewHandler(bot *tg.Bot, store store.Manager) *Handler {
 	}
 }
 
-func (h *Handler) UpdateHandler(ctx context.Context, upd *tg.Update) (err error) {
+func (h *Handler) UpdateHandler(ctx *model.Context) (err error) {
 	switch {
-	case upd.IsMessage():
-		err = h.IsMessage(ctx, upd.Message)
-	case upd.IsCallbackQuery():
-		err = h.IsCallbackQuery(ctx, upd.CallbackQuery)
-	case upd.IsInlineQuery():
-		err = h.IsInlineQuery(ctx, upd.InlineQuery)
+	case ctx.IsMessage():
+		err = h.IsMessage(ctx)
+	case ctx.IsCallbackQuery():
+		err = h.IsCallbackQuery(ctx)
+	case ctx.IsInlineQuery():
+		err = h.IsInlineQuery(ctx)
 	default:
-		dlog.D(upd)
+		dlog.D(ctx)
 	}
 
 	return err

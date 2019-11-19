@@ -1,12 +1,12 @@
 package internal
 
 import (
-	"context"
 	"time"
 
 	"github.com/kirillDanshin/dlog"
 	"gitlab.com/toby3d/mypackbot/internal/handler"
 	"gitlab.com/toby3d/mypackbot/internal/middleware"
+	"gitlab.com/toby3d/mypackbot/internal/model"
 	tg "gitlab.com/toby3d/telegram"
 )
 
@@ -50,13 +50,14 @@ func (mpb *MyPackBot) Run() error {
 		middleware.AcquireUser(mpb.store.Users()),
 		middleware.AcquirePrinter(),
 		middleware.AcquireSticker(mpb.bot, mpb.store.Stickers()),
-		middleware.Birthday(mpb.bot, mpb.store.Users(), bDay),
+		middleware.Birthday(mpb.bot, bDay),
 		middleware.UpdateLastSeen(mpb.store.Users()),
 	}
 
 	for update := range updates {
-		update := update
-		if err := chain.UpdateHandler(h.UpdateHandler)(context.Background(), &update); err != nil {
+		ctx := new(model.Context)
+		ctx.Update = &update
+		if err := chain.UpdateHandler(h.UpdateHandler)(ctx); err != nil {
 			dlog.Ln("ERROR:", err.Error())
 		}
 	}

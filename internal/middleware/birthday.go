@@ -1,54 +1,46 @@
 package middleware
 
 import (
-	"context"
 	"time"
 
-	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
-	"gitlab.com/toby3d/mypackbot/internal/model/store"
 	tg "gitlab.com/toby3d/telegram"
-	"golang.org/x/text/message"
 )
 
-func Birthday(bot *tg.Bot, us store.UsersManager, bday time.Time) Interceptor {
-	return func(ctx context.Context, update *tg.Update, next model.UpdateFunc) (err error) {
-		if !update.IsMessage() {
-			return next(ctx, update)
+func Birthday(bot *tg.Bot, bday time.Time) Interceptor {
+	return func(ctx *model.Context, next model.UpdateFunc) (err error) {
+		if !ctx.IsMessage() {
+			return next(ctx)
 		}
 
-		u, _ := ctx.Value(common.ContextUser).(*model.User)
-		lastSeen := time.Unix(u.LastSeen, 0)
-		date := update.Message.Time()
+		lastSeen := time.Unix(ctx.User.LastSeen, 0)
+		date := ctx.Message.Time()
 		before := time.Date(date.Year(), bday.Month(), bday.Day(), 0, 0, 0, 0, time.UTC)
 		after := before.AddDate(0, 0, 7)
 		if date.Before(before) || date.After(after) || lastSeen.After(before) {
-			return next(ctx, update)
+			return next(ctx)
 		}
 
 		// NOTE(toby3d): do this middleware only after sending all previous messages
-		if err = next(ctx, update); err != nil {
+		if err = next(ctx); err != nil {
 			return err
 		}
 
-		p, _ := ctx.Value(common.ContextPrinter).(*message.Printer)
-		reply := tg.NewMessage(update.Message.Chat.ID, p.Sprintf("birthday__message_text"))
+		reply := tg.NewMessage(ctx.Message.Chat.ID, ctx.Printer.Sprintf("🥳 4 November? It's a @toby3d birthday!\n\nIf you like this bot, then why not send him a congratulation along with a small gift? This will make him incredibly happy!"))
+		if date.After(bday.AddDate(0, 0, 1)) {
+			reply.Text = ctx.Printer.Sprintf("☺️ Oh, you missed @toby3d birthday on November 4th!\n\nIf you like this bot, why not send him some birthday greetings and a little birthday gift? It is not yet too late to make him happy!")
+		}
 		reply.DisableNotification = false
 		reply.DisableWebPagePreview = false
 		reply.ParseMode = tg.StyleMarkdown
 		reply.ReplyMarkup = tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonURL(
-			p.Sprintf("birthday__button_text-donate"), "https://toby3d.me/donate",
+			ctx.Printer.Sprintf("💸 Make a donation!"), "https://toby3d.me/donate",
 		)))
 
 		if _, err = bot.SendMessage(reply); err != nil {
 			return err
 		}
 
-		u.LastSeen = date.Unix()
-		if err = us.Update(u); err != nil {
-			return err
-		}
-
-		return next(ctx, update)
+		return next(ctx)
 	}
 }

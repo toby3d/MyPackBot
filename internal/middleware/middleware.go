@@ -1,21 +1,18 @@
 package middleware
 
 import (
-	"context"
-
 	"gitlab.com/toby3d/mypackbot/internal/model"
-	tg "gitlab.com/toby3d/telegram"
 )
 
 type (
-	Interceptor   func(context.Context, *tg.Update, model.UpdateFunc) error
+	Interceptor   func(*model.Context, model.UpdateFunc) error
 	UpdateHandler model.UpdateFunc
 	Chain         []Interceptor
 )
 
 func (count UpdateHandler) Intercept(middleware Interceptor) UpdateHandler {
-	return func(ctx context.Context, upd *tg.Update) error {
-		return middleware(ctx, upd, model.UpdateFunc(count))
+	return func(ctx *model.Context) error {
+		return middleware(ctx, model.UpdateFunc(count))
 	}
 }
 

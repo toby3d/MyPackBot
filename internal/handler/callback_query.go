@@ -1,38 +1,31 @@
 package handler
 
 import (
-	"context"
-
 	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	tg "gitlab.com/toby3d/telegram"
-	"golang.org/x/text/message"
 )
 
-func (h *Handler) IsCallbackQuery(ctx context.Context, call *tg.CallbackQuery) (err error) {
-	switch call.Data {
+func (h *Handler) IsCallbackQuery(ctx *model.Context) (err error) {
+	switch ctx.CallbackQuery.Data {
 	case common.DataAddSticker:
-		err = h.CallbackAddSticker(ctx, call)
+		err = h.CallbackAddSticker(ctx)
 	case common.DataAddSet:
-		err = h.CallbackAddSet(ctx, call)
+		err = h.CallbackAddSet(ctx)
 	case common.DataRemoveSticker:
-		err = h.CallbackRemoveSticker(ctx, call)
+		err = h.CallbackRemoveSticker(ctx)
 	case common.DataRemoveSet:
-		err = h.CallbackRemoveSet(ctx, call)
+		err = h.CallbackRemoveSet(ctx)
 	}
 
 	return err
 }
 
-func (h *Handler) CallbackAddSticker(ctx context.Context, call *tg.CallbackQuery) (err error) {
-	u, _ := ctx.Value(common.ContextUser).(*model.User)
-	p, _ := ctx.Value(common.ContextPrinter).(*message.Printer)
-	s, _ := ctx.Value(common.ContextSticker).(*model.Sticker)
+func (h *Handler) CallbackAddSticker(ctx *model.Context) (err error) {
+	answer := tg.NewAnswerCallbackQuery(ctx.CallbackQuery.ID)
+	answer.Text = ctx.Printer.Sprintf("callback__text_add-single")
 
-	answer := tg.NewAnswerCallbackQuery(call.ID)
-	answer.Text = p.Sprintf("callback__text_add-single")
-
-	if err = h.store.AddSticker(u, s); err != nil {
+	if err = h.store.AddSticker(ctx.User, ctx.Sticker); err != nil {
 		answer.Text = "🐞 " + err.Error()
 		_, err = h.bot.AnswerCallbackQuery(answer)
 
@@ -40,19 +33,19 @@ func (h *Handler) CallbackAddSticker(ctx context.Context, call *tg.CallbackQuery
 	}
 
 	markup := tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow(
-		tg.NewInlineKeyboardButton(p.Sprintf("sticker__button_remove-single"), common.DataRemoveSticker),
+		tg.NewInlineKeyboardButton(ctx.Printer.Sprintf("sticker__button_remove-single"), common.DataRemoveSticker),
 	))
 
-	if len(call.Message.ReplyMarkup.InlineKeyboard[0]) == 2 {
+	if len(ctx.CallbackQuery.Message.ReplyMarkup.InlineKeyboard[0]) == 2 {
 		markup.InlineKeyboard[0] = append(
-			markup.InlineKeyboard[0], call.Message.ReplyMarkup.InlineKeyboard[0][1],
+			markup.InlineKeyboard[0], ctx.CallbackQuery.Message.ReplyMarkup.InlineKeyboard[0][1],
 		)
 	}
 
 	if _, err = h.bot.EditMessageReplyMarkup(&tg.EditMessageReplyMarkupParameters{
-		ChatID:          call.Message.Chat.ID,
-		InlineMessageID: call.InlineMessageID,
-		MessageID:       call.Message.ID,
+		ChatID:          ctx.CallbackQuery.Message.Chat.ID,
+		InlineMessageID: ctx.CallbackQuery.InlineMessageID,
+		MessageID:       ctx.CallbackQuery.Message.ID,
 		ReplyMarkup:     markup,
 	}); err != nil {
 		return err
@@ -63,13 +56,10 @@ func (h *Handler) CallbackAddSticker(ctx context.Context, call *tg.CallbackQuery
 	return err
 }
 
-func (h *Handler) CallbackAddSet(ctx context.Context, call *tg.CallbackQuery) (err error) {
-	u, _ := ctx.Value(common.ContextUser).(*model.User)
-	p, _ := ctx.Value(common.ContextPrinter).(*message.Printer)
-	s, _ := ctx.Value(common.ContextSticker).(*model.Sticker)
-	answer := tg.NewAnswerCallbackQuery(call.ID)
+func (h *Handler) CallbackAddSet(ctx *model.Context) (err error) {
+	answer := tg.NewAnswerCallbackQuery(ctx.CallbackQuery.ID)
 
-	set, err := h.bot.GetStickerSet(s.SetName)
+	set, err := h.bot.GetStickerSet(ctx.Sticker.SetName)
 	if err != nil {
 		answer.Text = "🐞 " + err.Error()
 		_, err = h.bot.AnswerCallbackQuery(answer)
@@ -77,12 +67,12 @@ func (h *Handler) CallbackAddSet(ctx context.Context, call *tg.CallbackQuery) (e
 		return err
 	}
 
-	answer.Text = p.Sprintf("callback__text_add-set", set.Title)
+	answer.Text = ctx.Printer.Sprintf("callback__text_add-set", set.Title)
 
 	for i := range set.Stickers {
-		if s, err = h.store.Stickers().GetOrCreate(&model.Sticker{
-			CreatedAt:  call.Message.Date,
-			UpdatedAt:  call.Message.Date,
+		if ctx.Sticker, err = h.store.Stickers().GetOrCreate(&model.Sticker{
+			CreatedAt:  ctx.CallbackQuery.Message.Date,
+			UpdatedAt:  ctx.CallbackQuery.Message.Date,
 			Width:      set.Stickers[i].Width,
 			Height:     set.Stickers[i].Height,
 			Emoji:      set.Stickers[i].Emoji,
@@ -96,10 +86,10 @@ func (h *Handler) CallbackAddSet(ctx context.Context, call *tg.CallbackQuery) (e
 			return err
 		}
 
-		_ = h.store.AddSticker(u, s)
+		_ = h.store.AddSticker(ctx.User, ctx.Sticker)
 	}
 
-	if err = h.store.AddStickersSet(u, set.Name); err != nil {
+	if err = h.store.AddStickersSet(ctx.User, set.Name); err != nil {
 		answer.Text = "🐞 " + err.Error()
 		_, err = h.bot.AnswerCallbackQuery(answer)
 
@@ -107,14 +97,14 @@ func (h *Handler) CallbackAddSet(ctx context.Context, call *tg.CallbackQuery) (e
 	}
 
 	markup := tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow(
-		tg.NewInlineKeyboardButton(p.Sprintf("sticker__button_remove-single"), common.DataRemoveSticker),
-		tg.NewInlineKeyboardButton(p.Sprintf("sticker__button_remove-set"), common.DataRemoveSet),
+		tg.NewInlineKeyboardButton(ctx.Printer.Sprintf("sticker__button_remove-single"), common.DataRemoveSticker),
+		tg.NewInlineKeyboardButton(ctx.Printer.Sprintf("sticker__button_remove-set"), common.DataRemoveSet),
 	))
 
 	if _, err = h.bot.EditMessageReplyMarkup(&tg.EditMessageReplyMarkupParameters{
-		ChatID:          call.Message.Chat.ID,
-		InlineMessageID: call.InlineMessageID,
-		MessageID:       call.Message.ID,
+		ChatID:          ctx.CallbackQuery.Message.Chat.ID,
+		InlineMessageID: ctx.CallbackQuery.InlineMessageID,
+		MessageID:       ctx.CallbackQuery.Message.ID,
 		ReplyMarkup:     markup,
 	}); err != nil {
 		return err
@@ -125,15 +115,11 @@ func (h *Handler) CallbackAddSet(ctx context.Context, call *tg.CallbackQuery) (e
 	return err
 }
 
-func (h *Handler) CallbackRemoveSticker(ctx context.Context, call *tg.CallbackQuery) (err error) {
-	u, _ := ctx.Value(common.ContextUser).(*model.User)
-	p, _ := ctx.Value(common.ContextPrinter).(*message.Printer)
-	s, _ := ctx.Value(common.ContextSticker).(*model.Sticker)
+func (h *Handler) CallbackRemoveSticker(ctx *model.Context) (err error) {
+	answer := tg.NewAnswerCallbackQuery(ctx.CallbackQuery.ID)
+	answer.Text = ctx.Printer.Sprintf("callback__text_remove-single")
 
-	answer := tg.NewAnswerCallbackQuery(call.ID)
-	answer.Text = p.Sprintf("callback__text_remove-single")
-
-	if err = h.store.RemoveSticker(u, s); err != nil {
+	if err = h.store.RemoveSticker(ctx.User, ctx.Sticker); err != nil {
 		answer.Text = "🐞 " + err.Error()
 		_, err = h.bot.AnswerCallbackQuery(answer)
 
@@ -141,19 +127,19 @@ func (h *Handler) CallbackRemoveSticker(ctx context.Context, call *tg.CallbackQu
 	}
 
 	markup := tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow(
-		tg.NewInlineKeyboardButton(p.Sprintf("sticker__button_add-single"), common.DataAddSticker),
+		tg.NewInlineKeyboardButton(ctx.Printer.Sprintf("sticker__button_add-single"), common.DataAddSticker),
 	))
 
-	if len(call.Message.ReplyMarkup.InlineKeyboard[0]) == 2 {
+	if len(ctx.CallbackQuery.Message.ReplyMarkup.InlineKeyboard[0]) == 2 {
 		markup.InlineKeyboard[0] = append(
-			markup.InlineKeyboard[0], call.Message.ReplyMarkup.InlineKeyboard[0][1],
+			markup.InlineKeyboard[0], ctx.CallbackQuery.Message.ReplyMarkup.InlineKeyboard[0][1],
 		)
 	}
 
 	if _, err = h.bot.EditMessageReplyMarkup(&tg.EditMessageReplyMarkupParameters{
-		ChatID:          call.Message.Chat.ID,
-		InlineMessageID: call.InlineMessageID,
-		MessageID:       call.Message.ID,
+		ChatID:          ctx.CallbackQuery.Message.Chat.ID,
+		InlineMessageID: ctx.CallbackQuery.InlineMessageID,
+		MessageID:       ctx.CallbackQuery.Message.ID,
 		ReplyMarkup:     markup,
 	}); err != nil {
 		return err
@@ -164,15 +150,11 @@ func (h *Handler) CallbackRemoveSticker(ctx context.Context, call *tg.CallbackQu
 	return err
 }
 
-func (h *Handler) CallbackRemoveSet(ctx context.Context, call *tg.CallbackQuery) (err error) {
-	u, _ := ctx.Value(common.ContextUser).(*model.User)
-	p, _ := ctx.Value(common.ContextPrinter).(*message.Printer)
-	s, _ := ctx.Value(common.ContextSticker).(*model.Sticker)
+func (h *Handler) CallbackRemoveSet(ctx *model.Context) (err error) {
+	answer := tg.NewAnswerCallbackQuery(ctx.CallbackQuery.ID)
+	answer.Text = ctx.Printer.Sprintf("callback__text_remove-set", ctx.Sticker.SetName)
 
-	answer := tg.NewAnswerCallbackQuery(call.ID)
-	answer.Text = p.Sprintf("callback__text_remove-set", s.SetName)
-
-	if err = h.store.RemoveStickersSet(u, s.SetName); err != nil {
+	if err = h.store.RemoveStickersSet(ctx.User, ctx.Sticker.SetName); err != nil {
 		answer.Text = "🐞 " + err.Error()
 		_, err = h.bot.AnswerCallbackQuery(answer)
 
@@ -180,20 +162,20 @@ func (h *Handler) CallbackRemoveSet(ctx context.Context, call *tg.CallbackQuery)
 	}
 
 	markup := tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow(
-		tg.NewInlineKeyboardButton(p.Sprintf("sticker__button_add-single"), common.DataAddSticker),
+		tg.NewInlineKeyboardButton(ctx.Printer.Sprintf("sticker__button_add-single"), common.DataAddSticker),
 	))
 
-	if len(call.Message.ReplyMarkup.InlineKeyboard[0]) == 2 {
+	if len(ctx.CallbackQuery.Message.ReplyMarkup.InlineKeyboard[0]) == 2 {
 		markup.InlineKeyboard[0] = append(
 			markup.InlineKeyboard[0],
-			tg.NewInlineKeyboardButton(p.Sprintf("sticker__button_add-set"), common.DataAddSet),
+			tg.NewInlineKeyboardButton(ctx.Printer.Sprintf("sticker__button_add-set"), common.DataAddSet),
 		)
 	}
 
 	if _, err = h.bot.EditMessageReplyMarkup(&tg.EditMessageReplyMarkupParameters{
-		ChatID:          call.Message.Chat.ID,
-		InlineMessageID: call.InlineMessageID,
-		MessageID:       call.Message.ID,
+		ChatID:          ctx.CallbackQuery.Message.Chat.ID,
+		InlineMessageID: ctx.CallbackQuery.InlineMessageID,
+		MessageID:       ctx.CallbackQuery.Message.ID,
 		ReplyMarkup:     markup,
 	}); err != nil {
 		return err

@@ -1,9 +1,8 @@
 package model
 
 import (
-	"context"
-
 	tg "gitlab.com/toby3d/telegram"
+	"golang.org/x/text/message"
 )
 
 type (
@@ -43,9 +42,14 @@ type (
 
 	UserStickers []*UserSticker
 
-	UpdateFunc func(context.Context, *tg.Update) error
+	UpdateFunc func(*Context) error
 
-	ContextKey string
+	Context struct {
+		User    *User
+		Sticker *Sticker
+		Printer *message.Printer
+		*tg.Update
+	}
 )
 
 func (users Users) GetByID(id int) *User {

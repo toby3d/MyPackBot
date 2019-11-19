@@ -1,9 +1,6 @@
 package middleware
 
 import (
-	"context"
-
-	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	"gitlab.com/toby3d/mypackbot/internal/model/store"
 	"gitlab.com/toby3d/mypackbot/internal/utils"
@@ -11,33 +8,33 @@ import (
 )
 
 func AcquireSticker(bot *tg.Bot, store store.StickersManager) Interceptor {
-	return func(ctx context.Context, update *tg.Update, next model.UpdateFunc) (err error) {
-		var s *model.Sticker
+	return func(ctx *model.Context, next model.UpdateFunc) (err error) {
+		ctx.Sticker = new(model.Sticker)
 		switch {
-		case update.IsMessage():
-			if !update.Message.IsSticker() {
-				return next(ctx, update)
+		case ctx.IsMessage():
+			if !ctx.Message.IsSticker() {
+				return next(ctx)
 			}
 
-			s = utils.ConvertStickerToModel(update.Message.Sticker)
-			s.CreatedAt = update.Message.Date
-			s.UpdatedAt = update.Message.Date
-		case update.IsCallbackQuery():
-			if !update.CallbackQuery.Message.ReplyToMessage.IsSticker() ||
-				!update.CallbackQuery.Message.IsReply() {
-				return next(ctx, update)
+			ctx.Sticker = utils.ConvertStickerToModel(ctx.Message.Sticker)
+			ctx.Sticker.CreatedAt = ctx.Message.Date
+			ctx.Sticker.UpdatedAt = ctx.Message.Date
+		case ctx.IsCallbackQuery():
+			if !ctx.CallbackQuery.Message.ReplyToMessage.IsSticker() ||
+				!ctx.CallbackQuery.Message.IsReply() {
+				return next(ctx)
 			}
 
-			s = utils.ConvertStickerToModel(update.CallbackQuery.Message.ReplyToMessage.Sticker)
-			s.CreatedAt = update.CallbackQuery.Message.ReplyToMessage.Date
-			s.UpdatedAt = update.CallbackQuery.Message.ReplyToMessage.Date
+			ctx.Sticker = utils.ConvertStickerToModel(ctx.CallbackQuery.Message.ReplyToMessage.Sticker)
+			ctx.Sticker.CreatedAt = ctx.CallbackQuery.Message.ReplyToMessage.Date
+			ctx.Sticker.UpdatedAt = ctx.CallbackQuery.Message.ReplyToMessage.Date
 		default:
-			return next(ctx, update)
+			return next(ctx)
 		}
 
-		if s.SetName != "" {
+		if ctx.Sticker.SetName != "" {
 			go func() {
-				set, err := bot.GetStickerSet(s.SetName)
+				set, err := bot.GetStickerSet(ctx.Sticker.SetName)
 				if err != nil {
 					return
 				}
@@ -45,17 +42,17 @@ func AcquireSticker(bot *tg.Bot, store store.StickersManager) Interceptor {
 				for _, setSticker := range set.Stickers {
 					setSticker := setSticker
 					sticker := utils.ConvertStickerToModel(&setSticker)
-					sticker.CreatedAt = s.CreatedAt
-					sticker.UpdatedAt = s.UpdatedAt
+					sticker.CreatedAt = ctx.Sticker.CreatedAt
+					sticker.UpdatedAt = ctx.Sticker.UpdatedAt
 					_, _ = store.GetOrCreate(sticker)
 				}
 			}()
 		}
 
-		if s, err = store.GetOrCreate(s); err != nil {
+		if ctx.Sticker, err = store.GetOrCreate(ctx.Sticker); err != nil {
 			return err
 		}
 
-		return next(context.WithValue(ctx, common.ContextSticker, s), update)
+		return next(ctx)
 	}
 }

@@ -47,6 +47,7 @@ func (mpb *MyPackBot) Run() error {
 	h := handler.NewHandler(mpb.store, mpb.usersStore, mpb.stickersStore).UpdateHandler
 	chain := middleware.Chain{
 		middleware.AcquireUser(mpb.usersStore),
+		middleware.ChatAction(),
 		middleware.AcquireSticker(mpb.stickersStore),
 		middleware.Hacktober(),
 		middleware.Birthday(time.Date(0, time.November, 4, 0, 0, 0, 0, time.UTC)),

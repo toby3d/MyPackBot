@@ -84,7 +84,7 @@ func (h *Handler) IsSticker(ctx *model.Context) error {
 		tg.NewInlineKeyboardButton(ctx.T().Sprintf("sticker__button_add-single"), common.DataAddSticker),
 	))
 
-	if !strings.EqualFold(ctx.Sticker.SetName, common.SetNameUploaded) {
+	if ctx.Sticker.SetName != "" && !strings.EqualFold(ctx.Sticker.SetName, common.SetNameUploaded) {
 		markup.InlineKeyboard[0] = append(
 			markup.InlineKeyboard[0],
 			tg.NewInlineKeyboardButton(ctx.T().Sprintf("sticker__button_add-set"), common.DataAddSet),
@@ -92,14 +92,14 @@ func (h *Handler) IsSticker(ctx *model.Context) error {
 	}
 
 	if us != nil {
-		markup = tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButton(
+		markup.InlineKeyboard[0][0] = tg.NewInlineKeyboardButton(
 			ctx.T().Sprintf("sticker__button_remove-single"), common.DataRemoveSticker,
-		)))
+		)
 
-		if ctx.Sticker.SetName != "" {
-			markup.InlineKeyboard[0] = append(markup.InlineKeyboard[0], tg.NewInlineKeyboardButton(
+		if ctx.Sticker.SetName != "" && !strings.EqualFold(ctx.Sticker.SetName, common.SetNameUploaded) {
+			markup.InlineKeyboard[0][1] = tg.NewInlineKeyboardButton(
 				ctx.T().Sprintf("sticker__button_remove-set"), common.DataRemoveSet,
-			))
+			)
 		}
 	}
 

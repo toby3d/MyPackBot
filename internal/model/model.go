@@ -1,6 +1,7 @@
 package model
 
 import (
+	"context"
 	"fmt"
 
 	tg "gitlab.com/toby3d/telegram"
@@ -55,7 +56,11 @@ type (
 		printer *message.Printer
 		Sticker *Sticker
 		User    *User
+
+		context context.Context
 	}
+
+	contextKey string
 
 	Error struct {
 		Message string
@@ -177,4 +182,20 @@ func (ctx *Context) Error(err error) error {
 	}
 
 	return err
+}
+
+func (ctx *Context) Set(key string, val interface{}) {
+	if ctx.context == nil {
+		ctx.context = context.Background()
+	}
+
+	ctx.context = context.WithValue(ctx.context, contextKey(key), val)
+}
+
+func (ctx *Context) Get(key string) interface{} {
+	if ctx.context == nil {
+		ctx.context = context.Background()
+	}
+
+	return ctx.context.Value(contextKey(key))
 }

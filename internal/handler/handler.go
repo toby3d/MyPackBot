@@ -3,15 +3,23 @@ package handler
 import (
 	"github.com/kirillDanshin/dlog"
 	"gitlab.com/toby3d/mypackbot/internal/model"
+	"gitlab.com/toby3d/mypackbot/internal/model/stickers"
 	"gitlab.com/toby3d/mypackbot/internal/model/store"
+	"gitlab.com/toby3d/mypackbot/internal/model/users"
 )
 
 type Handler struct {
-	store store.Manager
+	store         store.Manager
+	usersStore    users.Manager
+	stickersStore stickers.Manager
 }
 
-func NewHandler(store store.Manager) *Handler {
-	return &Handler{store: store}
+func NewHandler(store store.Manager, usersStore users.Manager, stickersStore stickers.Manager) *Handler {
+	return &Handler{
+		store:         store,
+		usersStore:    usersStore,
+		stickersStore: stickersStore,
+	}
 }
 
 func (h *Handler) UpdateHandler(ctx *model.Context) (err error) {
@@ -26,5 +34,5 @@ func (h *Handler) UpdateHandler(ctx *model.Context) (err error) {
 		dlog.D(ctx)
 	}
 
-	return err
+	return ctx.Error(err)
 }

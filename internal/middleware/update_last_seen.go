@@ -4,10 +4,10 @@ import (
 	"time"
 
 	"gitlab.com/toby3d/mypackbot/internal/model"
-	"gitlab.com/toby3d/mypackbot/internal/model/store"
+	"gitlab.com/toby3d/mypackbot/internal/model/users"
 )
 
-func UpdateLastSeen(us store.UsersManager) Interceptor {
+func UpdateLastSeen(us users.Manager) Interceptor {
 	return func(ctx *model.Context, next model.UpdateFunc) (err error) {
 		timeStamp := time.Now().UTC().Unix()
 

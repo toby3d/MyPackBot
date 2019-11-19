@@ -50,7 +50,7 @@ func (h *Handler) CallbackAddSticker(ctx *model.Context) (err error) {
 
 	_, err = ctx.AnswerCallbackQuery(answer)
 
-	return err
+	return ctx.Error(err)
 }
 
 func (h *Handler) CallbackAddSet(ctx *model.Context) (err error) {
@@ -64,7 +64,7 @@ func (h *Handler) CallbackAddSet(ctx *model.Context) (err error) {
 	answer.Text = ctx.T().Sprintf("callback__text_add-set", set.Title)
 
 	for i := range set.Stickers {
-		if ctx.Sticker, err = h.store.Stickers().GetOrCreate(&model.Sticker{
+		if ctx.Sticker, err = h.stickersStore.GetOrCreate(&model.Sticker{
 			CreatedAt:  ctx.CallbackQuery.Message.Date,
 			UpdatedAt:  ctx.CallbackQuery.Message.Date,
 			Width:      set.Stickers[i].Width,
@@ -100,7 +100,7 @@ func (h *Handler) CallbackAddSet(ctx *model.Context) (err error) {
 
 	_, err = ctx.AnswerCallbackQuery(answer)
 
-	return err
+	return ctx.Error(err)
 }
 
 func (h *Handler) CallbackRemoveSticker(ctx *model.Context) (err error) {
@@ -132,7 +132,7 @@ func (h *Handler) CallbackRemoveSticker(ctx *model.Context) (err error) {
 
 	_, err = ctx.AnswerCallbackQuery(answer)
 
-	return err
+	return ctx.Error(err)
 }
 
 func (h *Handler) CallbackRemoveSet(ctx *model.Context) (err error) {
@@ -165,5 +165,5 @@ func (h *Handler) CallbackRemoveSet(ctx *model.Context) (err error) {
 
 	_, err = ctx.AnswerCallbackQuery(answer)
 
-	return err
+	return ctx.Error(err)
 }

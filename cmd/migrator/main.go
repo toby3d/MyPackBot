@@ -39,9 +39,11 @@ func main() {
 	defer newDB.Close()
 
 	if err = migrator.AutoMigrate(migrator.AutoMigrateConfig{
-		OldDB: oldDB,
-		NewDB: store.NewStore(newDB),
-		Bot:   bot,
+		OldDB:            oldDB,
+		NewStore:         store.NewStore(newDB),
+		NewUsersStore:    store.NewUsersStore(newDB),
+		NewStickersStore: store.NewStickersStore(newDB),
+		Bot:              bot,
 	}); err != nil {
 		log.Fatalln("ERROR:", err.Error())
 	}

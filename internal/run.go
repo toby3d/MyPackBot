@@ -44,21 +44,23 @@ func (mpb *MyPackBot) Run() error {
 		})
 	}
 
-	h := handler.NewHandler(mpb.store).UpdateHandler
+	h := handler.NewHandler(mpb.store, mpb.usersStore, mpb.stickersStore).UpdateHandler
 	chain := middleware.Chain{
-		middleware.AcquireUser(mpb.store.Users()),
-		middleware.AcquireSticker(mpb.store.Stickers()),
-		middleware.Hacktober(time.October),
+		middleware.AcquireUser(mpb.usersStore),
+		middleware.AcquireSticker(mpb.stickersStore),
+		middleware.Hacktober(),
 		middleware.Birthday(time.Date(0, time.November, 4, 0, 0, 0, 0, time.UTC)),
-		middleware.UpdateLastSeen(mpb.store.Users()),
+		middleware.UpdateLastSeen(mpb.usersStore),
 	}
 	h = chain.UpdateHandler(h)
 
 	for update := range updates {
-		ctx := new(model.Context)
 		update := update
+		ctx := new(model.Context)
 		ctx.Bot = mpb.bot
+		ctx.Sticker = new(model.Sticker)
 		ctx.Update = &update
+		ctx.User = new(model.User)
 
 		if err := h(ctx); err != nil {
 			dlog.Ln("ERROR:", err.Error())

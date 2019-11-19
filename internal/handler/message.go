@@ -16,17 +16,17 @@ func (h *Handler) IsMessage(ctx *model.Context) (err error) {
 		err = h.IsSticker(ctx)
 	}
 
-	return err
+	return ctx.Error(err)
 }
 
 func (h *Handler) IsCommand(ctx *model.Context) (err error) {
 	switch {
-	case ctx.Message.IsCommandEqual(common.CommandPing):
-		err = h.CommandPing(ctx)
 	case ctx.Message.IsCommandEqual(tg.CommandStart):
 		err = h.CommandStart(ctx)
 	case ctx.Message.IsCommandEqual(tg.CommandHelp):
 		err = h.CommandHelp(ctx)
+	case ctx.Message.IsCommandEqual(common.CommandPing):
+		err = h.CommandPing(ctx)
 	case ctx.Message.IsCommandEqual(tg.CommandSettings),
 		ctx.Message.IsCommandEqual("addSticker"),
 		ctx.Message.IsCommandEqual("addPack"),
@@ -39,48 +39,45 @@ func (h *Handler) IsCommand(ctx *model.Context) (err error) {
 		err = h.CommandUnknown(ctx)
 	}
 
-	return err
+	return ctx.Error(err)
 }
 
 func (h *Handler) CommandPing(ctx *model.Context) (err error) {
 	_, err = ctx.SendMessage(tg.NewMessage(ctx.Message.Chat.ID, "🏓"))
-	return err
+	return ctx.Error(err)
 }
 
 func (h *Handler) CommandStart(ctx *model.Context) (err error) {
 	reply := tg.NewMessage(ctx.Message.Chat.ID, ctx.T().Sprintf("start__text", ctx.Message.From.FullName()))
 	reply.ReplyToMessageID = ctx.Message.ID
 	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
-
 	_, err = ctx.SendMessage(reply)
 
-	return err
+	return ctx.Error(err)
 }
 
 func (h *Handler) CommandHelp(ctx *model.Context) (err error) {
 	reply := tg.NewMessage(ctx.Message.Chat.ID, ctx.T().Sprintf("help__text"))
 	reply.ReplyToMessageID = ctx.Message.ID
 	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
-
 	_, err = ctx.SendMessage(reply)
 
-	return err
+	return ctx.Error(err)
 }
 
 func (h *Handler) CommandUnknown(ctx *model.Context) (err error) {
 	reply := tg.NewMessage(ctx.Message.Chat.ID, ctx.T().Sprintf("unknown-command__text"))
 	reply.ReplyToMessageID = ctx.Message.ID
 	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
-
 	_, err = ctx.SendMessage(reply)
 
-	return err
+	return ctx.Error(err)
 }
 
 func (h *Handler) IsSticker(ctx *model.Context) error {
 	us, err := h.store.GetSticker(ctx.User, ctx.Sticker)
 	if err != nil {
-		return err
+		return ctx.Error(err)
 	}
 
 	markup := tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow(
@@ -109,8 +106,7 @@ func (h *Handler) IsSticker(ctx *model.Context) error {
 	reply := tg.NewMessage(ctx.Message.Chat.ID, ctx.T().Sprintf("sticker__text"))
 	reply.ReplyToMessageID = ctx.Message.ID
 	reply.ReplyMarkup = markup
-
 	_, err = ctx.SendMessage(reply)
 
-	return err
+	return ctx.Error(err)
 }

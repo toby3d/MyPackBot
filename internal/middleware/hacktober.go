@@ -7,7 +7,7 @@ import (
 	tg "gitlab.com/toby3d/telegram"
 )
 
-func Hacktober(month time.Month) Interceptor {
+func Hacktober() Interceptor {
 	return func(ctx *model.Context, next model.UpdateFunc) (err error) {
 		if !ctx.IsMessage() {
 			return next(ctx)
@@ -15,7 +15,7 @@ func Hacktober(month time.Month) Interceptor {
 
 		lastSeen := time.Unix(ctx.User.LastSeen, 0)
 		date := ctx.Message.Time()
-		before := time.Date(date.Year(), month, 1, 0, 0, 0, 0, time.UTC)
+		before := time.Date(date.Year(), time.October, 1, 0, 0, 0, 0, time.UTC)
 		// NOTE(toby3d): not November 1, use October 31
 		after := before.AddDate(0, 1, 0).Add(-1 * 24 * time.Hour)
 		if date.Before(before) || date.After(after) || lastSeen.After(before) {

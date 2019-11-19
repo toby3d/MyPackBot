@@ -1,6 +1,7 @@
 package store
 
 import (
+	"sort"
 	"strings"
 	"time"
 
@@ -47,9 +48,7 @@ func (store *StickersStore) Get(sid string) *model.Sticker {
 	s := new(model.Sticker)
 
 	if err := store.conn.View(func(tx *bolt.Tx) error {
-		src := tx.Bucket(common.BucketStickers).Get([]byte(sid))
-
-		return json.ConfigFastest.Unmarshal(src, s)
+		return json.ConfigFastest.Unmarshal(tx.Bucket(common.BucketStickers).Get([]byte(sid)), s)
 	}); err != nil {
 		return nil
 	}
@@ -63,7 +62,6 @@ func (store *StickersStore) GetList(offset, limit int, query string) (model.Stic
 	_ = store.conn.View(func(tx *bolt.Tx) error {
 		return tx.Bucket(common.BucketStickers).ForEach(func(key, val []byte) error {
 			s := new(model.Sticker)
-
 			if err := json.ConfigFastest.Unmarshal(val, s); err != nil {
 				return err
 			}
@@ -84,16 +82,20 @@ func (store *StickersStore) GetList(offset, limit int, query string) (model.Stic
 		})
 	})
 
+	sort.Slice(stickers, func(i, j int) bool {
+		return stickers[i].SetName < stickers[j].SetName || stickers[i].UpdatedAt < stickers[j].UpdatedAt
+	})
+
 	return stickers, count
 }
 
 func (store *StickersStore) GetSet(name string) (model.Stickers, int) {
 	count := 0
 	stickers := make(model.Stickers, 0)
+
 	_ = store.conn.View(func(tx *bolt.Tx) error {
 		return tx.Bucket(common.BucketStickers).ForEach(func(key, val []byte) error {
 			s := new(model.Sticker)
-
 			if err := json.ConfigFastest.Unmarshal(val, s); err != nil {
 				return err
 			}
@@ -108,6 +110,10 @@ func (store *StickersStore) GetSet(name string) (model.Stickers, int) {
 
 			return nil
 		})
+	})
+
+	sort.Slice(stickers, func(i, j int) bool {
+		return stickers[i].UpdatedAt < stickers[j].UpdatedAt
 	})
 
 	return stickers, count
@@ -143,7 +149,6 @@ func (store *StickersStore) Remove(sid string) error {
 
 	return store.conn.Update(func(tx *bolt.Tx) error {
 		bkt := tx.Bucket(common.BucketStickers)
-
 		if err := bkt.Delete([]byte(sid)); err != nil {
 			return err
 		}
@@ -152,7 +157,6 @@ func (store *StickersStore) Remove(sid string) error {
 
 		return bkt.ForEach(func(key, val []byte) error {
 			us := new(model.UserSticker)
-
 			if err := json.Unmarshal(val, us); err != nil {
 				return err
 			}

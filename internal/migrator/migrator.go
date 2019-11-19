@@ -8,8 +8,9 @@ import (
 	bunt "github.com/tidwall/buntdb"
 	"gitlab.com/toby3d/mypackbot/internal/handler"
 	"gitlab.com/toby3d/mypackbot/internal/model"
+	"gitlab.com/toby3d/mypackbot/internal/model/stickers"
 	"gitlab.com/toby3d/mypackbot/internal/model/store"
-	"gitlab.com/toby3d/mypackbot/internal/utils"
+	"gitlab.com/toby3d/mypackbot/internal/model/users"
 	tg "gitlab.com/toby3d/telegram"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
@@ -17,9 +18,11 @@ import (
 
 type (
 	AutoMigrateConfig struct {
-		OldDB *bunt.DB
-		NewDB store.Manager
-		Bot   *tg.Bot
+		OldDB            *bunt.DB
+		NewStore         store.Manager
+		NewUsersStore    users.Manager
+		NewStickersStore stickers.Manager
+		Bot              *tg.Bot
 	}
 
 	tempData struct {
@@ -67,7 +70,7 @@ func AutoMigrate(cfg AutoMigrateConfig) (err error) {
 	}
 
 	for uid, u := range data.users { // NOTE(toby3d): STEP 1: migrate users
-		if _, err = cfg.NewDB.Users().GetOrCreate(u); err != nil {
+		if _, err = cfg.NewUsersStore.GetOrCreate(u); err != nil {
 			delete(data.users, uid)
 		}
 	}
@@ -81,25 +84,31 @@ func AutoMigrate(cfg AutoMigrateConfig) (err error) {
 
 		for _, setSticker := range set.Stickers {
 			setSticker := setSticker
-			_, _ = cfg.NewDB.Stickers().GetOrCreate(utils.ConvertStickerToModel(&setSticker))
+			_, _ = cfg.NewStickersStore.GetOrCreate(&model.Sticker{
+				ID:         setSticker.FileID,
+				Emoji:      setSticker.Emoji,
+				Width:      setSticker.Width,
+				Height:     setSticker.Height,
+				IsAnimated: setSticker.IsAnimated,
+				SetName:    setSticker.SetName,
+			})
 		}
 	}
 
 	for uid, sets := range data.userSets { // NOTE(toby3d): STEP 3: import sets to users
 		for _, setName := range sets {
-			u, err := cfg.NewDB.Users().GetOrCreate(data.users[uid])
+			u, err := cfg.NewUsersStore.GetOrCreate(data.users[uid])
 			if err != nil || u == nil {
 				continue
 			}
 
-			_ = cfg.NewDB.AddStickersSet(u, setName)
+			_ = cfg.NewStore.AddStickersSet(u, setName)
 		}
 	}
 
 	count := 0
 	ticker := time.NewTicker(100 * time.Millisecond)
-	matcher := language.NewMatcher([]language.Tag{language.English, language.Russian})
-	h := handler.NewHandler(cfg.Bot, cfg.NewDB)
+	h := handler.NewHandler(cfg.NewStore, cfg.NewUsersStore, cfg.NewStickersStore)
 
 	for uid, fileID := range data.userStickers { // NOTE(toby3d): STEP 4: send uploaded stickers directly to users
 		count++
@@ -123,12 +132,17 @@ func AutoMigrate(cfg AutoMigrateConfig) (err error) {
 			continue
 		}
 
-		ctx.User = cfg.NewDB.Users().Get(uid)
-		ctx.Sticker = utils.ConvertStickerToModel(ctx.Message.Sticker)
-		ctx.Sticker.CreatedAt = ctx.Message.Date
-		ctx.Sticker.UpdatedAt = ctx.Message.Date
-		tag, _, _ := matcher.Match(language.Make(ctx.User.LanguageCode))
-		ctx.Printer = message.NewPrinter(tag)
+		ctx.User = cfg.NewUsersStore.Get(uid)
+		ctx.Sticker = &model.Sticker{
+			ID:         ctx.Message.Sticker.FileID,
+			Emoji:      ctx.Message.Sticker.Emoji,
+			Width:      ctx.Message.Sticker.Width,
+			Height:     ctx.Message.Sticker.Height,
+			IsAnimated: ctx.Message.Sticker.IsAnimated,
+			SetName:    ctx.Message.Sticker.SetName,
+			CreatedAt:  ctx.Message.Date,
+			UpdatedAt:  ctx.Message.Date,
+		}
 
 		_ = h.IsSticker(ctx)
 	}

@@ -16,12 +16,15 @@ var replacer = strings.NewReplacer(
 )
 
 func (h *Handler) IsInlineQuery(ctx *model.Context) (err error) {
-	offset, _ := strconv.Atoi(ctx.InlineQuery.Offset)
+	var stickers model.Stickers
+
 	answer := tg.NewAnswerInlineQuery(ctx.InlineQuery.ID)
 	answer.IsPersonal = !strings.Contains(ctx.InlineQuery.Query, "personal:false")
-	answer.CacheTime = 1
 	answer.SwitchPrivateMessageText = ctx.T().Sprintf("inline__not-found_switch-text")
 	answer.SwitchPrivateMessageParameter = "from_inline"
+	answer.CacheTime = 1
+	offset, _ := strconv.Atoi(ctx.InlineQuery.Offset)
+	count := 0
 
 	if ctx.InlineQuery.HasQuery() {
 		ctx.InlineQuery.Query = replacer.Replace(ctx.InlineQuery.Query)
@@ -29,16 +32,13 @@ func (h *Handler) IsInlineQuery(ctx *model.Context) (err error) {
 		ctx.InlineQuery.Query, _ = utils.FixEmojiTone(ctx.InlineQuery.Query)
 	}
 
-	var stickers model.Stickers
-
-	count := 0
 	if answer.IsPersonal {
 		stickers, count = h.store.GetStickersList(ctx.User, offset, 50, ctx.InlineQuery.Query)
 	} else {
-		stickers, count = h.store.Stickers().GetList(offset, 50, ctx.InlineQuery.Query)
+		stickers, count = h.stickersStore.GetList(offset, 50, ctx.InlineQuery.Query)
 	}
 
-	if count > 0 && offset+50 < count {
+	if count > offset+50 {
 		answer.NextOffset = strconv.Itoa(offset + 50)
 	}
 
@@ -52,5 +52,5 @@ func (h *Handler) IsInlineQuery(ctx *model.Context) (err error) {
 
 	_, err = ctx.AnswerInlineQuery(answer)
 
-	return err
+	return ctx.Error(err)
 }

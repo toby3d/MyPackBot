@@ -1,6 +1,7 @@
 package store
 
 import (
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -9,13 +10,14 @@ import (
 	json "github.com/json-iterator/go"
 	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
-	store "gitlab.com/toby3d/mypackbot/internal/model/store"
+	"gitlab.com/toby3d/mypackbot/internal/model/stickers"
+	"gitlab.com/toby3d/mypackbot/internal/model/users"
 )
 
 type Store struct {
 	conn     *bolt.DB
-	users    store.UsersManager
-	stickers store.StickersManager
+	users    users.Manager
+	stickers stickers.Manager
 }
 
 func NewStore(conn *bolt.DB) *Store {
@@ -25,10 +27,6 @@ func NewStore(conn *bolt.DB) *Store {
 		stickers: NewStickersStore(conn),
 	}
 }
-
-func (store *Store) Users() store.UsersManager { return store.users }
-
-func (store *Store) Stickers() store.StickersManager { return store.stickers }
 
 func (store *Store) AddSticker(u *model.User, s *model.Sticker) (err error) {
 	var us *model.UserSticker
@@ -90,7 +88,7 @@ func (store *Store) GetSticker(u *model.User, s *model.Sticker) (*model.UserStic
 
 	var us *model.UserSticker
 
-	err = store.conn.View(func(tx *bolt.Tx) error {
+	if err = store.conn.View(func(tx *bolt.Tx) error {
 		return tx.Bucket(common.BucketUsersStickers).ForEach(func(key, val []byte) error {
 			item := new(model.UserSticker)
 
@@ -106,9 +104,11 @@ func (store *Store) GetSticker(u *model.User, s *model.Sticker) (*model.UserStic
 
 			return nil
 		})
-	})
+	}); err != nil {
+		return nil, err
+	}
 
-	return us, err
+	return us, nil
 }
 
 func (store *Store) GetStickersList(u *model.User, offset, limit int, query string) (model.Stickers, int) {
@@ -145,12 +145,17 @@ func (store *Store) GetStickersList(u *model.User, offset, limit int, query stri
 		})
 	})
 
+	sort.Slice(stickers, func(i, j int) bool {
+		return stickers[i].SetName < stickers[j].SetName || stickers[i].UpdatedAt < stickers[j].UpdatedAt
+	})
+
 	return stickers, count
 }
 
 func (store *Store) GetStickersSet(u *model.User, offset, limit int, setName string) (model.Stickers, int) {
 	count := 0
 	stickers := make(model.Stickers, 0, limit)
+
 	_ = store.conn.View(func(tx *bolt.Tx) error {
 		return tx.Bucket(common.BucketUsersStickers).ForEach(func(key, val []byte) (err error) {
 			us := new(model.UserSticker)
@@ -184,6 +189,10 @@ func (store *Store) GetStickersSet(u *model.User, offset, limit int, setName str
 
 			return nil
 		})
+	})
+
+	sort.Slice(stickers, func(i, j int) bool {
+		return stickers[i].UpdatedAt < stickers[j].UpdatedAt
 	})
 
 	return stickers, count

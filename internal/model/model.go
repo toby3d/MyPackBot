@@ -51,6 +51,7 @@ type (
 	Context struct {
 		*tg.Bot
 		*tg.Update
+
 		printer *message.Printer
 		Sticker *Sticker
 		User    *User
@@ -65,6 +66,7 @@ type (
 func (err Error) FormatError(p xerrors.Printer) error {
 	p.Printf("🐛 %s", err.Message)
 	err.frame.Format(p)
+
 	return nil
 }
 
@@ -151,10 +153,14 @@ func (ctx *Context) T() *message.Printer {
 }
 
 func (ctx *Context) Error(err error) error {
+	if err == nil {
+		return nil
+	}
+
 	switch {
 	case ctx.IsCallbackQuery():
 		answer := tg.NewAnswerCallbackQuery(ctx.CallbackQuery.ID)
-		answer.Text = "🐞 " + err.Error()
+		answer.Text = err.Error()
 
 		if _, sendErr := ctx.AnswerCallbackQuery(answer); sendErr != nil {
 			err = sendErr
@@ -163,7 +169,7 @@ func (ctx *Context) Error(err error) error {
 		answer := tg.NewAnswerInlineQuery(ctx.InlineQuery.ID)
 		answer.IsPersonal = true
 		answer.SwitchPrivateMessageParameter = "error"
-		answer.SwitchPrivateMessageText = "🐞 " + err.Error()
+		answer.SwitchPrivateMessageText = err.Error()
 
 		if _, sendErr := ctx.AnswerInlineQuery(answer); sendErr != nil {
 			err = sendErr

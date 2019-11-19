@@ -8,12 +8,13 @@ import (
 
 	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
-	store "gitlab.com/toby3d/mypackbot/internal/model/store"
+	"gitlab.com/toby3d/mypackbot/internal/model/stickers"
+	"gitlab.com/toby3d/mypackbot/internal/model/users"
 )
 
 type InMemoryStore struct {
-	users    store.UsersManager
-	stickers store.StickersManager
+	users    users.Manager
+	stickers stickers.Manager
 
 	mutex        sync.RWMutex
 	userStickers model.UserStickers
@@ -27,9 +28,9 @@ func NewInMemoryStore() *InMemoryStore {
 	}
 }
 
-func (store *InMemoryStore) Users() store.UsersManager { return store.users }
+func (store *InMemoryStore) Users() users.Manager { return store.users }
 
-func (store *InMemoryStore) Stickers() store.StickersManager { return store.stickers }
+func (store *InMemoryStore) Stickers() stickers.Manager { return store.stickers }
 
 func (store *InMemoryStore) AddSticker(u *model.User, s *model.Sticker) (err error) {
 	var us *model.UserSticker

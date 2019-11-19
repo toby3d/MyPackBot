@@ -3,14 +3,12 @@ package middleware
 import (
 	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
-	"gitlab.com/toby3d/mypackbot/internal/model/store"
+	"gitlab.com/toby3d/mypackbot/internal/model/stickers"
 	tg "gitlab.com/toby3d/telegram"
 )
 
-func AcquireSticker(store store.StickersManager) Interceptor {
+func AcquireSticker(store stickers.Manager) Interceptor {
 	return func(ctx *model.Context, next model.UpdateFunc) (err error) {
-		ctx.Sticker = new(model.Sticker)
-
 		switch {
 		case ctx.IsMessage():
 			if !ctx.Message.IsSticker() {

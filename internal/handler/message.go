@@ -21,6 +21,8 @@ func (h *Handler) IsMessage(ctx *model.Context) (err error) {
 
 func (h *Handler) IsCommand(ctx *model.Context) (err error) {
 	switch {
+	case ctx.Message.IsCommandEqual(common.CommandPing):
+		err = h.CommandPing(ctx)
 	case ctx.Message.IsCommandEqual(tg.CommandStart):
 		err = h.CommandStart(ctx)
 	case ctx.Message.IsCommandEqual(tg.CommandHelp):
@@ -37,6 +39,11 @@ func (h *Handler) IsCommand(ctx *model.Context) (err error) {
 		err = h.CommandUnknown(ctx)
 	}
 
+	return err
+}
+
+func (h *Handler) CommandPing(ctx *model.Context) (err error) {
+	_, err = ctx.SendMessage(tg.NewMessage(ctx.Message.Chat.ID, "🏓"))
 	return err
 }
 

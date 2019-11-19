@@ -7,6 +7,10 @@ import (
 )
 
 const (
+	CommandPing string = "ping"
+)
+
+const (
 	DataAdd           string = "add"
 	DataAddSet        string = DataSet + DataSeparator + DataAdd
 	DataAddSticker    string = DataSticker + DataSeparator + DataAdd

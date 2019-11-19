@@ -45,12 +45,12 @@ func (mpb *MyPackBot) Run() error {
 	}
 
 	h := handler.NewHandler(mpb.bot, mpb.store)
-	bDay := time.Date(0, time.November, 4, 0, 0, 0, 0, time.UTC)
 	chain := middleware.Chain{
 		middleware.AcquireUser(mpb.store.Users()),
 		middleware.AcquirePrinter(),
 		middleware.AcquireSticker(mpb.bot, mpb.store.Stickers()),
-		middleware.Birthday(mpb.bot, bDay),
+		middleware.Hacktober(mpb.bot, time.October),
+		middleware.Birthday(mpb.bot, time.Date(0, time.November, 4, 0, 0, 0, 0, time.UTC)),
 		middleware.UpdateLastSeen(mpb.store.Users()),
 	}
 

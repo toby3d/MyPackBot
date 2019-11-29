@@ -16,7 +16,7 @@ func NewUsersStore(conn *bolt.DB) *UsersStore { return &UsersStore{conn: conn} }
 
 func (store *UsersStore) Create(u *model.User) error {
 	if store.Get(u.ID) != nil {
-		return common.ErrUserExist
+		return model.ErrUserExist
 	}
 
 	now := time.Now().UTC().Unix()
@@ -78,7 +78,7 @@ func (store *UsersStore) Update(u *model.User) error {
 
 func (store *UsersStore) Remove(uid int) error {
 	if store.Get(uid) == nil {
-		return common.ErrUserNotExist
+		return model.ErrUserNotExist
 	}
 
 	return store.conn.Update(func(tx *bolt.Tx) error {

@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"strings"
-
 	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	tg "gitlab.com/toby3d/telegram"
@@ -28,12 +26,12 @@ func (h *Handler) IsCommand(ctx *model.Context) (err error) {
 	case ctx.Message.IsCommandEqual(common.CommandPing):
 		err = h.CommandPing(ctx)
 	case ctx.Message.IsCommandEqual(tg.CommandSettings),
-		ctx.Message.IsCommandEqual("addSticker"),
-		ctx.Message.IsCommandEqual("addPack"),
-		ctx.Message.IsCommandEqual("delSticker"),
-		ctx.Message.IsCommandEqual("delPack"),
-		ctx.Message.IsCommandEqual("reset"),
-		ctx.Message.IsCommandEqual("cancel"):
+		ctx.Message.IsCommandEqual(common.DataAddSticker),
+		ctx.Message.IsCommandEqual(common.CommandAddPack),
+		ctx.Message.IsCommandEqual(common.CommandDelSticker),
+		ctx.Message.IsCommandEqual(common.CommandDelPack),
+		ctx.Message.IsCommandEqual(common.CommandReset),
+		ctx.Message.IsCommandEqual(common.CommandCancel):
 		fallthrough
 	default:
 		err = h.CommandUnknown(ctx)
@@ -84,7 +82,7 @@ func (h *Handler) IsSticker(ctx *model.Context) error {
 		tg.NewInlineKeyboardButton(ctx.T().Sprintf("sticker__button_add-single"), common.DataAddSticker),
 	))
 
-	if ctx.Sticker.SetName != "" && !strings.EqualFold(ctx.Sticker.SetName, common.SetNameUploaded) {
+	if ctx.Sticker.InSet() {
 		markup.InlineKeyboard[0] = append(
 			markup.InlineKeyboard[0],
 			tg.NewInlineKeyboardButton(ctx.T().Sprintf("sticker__button_add-set"), common.DataAddSet),
@@ -96,7 +94,7 @@ func (h *Handler) IsSticker(ctx *model.Context) error {
 			ctx.T().Sprintf("sticker__button_remove-single"), common.DataRemoveSticker,
 		)
 
-		if ctx.Sticker.SetName != "" && !strings.EqualFold(ctx.Sticker.SetName, common.SetNameUploaded) {
+		if ctx.Sticker.InSet() {
 			markup.InlineKeyboard[0][1] = tg.NewInlineKeyboardButton(
 				ctx.T().Sprintf("sticker__button_remove-set"), common.DataRemoveSet,
 			)

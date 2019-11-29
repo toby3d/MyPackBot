@@ -36,7 +36,7 @@ func (store *Store) AddSticker(u *model.User, s *model.Sticker) (err error) {
 	}
 
 	if us != nil {
-		return common.ErrUserStickerExist
+		return model.ErrUserStickerExist
 	}
 
 	src, err := json.ConfigFastest.Marshal(&model.UserSticker{
@@ -206,7 +206,7 @@ func (store *Store) RemoveSticker(u *model.User, s *model.Sticker) (err error) {
 	}
 
 	if us == nil {
-		return common.ErrUserStickerNotExist
+		return model.ErrUserStickerNotExist
 	}
 
 	return store.conn.Update(func(tx *bolt.Tx) error {

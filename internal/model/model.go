@@ -3,7 +3,9 @@ package model
 import (
 	"context"
 	"fmt"
+	"strings"
 
+	"gitlab.com/toby3d/mypackbot/internal/common"
 	tg "gitlab.com/toby3d/telegram"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
@@ -67,6 +69,37 @@ type (
 		frame   xerrors.Frame
 	}
 )
+
+var (
+	ErrStickerExist = Error{
+		Message: "Sticker already exist",
+		frame:   xerrors.Caller(0),
+	}
+	ErrStickerNotExist = Error{
+		Message: "Sticker not exist",
+		frame:   xerrors.Caller(0),
+	}
+	ErrUserExist = Error{
+		Message: "User already exist",
+		frame:   xerrors.Caller(0),
+	}
+	ErrUserNotExist = Error{
+		Message: "User not exist",
+		frame:   xerrors.Caller(0),
+	}
+	ErrUserStickerExist = Error{
+		Message: "Sticker already imported",
+		frame:   xerrors.Caller(0),
+	}
+	ErrUserStickerNotExist = Error{
+		Message: "Sticker already removed",
+		frame:   xerrors.Caller(0),
+	}
+)
+
+func (s *Sticker) InSet() bool {
+	return s.SetName != "" && !strings.EqualFold(s.SetName, common.SetNameUploaded)
+}
 
 func (err Error) FormatError(p xerrors.Printer) error {
 	p.Printf("🐛 %s", err.Message)

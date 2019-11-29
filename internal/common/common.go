@@ -3,11 +3,16 @@ package common
 
 import (
 	"github.com/Masterminds/semver"
-	"gitlab.com/toby3d/mypackbot/internal/model"
 )
 
 const (
-	CommandPing string = "ping"
+	CommandPing       string = "ping"
+	CommandAddSticker string = "addsticker"
+	CommandAddPack    string = "addpack"
+	CommandDelSticker string = "delsticker"
+	CommandDelPack    string = "delpack"
+	CommandReset      string = "reset"
+	CommandCancel     string = "cancel"
 )
 
 const (
@@ -34,13 +39,4 @@ var (
 	BucketUsers         = []byte("users")
 	BucketUsersStickers = []byte("users_stickers")
 	Buckets             = [...][]byte{BucketStickers, BucketUsers, BucketUsersStickers}
-)
-
-var (
-	ErrStickerExist        = model.Error{Message: "Sticker already exist"}
-	ErrStickerNotExist     = model.Error{Message: "Sticker not exist"}
-	ErrUserExist           = model.Error{Message: "User already exist"}
-	ErrUserNotExist        = model.Error{Message: "User not exist"}
-	ErrUserStickerExist    = model.Error{Message: "Sticker already imported"}
-	ErrUserStickerNotExist = model.Error{Message: "Sticker already removed"}
 )

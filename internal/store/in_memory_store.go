@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	"gitlab.com/toby3d/mypackbot/internal/model/stickers"
 	"gitlab.com/toby3d/mypackbot/internal/model/users"
@@ -40,7 +39,7 @@ func (store *InMemoryStore) AddSticker(u *model.User, s *model.Sticker) (err err
 	}
 
 	if us != nil {
-		return common.ErrUserStickerExist
+		return model.ErrUserStickerExist
 	}
 
 	store.mutex.Lock()
@@ -150,7 +149,7 @@ func (store *InMemoryStore) RemoveSticker(u *model.User, s *model.Sticker) (err 
 	}
 
 	if us == nil {
-		return common.ErrUserStickerNotExist
+		return model.ErrUserStickerNotExist
 	}
 
 	store.mutex.Lock()

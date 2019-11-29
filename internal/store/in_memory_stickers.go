@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 )
 
@@ -24,7 +23,7 @@ func NewInMemoryStickersStore() *InMemoryStickersStore {
 
 func (store *InMemoryStickersStore) Create(s *model.Sticker) error {
 	if store.Get(s.ID) != nil {
-		return common.ErrStickerExist
+		return model.ErrStickerExist
 	}
 
 	if s.CreatedAt == 0 {
@@ -99,7 +98,7 @@ func (store *InMemoryStickersStore) Update(s *model.Sticker) error {
 
 func (store *InMemoryStickersStore) Remove(sid string) error {
 	if store.Get(sid) == nil {
-		return common.ErrStickerNotExist
+		return model.ErrStickerNotExist
 	}
 
 	store.mutex.Lock()

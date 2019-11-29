@@ -5,7 +5,6 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 )
 
@@ -23,7 +22,7 @@ func NewInMemoryUsersStore() *InMemoryUsersStore {
 
 func (store *InMemoryUsersStore) Create(u *model.User) error {
 	if store.Get(u.ID) != nil {
-		return common.ErrUserExist
+		return model.ErrUserExist
 	}
 
 	if u.CreatedAt == 0 {
@@ -70,7 +69,7 @@ func (store *InMemoryUsersStore) Update(u *model.User) error {
 
 func (store *InMemoryUsersStore) Remove(uid int) error {
 	if store.Get(uid) == nil {
-		return common.ErrUserNotExist
+		return model.ErrUserNotExist
 	}
 
 	store.mutex.Lock()

@@ -8,17 +8,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//nolint:gochecknoglobals
-var testDir = filepath.Join(os.Getenv("GOPATH"), "src", "gitlab.com", "toby3d", "mypackbot")
-
 func TestOpen(t *testing.T) {
+	rootPath, err := os.Getwd()
+	assert.NoError(t, err)
+
 	t.Run("invalid", func(t *testing.T) {
-		cfg, err := Open("/invalid/directory")
+		cfg, err := Open(filepath.Join("/", "invalid", "directory"))
 		assert.Error(t, err)
 		assert.Nil(t, cfg)
 	})
 	t.Run("valid", func(t *testing.T) {
-		cfg, err := Open(filepath.Join(testDir, "configs", "config.example.yaml"))
+		cfg, err := Open(filepath.Join(rootPath, "..", "..", "configs", "config.example.yaml"))
 		assert.NoError(t, err)
 		assert.NotNil(t, cfg)
 	})

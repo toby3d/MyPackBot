@@ -13,7 +13,10 @@ import (
 )
 
 func initDB(t *testing.T) (*bolt.DB, func()) {
-	dbPath := filepath.Join(os.Getenv("GOPATH"), "src", "gitlab.com", "toby3d", "mypackbot", "test", "testing.db")
+	rootPath, err := os.Getwd()
+	assert.NoError(t, err)
+
+	dbPath := filepath.Join(rootPath, "..", "..", "test", "testing.db")
 	dataBase, err := db.Open(dbPath)
 
 	if !assert.NoError(t, err) {

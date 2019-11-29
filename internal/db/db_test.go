@@ -18,9 +18,10 @@ func TestOpen(t *testing.T) {
 		})
 	})
 	t.Run("valid", func(t *testing.T) {
-		testPath := filepath.Join(
-			os.Getenv("GOPATH"), "src", "gitlab.com", "toby3d", "mypackbot", "test", "testing.db",
-		)
+		rootPath, err := os.Getwd()
+		assert.NoError(t, err)
+
+		testPath := filepath.Join(rootPath, "..", "..", "test", "testing.db")
 		db, err := Open(testPath)
 		assert.NoError(t, err)
 		assert.NotNil(t, db)

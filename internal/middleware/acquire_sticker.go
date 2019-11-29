@@ -31,7 +31,7 @@ func AcquireSticker(store stickers.Manager) Interceptor {
 			return next(ctx)
 		}
 
-		if ctx.Sticker.SetName != "" {
+		if ctx.Sticker.InSet() {
 			go func() {
 				set, err := ctx.GetStickerSet(ctx.Sticker.SetName)
 				if err != nil {
@@ -65,7 +65,7 @@ func stickerToModel(s *tg.Sticker) *model.Sticker {
 	sticker.IsAnimated = s.IsAnimated
 	sticker.SetName = s.SetName
 
-	if sticker.SetName == "" {
+	if !sticker.InSet() {
 		sticker.SetName = common.SetNameUploaded
 	}
 

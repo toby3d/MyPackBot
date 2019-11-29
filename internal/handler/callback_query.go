@@ -23,14 +23,12 @@ func (h *Handler) CallbackSticker(ctx *model.Context) (err error) {
 	isAdd, _ := ctx.Get("is_add").(bool)
 	answer := tg.NewAnswerCallbackQuery(ctx.CallbackQuery.ID)
 	markup := tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow())
-	markup.InlineKeyboard[0] = make([]tg.InlineKeyboardButton, 2)
+	markup.InlineKeyboard[0] = make([]tg.InlineKeyboardButton, 1)
 
 	if isAdd {
 		answer.Text = ctx.T().Sprintf("callback__text_add-single")
 
-		if err = h.store.AddSticker(ctx.User, ctx.Sticker); err != nil {
-			return ctx.Error(err)
-		}
+		go h.store.AddSticker(ctx.User, ctx.Sticker)
 
 		markup.InlineKeyboard[0][0] = tg.NewInlineKeyboardButton(
 			ctx.T().Sprintf("sticker__button_remove-single"), common.DataRemoveSticker,
@@ -38,9 +36,7 @@ func (h *Handler) CallbackSticker(ctx *model.Context) (err error) {
 	} else {
 		answer.Text = ctx.T().Sprintf("callback__text_remove-single")
 
-		if err = h.store.RemoveSticker(ctx.User, ctx.Sticker); err != nil {
-			return ctx.Error(err)
-		}
+		go h.store.RemoveSticker(ctx.User, ctx.Sticker)
 
 		markup.InlineKeyboard[0][0] = tg.NewInlineKeyboardButton(
 			ctx.T().Sprintf("sticker__button_add-single"), common.DataAddSticker,
@@ -48,7 +44,9 @@ func (h *Handler) CallbackSticker(ctx *model.Context) (err error) {
 	}
 
 	if len(ctx.CallbackQuery.Message.ReplyMarkup.InlineKeyboard[0]) == 2 {
-		markup.InlineKeyboard[0][1] = ctx.CallbackQuery.Message.ReplyMarkup.InlineKeyboard[0][1]
+		markup.InlineKeyboard[0] = append(
+			markup.InlineKeyboard[0], ctx.CallbackQuery.Message.ReplyMarkup.InlineKeyboard[0][1],
+		)
 	}
 
 	if _, err = ctx.EditMessageReplyMarkup(&tg.EditMessageReplyMarkupParameters{
@@ -78,26 +76,27 @@ func (h *Handler) CallbackSet(ctx *model.Context) (err error) {
 
 		answer.Text = ctx.T().Sprintf("callback__text_add-set", set.Title)
 
-		for i := range set.Stickers {
-			if ctx.Sticker, err = h.stickersStore.GetOrCreate(&model.Sticker{
-				CreatedAt:  ctx.CallbackQuery.Message.Date,
-				UpdatedAt:  ctx.CallbackQuery.Message.Date,
-				Width:      set.Stickers[i].Width,
-				Height:     set.Stickers[i].Height,
-				Emoji:      set.Stickers[i].Emoji,
-				ID:         set.Stickers[i].FileID,
-				IsAnimated: set.Stickers[i].IsAnimated,
-				SetName:    set.Name,
-			}); err != nil {
-				return ctx.Error(err)
+		go func(ctx *model.Context) {
+			for i := range set.Stickers {
+				sticker, err := h.stickersStore.GetOrCreate(&model.Sticker{
+					CreatedAt:  ctx.CallbackQuery.Message.Date,
+					UpdatedAt:  ctx.CallbackQuery.Message.Date,
+					Width:      set.Stickers[i].Width,
+					Height:     set.Stickers[i].Height,
+					Emoji:      set.Stickers[i].Emoji,
+					ID:         set.Stickers[i].FileID,
+					IsAnimated: set.Stickers[i].IsAnimated,
+					SetName:    set.Name,
+				})
+				if err != nil {
+					continue
+				}
+
+				_ = h.store.AddSticker(ctx.User, sticker)
 			}
 
-			_ = h.store.AddSticker(ctx.User, ctx.Sticker)
-		}
-
-		if err = h.store.AddStickersSet(ctx.User, set.Name); err != nil {
-			return ctx.Error(err)
-		}
+			_ = h.store.AddStickersSet(ctx.User, set.Name)
+		}(ctx)
 
 		markup.InlineKeyboard = append(markup.InlineKeyboard, tg.NewInlineKeyboardRow(
 			tg.NewInlineKeyboardButton(
@@ -110,9 +109,7 @@ func (h *Handler) CallbackSet(ctx *model.Context) (err error) {
 	} else {
 		answer.Text = ctx.T().Sprintf("callback__text_remove-set", ctx.Sticker.SetName)
 
-		if err = h.store.RemoveStickersSet(ctx.User, ctx.Sticker.SetName); err != nil {
-			return ctx.Error(err)
-		}
+		go h.store.RemoveStickersSet(ctx.User, ctx.Sticker.SetName)
 
 		markup.InlineKeyboard = append(markup.InlineKeyboard, tg.NewInlineKeyboardRow(
 			tg.NewInlineKeyboardButton(

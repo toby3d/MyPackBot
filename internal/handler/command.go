@@ -66,9 +66,7 @@ func (h *Handler) CommandAddSticker(ctx *model.Context) (err error) {
 		return nil
 	}
 
-	if err = h.store.AddSticker(ctx.User, ctx.Sticker); err != nil {
-		return ctx.Error(err)
-	}
+	go h.store.AddSticker(ctx.User, ctx.Sticker)
 
 	return h.sendMessage(ctx, ctx.T().Sprintf("addsticker-command__text"))
 }
@@ -80,9 +78,7 @@ func (h *Handler) CommandAddPack(ctx *model.Context) (err error) {
 		return nil
 	}
 
-	if err = h.store.AddStickersSet(ctx.User, ctx.Sticker.SetName); err != nil {
-		return ctx.Error(err)
-	}
+	go h.store.AddStickersSet(ctx.User, ctx.Sticker.SetName)
 
 	return h.sendMessage(ctx, ctx.T().Sprintf("addpack-command__text"))
 }
@@ -94,9 +90,7 @@ func (h *Handler) CommandDelSticker(ctx *model.Context) (err error) {
 		return nil
 	}
 
-	if err = h.store.RemoveSticker(ctx.User, ctx.Sticker); err != nil {
-		return ctx.Error(err)
-	}
+	go h.store.RemoveSticker(ctx.User, ctx.Sticker)
 
 	return h.sendMessage(ctx, ctx.T().Sprintf("delsticker-command__text"))
 }
@@ -108,9 +102,7 @@ func (h *Handler) CommandDelPack(ctx *model.Context) (err error) {
 		return nil
 	}
 
-	if err = h.store.RemoveStickersSet(ctx.User, ctx.Sticker.SetName); err != nil {
-		return ctx.Error(err)
-	}
+	go h.store.RemoveStickersSet(ctx.User, ctx.Sticker.SetName)
 
 	return h.sendMessage(ctx, ctx.T().Sprintf("delpack-command__text"))
 }

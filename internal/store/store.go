@@ -12,6 +12,7 @@ import (
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	"gitlab.com/toby3d/mypackbot/internal/model/stickers"
 	"gitlab.com/toby3d/mypackbot/internal/model/users"
+	"golang.org/x/xerrors"
 )
 
 type Store struct {
@@ -88,11 +89,11 @@ func (store *Store) GetSticker(u *model.User, s *model.Sticker) (*model.UserStic
 
 	var us *model.UserSticker
 
-	if err = store.conn.View(func(tx *bolt.Tx) error {
-		return tx.Bucket(common.BucketUsersStickers).ForEach(func(key, val []byte) error {
+	if err = store.conn.View(func(tx *bolt.Tx) (err error) {
+		if err = tx.Bucket(common.BucketUsersStickers).ForEach(func(key, val []byte) (err error) {
 			item := new(model.UserSticker)
 
-			if err := json.ConfigFastest.Unmarshal(val, item); err != nil {
+			if err = json.ConfigFastest.Unmarshal(val, item); err != nil {
 				return err
 			}
 
@@ -102,8 +103,12 @@ func (store *Store) GetSticker(u *model.User, s *model.Sticker) (*model.UserStic
 
 			us = item
 
-			return nil
-		})
+			return model.ErrForEachStop
+		}); err != nil && !xerrors.Is(err, model.ErrForEachStop) {
+			return err
+		}
+
+		return nil
 	}); err != nil {
 		return nil, err
 	}
@@ -209,13 +214,13 @@ func (store *Store) RemoveSticker(u *model.User, s *model.Sticker) (err error) {
 		return model.ErrUserStickerNotExist
 	}
 
-	return store.conn.Update(func(tx *bolt.Tx) error {
+	return store.conn.Update(func(tx *bolt.Tx) (err error) {
 		bkt := tx.Bucket(common.BucketUsersStickers)
 
-		return bkt.ForEach(func(key, val []byte) error {
+		if err = bkt.ForEach(func(key, val []byte) (err error) {
 			item := new(model.UserSticker)
 
-			if err := json.ConfigFastest.Unmarshal(val, &item); err != nil {
+			if err = json.ConfigFastest.Unmarshal(val, &item); err != nil {
 				return err
 			}
 
@@ -223,8 +228,16 @@ func (store *Store) RemoveSticker(u *model.User, s *model.Sticker) (err error) {
 				return nil
 			}
 
-			return bkt.Delete(key)
-		})
+			if err = bkt.Delete(key); err != nil {
+				return err
+			}
+
+			return model.ErrForEachStop
+		}); err != nil && !xerrors.Is(err, model.ErrForEachStop) {
+			return err
+		}
+
+		return nil
 	})
 }
 

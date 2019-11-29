@@ -9,6 +9,7 @@ import (
 	json "github.com/json-iterator/go"
 	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
+	"golang.org/x/xerrors"
 )
 
 type StickersStore struct{ conn *bolt.DB }
@@ -94,9 +95,9 @@ func (store *StickersStore) GetSet(name string) (model.Stickers, int) {
 	stickers := make(model.Stickers, 0)
 
 	_ = store.conn.View(func(tx *bolt.Tx) error {
-		return tx.Bucket(common.BucketStickers).ForEach(func(key, val []byte) error {
+		return tx.Bucket(common.BucketStickers).ForEach(func(key, val []byte) (err error) {
 			s := new(model.Sticker)
-			if err := json.ConfigFastest.Unmarshal(val, s); err != nil {
+			if err = json.ConfigFastest.Unmarshal(val, s); err != nil {
 				return err
 			}
 
@@ -147,15 +148,14 @@ func (store *StickersStore) Remove(sid string) error {
 		return model.ErrStickerNotExist
 	}
 
-	return store.conn.Update(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket(common.BucketStickers)
-		if err := bkt.Delete([]byte(sid)); err != nil {
+	return store.conn.Update(func(tx *bolt.Tx) (err error) {
+		if err = tx.Bucket(common.BucketStickers).Delete([]byte(sid)); err != nil {
 			return err
 		}
 
-		bkt = tx.Bucket(common.BucketUsersStickers)
+		bkt := tx.Bucket(common.BucketUsersStickers)
 
-		return bkt.ForEach(func(key, val []byte) error {
+		if err = bkt.ForEach(func(key, val []byte) (err error) {
 			us := new(model.UserSticker)
 			if err := json.Unmarshal(val, us); err != nil {
 				return err
@@ -165,8 +165,16 @@ func (store *StickersStore) Remove(sid string) error {
 				return nil
 			}
 
-			return bkt.Delete(key)
-		})
+			if err = bkt.Delete(key); err != nil {
+				return err
+			}
+
+			return model.ErrForEachStop
+		}); err != nil && !xerrors.Is(err, model.ErrForEachStop) {
+			return err
+		}
+
+		return nil
 	})
 }
 

@@ -44,7 +44,7 @@ func AcquireSticker(store stickers.Manager) Interceptor {
 					sticker := stickerToModel(&setSticker)
 					sticker.CreatedAt = ctx.Sticker.CreatedAt
 					sticker.UpdatedAt = ctx.Sticker.UpdatedAt
-					_, _ = store.GetOrCreate(sticker)
+					_ = store.Create(sticker)
 				}
 			}()
 		}

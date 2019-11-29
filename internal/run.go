@@ -57,13 +57,15 @@ func (mpb *MyPackBot) Run() error {
 
 	for update := range updates {
 		update := update
-		ctx := new(model.Context)
-		ctx.Bot = mpb.bot
-		ctx.Update = &update
+		go func(update *tg.Update) {
+			ctx := new(model.Context)
+			ctx.Bot = mpb.bot
+			ctx.Update = update
 
-		if err := h(ctx); err != nil {
-			dlog.Ln("ERROR:", err.Error())
-		}
+			if err := h(ctx); err != nil {
+				dlog.Ln("ERROR:", err.Error())
+			}
+		}(&update)
 	}
 
 	return nil

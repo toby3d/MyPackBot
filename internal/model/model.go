@@ -95,6 +95,9 @@ var (
 		Message: "Sticker already removed",
 		frame:   xerrors.Caller(0),
 	}
+
+	// ErrForEachStop used in ForEach loops in database for forse stop iterations
+	ErrForEachStop = xerrors.New("stop")
 )
 
 func (s *Sticker) InSet() bool {

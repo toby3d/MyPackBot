@@ -8,6 +8,7 @@ import (
 	json "github.com/json-iterator/go"
 	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
+	"golang.org/x/xerrors"
 )
 
 type UsersStore struct{ conn *bolt.DB }
@@ -81,19 +82,17 @@ func (store *UsersStore) Remove(uid int) error {
 		return model.ErrUserNotExist
 	}
 
-	return store.conn.Update(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket(common.BucketUsers)
-
-		if err := bkt.Delete([]byte(strconv.Itoa(uid))); err != nil {
+	return store.conn.Update(func(tx *bolt.Tx) (err error) {
+		if err = tx.Bucket(common.BucketUsers).Delete([]byte(strconv.Itoa(uid))); err != nil {
 			return err
 		}
 
-		bkt = tx.Bucket(common.BucketUsersStickers)
+		bkt := tx.Bucket(common.BucketUsersStickers)
 
-		return bkt.ForEach(func(key, val []byte) error {
+		if err = bkt.ForEach(func(key, val []byte) (err error) {
 			us := new(model.UserSticker)
 
-			if err := json.Unmarshal(val, us); err != nil {
+			if err = json.Unmarshal(val, us); err != nil {
 				return err
 			}
 
@@ -101,8 +100,16 @@ func (store *UsersStore) Remove(uid int) error {
 				return nil
 			}
 
-			return bkt.Delete(key)
-		})
+			if err = bkt.Delete(key); err != nil {
+				return err
+			}
+
+			return model.ErrForEachStop
+		}); err != nil && !xerrors.Is(err, model.ErrForEachStop) {
+			return err
+		}
+
+		return nil
 	})
 }
 

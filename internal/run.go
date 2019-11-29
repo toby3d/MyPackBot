@@ -59,9 +59,7 @@ func (mpb *MyPackBot) Run() error {
 		update := update
 		ctx := new(model.Context)
 		ctx.Bot = mpb.bot
-		ctx.Sticker = new(model.Sticker)
 		ctx.Update = &update
-		ctx.User = new(model.User)
 
 		if err := h(ctx); err != nil {
 			dlog.Ln("ERROR:", err.Error())

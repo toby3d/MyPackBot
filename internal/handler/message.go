@@ -17,61 +17,7 @@ func (h *Handler) IsMessage(ctx *model.Context) (err error) {
 	return ctx.Error(err)
 }
 
-func (h *Handler) IsCommand(ctx *model.Context) (err error) {
-	switch {
-	case ctx.Message.IsCommandEqual(tg.CommandStart):
-		err = h.CommandStart(ctx)
-	case ctx.Message.IsCommandEqual(tg.CommandHelp):
-		err = h.CommandHelp(ctx)
-	case ctx.Message.IsCommandEqual(common.CommandPing):
-		err = h.CommandPing(ctx)
-	case ctx.Message.IsCommandEqual(tg.CommandSettings),
-		ctx.Message.IsCommandEqual(common.DataAddSticker),
-		ctx.Message.IsCommandEqual(common.CommandAddPack),
-		ctx.Message.IsCommandEqual(common.CommandDelSticker),
-		ctx.Message.IsCommandEqual(common.CommandDelPack),
-		ctx.Message.IsCommandEqual(common.CommandReset),
-		ctx.Message.IsCommandEqual(common.CommandCancel):
-		fallthrough
-	default:
-		err = h.CommandUnknown(ctx)
-	}
-
-	return ctx.Error(err)
-}
-
-func (h *Handler) CommandPing(ctx *model.Context) (err error) {
-	_, err = ctx.SendMessage(tg.NewMessage(ctx.Message.Chat.ID, "🏓"))
-	return ctx.Error(err)
-}
-
-func (h *Handler) CommandStart(ctx *model.Context) (err error) {
-	reply := tg.NewMessage(ctx.Message.Chat.ID, ctx.T().Sprintf("start__text", ctx.Message.From.FullName()))
-	reply.ReplyToMessageID = ctx.Message.ID
-	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
-	_, err = ctx.SendMessage(reply)
-
-	return ctx.Error(err)
-}
-
-func (h *Handler) CommandHelp(ctx *model.Context) (err error) {
-	reply := tg.NewMessage(ctx.Message.Chat.ID, ctx.T().Sprintf("help__text"))
-	reply.ReplyToMessageID = ctx.Message.ID
-	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
-	_, err = ctx.SendMessage(reply)
-
-	return ctx.Error(err)
-}
-
-func (h *Handler) CommandUnknown(ctx *model.Context) (err error) {
-	reply := tg.NewMessage(ctx.Message.Chat.ID, ctx.T().Sprintf("unknown-command__text"))
-	reply.ReplyToMessageID = ctx.Message.ID
-	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
-	_, err = ctx.SendMessage(reply)
-
-	return ctx.Error(err)
-}
-
+// IsSticker send to the Sticker a Message with CallbackQuery buttons for selecting actions.
 func (h *Handler) IsSticker(ctx *model.Context) error {
 	us, err := h.store.GetSticker(ctx.User, ctx.Sticker)
 	if err != nil {

@@ -9,6 +9,8 @@ import (
 
 func AcquireUser(us users.Manager) Interceptor {
 	return func(ctx *model.Context, next model.UpdateFunc) (err error) {
+		ctx.User = new(model.User)
+
 		switch {
 		case ctx.IsMessage():
 			ctx.User.ID = ctx.Message.From.ID

@@ -55,11 +55,11 @@ type (
 		*tg.Bot
 		*tg.Update
 
-		printer *message.Printer
-		Sticker *Sticker
 		User    *User
+		Sticker *Sticker
 
 		context context.Context
+		printer *message.Printer
 	}
 
 	contextKey string

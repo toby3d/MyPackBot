@@ -9,13 +9,14 @@ import (
 
 func AcquireSticker(store stickers.Manager) Interceptor {
 	return func(ctx *model.Context, next model.UpdateFunc) (err error) {
+		ctx.Sticker = new(model.Sticker)
 		switch {
-		case ctx.IsMessage():
-			if !ctx.Message.IsSticker() {
-				return next(ctx)
-			}
-
+		case ctx.IsMessage() && ctx.Message.IsSticker():
 			ctx.Sticker = stickerToModel(ctx.Message.Sticker)
+			ctx.Sticker.CreatedAt = ctx.Message.Date
+			ctx.Sticker.UpdatedAt = ctx.Message.Date
+		case ctx.IsMessage() && ctx.Message.IsReply() && ctx.Message.ReplyToMessage.IsSticker():
+			ctx.Sticker = stickerToModel(ctx.Message.ReplyToMessage.Sticker)
 			ctx.Sticker.CreatedAt = ctx.Message.Date
 			ctx.Sticker.UpdatedAt = ctx.Message.Date
 		case ctx.IsCallbackQuery():

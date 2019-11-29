@@ -7,9 +7,9 @@ import (
 
 const (
 	CommandPing       string = "ping"
-	CommandAddSticker string = "addsticker"
-	CommandAddPack    string = "addpack"
-	CommandDelSticker string = "delsticker"
+	CommandAddSticker string = DataAdd + DataSticker
+	CommandAddPack    string = DataAdd + "pack"
+	CommandDelSticker string = "del" + DataSticker
 	CommandDelPack    string = "delpack"
 	CommandReset      string = "reset"
 	CommandCancel     string = "cancel"
@@ -28,9 +28,7 @@ const (
 	DataSticker       string = "sticker"
 )
 
-const (
-	SetNameUploaded string = "uploaded_by_mypackbot"
-)
+const SetNameUploaded string = "uploaded_by_mypackbot"
 
 var Version = semver.MustParse("2.0.0")
 
@@ -38,5 +36,9 @@ var (
 	BucketStickers      = []byte("stickers")
 	BucketUsers         = []byte("users")
 	BucketUsersStickers = []byte("users_stickers")
-	Buckets             = [...][]byte{BucketStickers, BucketUsers, BucketUsersStickers}
+	Buckets             = [...][]byte{
+		BucketStickers,
+		BucketUsers,
+		BucketUsersStickers,
+	}
 )

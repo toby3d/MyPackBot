@@ -34,8 +34,8 @@ func TestUsersStore(t *testing.T) {
 		ID:           42,
 		CreatedAt:    time.Now().UTC().Unix(),
 		UpdatedAt:    time.Now().UTC().Unix(),
-		LanguageCode: "ru",
 		LastSeen:     time.Now().UTC().Unix(),
+		LanguageCode: "ru",
 	}
 
 	dataBase, release := initDB(t)

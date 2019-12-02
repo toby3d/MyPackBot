@@ -27,6 +27,7 @@ func AutoMigrate(db *bolt.DB) error {
 				return err
 			}
 		}
+
 		return nil
 	})
 }

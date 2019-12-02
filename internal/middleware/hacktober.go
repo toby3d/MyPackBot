@@ -9,12 +9,12 @@ import (
 
 func Hacktober() Interceptor {
 	return func(ctx *model.Context, next model.UpdateFunc) (err error) {
-		if !ctx.IsMessage() {
+		if !ctx.Request.IsMessage() {
 			return next(ctx)
 		}
 
 		lastSeen := time.Unix(ctx.User.LastSeen, 0)
-		date := ctx.Message.Time()
+		date := ctx.Request.Message.Time()
 		before := time.Date(date.Year(), time.October, 1, 0, 0, 0, 0, time.UTC)
 		// NOTE(toby3d): not November 1, use October 31
 		after := before.AddDate(0, 1, 0).Add(-1 * 24 * time.Hour)
@@ -27,12 +27,12 @@ func Hacktober() Interceptor {
 			return err
 		}
 
-		reply := tg.NewMessage(ctx.Message.Chat.ID, ctx.T().Sprintf("🕺 HacktoberFest is here!\n\nIf you are a beginner or already an experienced golang-developer, now is a great time to help improve the quality of the code of this bot. Choose issue to your taste and offer your PR!"))
+		reply := tg.NewMessage(ctx.Request.Message.Chat.ID, "🕺 HacktoberFest is here!\n\nIf you are a beginner or already an experienced golang-developer, now is a great time to help improve the quality of the code of this bot. Choose issue to your taste and offer your PR!")
 		reply.DisableNotification = false
 		reply.DisableWebPagePreview = false
 		reply.ParseMode = tg.StyleMarkdown
 		reply.ReplyMarkup = tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonURL(
-			ctx.T().Sprintf("🔧 Let's hack!"),
+			"🔧 Let's hack!",
 			"https://gitlab.com/toby3d/mypackbot/issues?label_name%5B%5D=hacktoberfest",
 		)))
 

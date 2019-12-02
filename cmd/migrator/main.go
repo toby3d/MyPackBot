@@ -5,6 +5,7 @@ import (
 	"log"
 	"path/filepath"
 
+	json "github.com/json-iterator/go"
 	bunt "github.com/tidwall/buntdb"
 	"gitlab.com/toby3d/mypackbot/internal/db"
 	"gitlab.com/toby3d/mypackbot/internal/migrator"
@@ -13,8 +14,9 @@ import (
 )
 
 var (
-	flagOld   = flag.String("old", filepath.Join(".", "old.db"), "filepath to old database file")
+	flagGroup = flag.Int64("group", 0, "proxy group for migration")
 	flagNew   = flag.String("new", filepath.Join(".", "new.db"), "filepath to new database file")
+	flagOld   = flag.String("old", filepath.Join(".", "old.db"), "filepath to old database file")
 	flagToken = flag.String("token", "", "bot token")
 )
 
@@ -28,22 +30,29 @@ func main() {
 
 	oldDB, err := bunt.Open(*flagOld)
 	if err != nil {
-		log.Fatalln("ERROR:", err.Error())
+		log.Fatalln("ERROR OLD DB:", err.Error())
 	}
 	defer oldDB.Close()
 
 	newDB, err := db.Open(*flagNew)
 	if err != nil {
-		log.Fatalln("ERROR:", err.Error())
+		log.Fatalln("ERROR NEW DB:", err.Error())
 	}
 	defer newDB.Close()
 
+	marshler := json.ConfigFastest
+	users := store.NewUsersStore(newDB, marshler)
+	stickers := store.NewStickersStore(newDB, marshler)
+	usersStickers := store.NewUsersStickersStore(newDB, users, stickers, marshler)
+
 	if err = migrator.AutoMigrate(migrator.AutoMigrateConfig{
-		OldDB:            oldDB,
-		NewStore:         store.NewStore(newDB),
-		NewUsersStore:    store.NewUsersStore(newDB),
-		NewStickersStore: store.NewStickersStore(newDB),
-		Bot:              bot,
+		Bot:           bot,
+		GroupID:       *flagGroup,
+		Stickers:      stickers,
+		UsersStickers: usersStickers,
+		Users:         users,
+		OldDB:         oldDB,
+		Marshler:      marshler,
 	}); err != nil {
 		log.Fatalln("ERROR:", err.Error())
 	}

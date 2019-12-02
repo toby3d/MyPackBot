@@ -1,38 +1,49 @@
 package handler
 
 import (
-	"github.com/kirillDanshin/dlog"
 	"gitlab.com/toby3d/mypackbot/internal/model"
+	"gitlab.com/toby3d/mypackbot/internal/model/photos"
 	"gitlab.com/toby3d/mypackbot/internal/model/stickers"
-	"gitlab.com/toby3d/mypackbot/internal/model/store"
 	"gitlab.com/toby3d/mypackbot/internal/model/users"
+	usersphotos "gitlab.com/toby3d/mypackbot/internal/model/users/photos"
+	usersstickers "gitlab.com/toby3d/mypackbot/internal/model/users/stickers"
+	"gitlab.com/toby3d/mypackbot/internal/store"
 )
 
 type Handler struct {
-	store         store.Manager
-	usersStore    users.Manager
-	stickersStore stickers.Manager
+	users         users.Manager
+	stickers      stickers.Manager
+	photos        photos.Manager
+	usersStickers usersstickers.Manager
+	usersPhotos   usersphotos.Manager
+	store         *store.Store
 }
 
-func NewHandler(store store.Manager, usersStore users.Manager, stickersStore stickers.Manager) *Handler {
+func NewHandler(us users.Manager, ss stickers.Manager, ps photos.Manager, uss usersstickers.Manager, ups usersphotos.Manager) *Handler {
 	return &Handler{
-		store:         store,
-		usersStore:    usersStore,
-		stickersStore: stickersStore,
+		photos:        ps,
+		stickers:      ss,
+		users:         us,
+		usersPhotos:   ups,
+		usersStickers: uss,
+		store: &store.Store{
+			Photos:        ps,
+			Stickers:      ss,
+			UsersPhotos:   ups,
+			UsersStickers: uss,
+		},
 	}
 }
 
 func (h *Handler) UpdateHandler(ctx *model.Context) (err error) {
 	switch {
-	case ctx.IsMessage():
+	case ctx.Request.IsMessage():
 		err = h.IsMessage(ctx)
-	case ctx.IsCallbackQuery():
+	case ctx.Request.IsCallbackQuery():
 		err = h.IsCallbackQuery(ctx)
-	case ctx.IsInlineQuery():
+	case ctx.Request.IsInlineQuery():
 		err = h.IsInlineQuery(ctx)
-	default:
-		dlog.D(ctx)
 	}
 
-	return ctx.Error(err)
+	return err
 }

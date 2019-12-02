@@ -12,10 +12,10 @@ func UpdateLastSeen(us users.Manager) Interceptor {
 		timeStamp := time.Now().UTC().Unix()
 
 		switch {
-		case ctx.IsMessage():
-			timeStamp = ctx.Message.Date
-		case ctx.IsCallbackQuery():
-			timeStamp = ctx.CallbackQuery.Message.Date
+		case ctx.Request.IsMessage():
+			timeStamp = ctx.Request.Message.Date
+		case ctx.Request.IsCallbackQuery():
+			timeStamp = ctx.Request.CallbackQuery.Message.Date
 		}
 
 		if time.Unix(ctx.User.LastSeen, 0).After(time.Unix(timeStamp, 0).Add(-1 * time.Hour)) {

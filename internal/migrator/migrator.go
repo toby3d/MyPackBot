@@ -1,220 +1,324 @@
 package migrator
 
 import (
+	"io/ioutil"
+	"os"
+	"sort"
 	"strconv"
 	"strings"
-	"time"
 
+	json "github.com/json-iterator/go"
 	bunt "github.com/tidwall/buntdb"
-	"gitlab.com/toby3d/mypackbot/internal/handler"
+	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	"gitlab.com/toby3d/mypackbot/internal/model/stickers"
-	"gitlab.com/toby3d/mypackbot/internal/model/store"
 	"gitlab.com/toby3d/mypackbot/internal/model/users"
+	usersstickers "gitlab.com/toby3d/mypackbot/internal/model/users/stickers"
 	tg "gitlab.com/toby3d/telegram"
-	"golang.org/x/text/language"
-	"golang.org/x/text/message"
 )
 
 type (
-	AutoMigrateConfig struct {
-		OldDB            *bunt.DB
-		NewStore         store.Manager
-		NewUsersStore    users.Manager
-		NewStickersStore stickers.Manager
-		Bot              *tg.Bot
+	Data struct {
+		Records Records
+		*Backup
 	}
 
-	tempData struct {
-		users        map[int]*model.User // NOTE(toby3d): users[userId]*User
-		sets         map[string]struct{} // NOTE(toby3d): sets[setName]
-		userSets     map[int][]string    // NOTE(toby3d): userSets[userId][]setName
-		userStickers map[int]string      // NOTE(toby3d): userStickers[userId]fileId
+	Record struct {
+		UserID  int64
+		SetName string
+		FileID  string
+		Emoji   string
+	}
+
+	Records []*Record
+
+	Backup struct {
+		Users        []int64  `json:"users"`
+		Stickers     []string `json:"stickers"`
+		ImportedSets []string `json:"imported_sets"`
+		BlockedSets  []string `json:"blocked_sets"`
+	}
+
+	AutoMigrateConfig struct {
+		OldDB         *bunt.DB
+		Stickers      stickers.Manager
+		UsersStickers usersstickers.Manager
+		Users         users.Manager
+		Bot           *tg.Bot
+		GroupID       int64
+		Marshler      json.API
 	}
 )
 
 const (
 	partSet         string = "set"
+	partSticker     string = "sticker"
 	uploadedSetName string = "?"
 )
 
-func setStrings() (err error) {
-	if err = message.SetString(language.English, "sticker__text", "🤔 This custom/uploaded sticker has been imported from previous version of the bot. You can add it to your pack by clicking on the button below. If the button does not work - please try to click it later when the migration process is completed."); err != nil {
-		return err
-	}
-
-	if err = message.SetString(language.Russian, "sticker__text", "🤔 Этот загруженый стикер был импортирован с прошлой версии бота. Ты можешь добавить его к себе нажав на кнопку ниже. Если кнопка не работает - пожалуйста, попробуй нажать её позже, когда процесс миграции завершится."); err != nil {
-		return err
-	}
-
-	if err = message.SetString(language.English, "sticker__button_add-single", "📙 Import this sticker"); err != nil {
-		return err
-	}
-
-	if err = message.SetString(language.Russian, "sticker__button_add-single", "📙 Импортировать этот стикер"); err != nil {
-		return err
-	}
-
-	return err
-}
-
 func AutoMigrate(cfg AutoMigrateConfig) (err error) {
-	if err = setStrings(); err != nil {
-		return err
-	}
-
 	// NOTE(toby3d): preparing temp-stores for migrating
-	data, err := importOldData(cfg.OldDB)
+	data, err := cfg.importOldData()
 	if err != nil {
 		return err
 	}
 
-	for uid, u := range data.users { // NOTE(toby3d): STEP 1: migrate users
-		if _, err = cfg.NewUsersStore.GetOrCreate(u); err != nil {
-			delete(data.users, uid)
-		}
+	// NOTE(toby3d): STEP 1: migrate users
+	cfg.migrateUsers(data)
+
+	// NOTE(toby3d): STEP 2: migrate sets
+	cfg.migrateSets(data)
+
+	// NOTE(toby3d): STEP 3: migrate stickers
+	cfg.migrateStickers(data)
+
+	return nil
+}
+
+func (cfg *AutoMigrateConfig) importOldData() (*Data, error) {
+	data := new(Data)
+
+	var err error
+	if data.Backup, err = cfg.readBackup("backup.json"); err != nil && !os.IsNotExist(err) {
+		return nil, err
 	}
 
-	for setName := range data.sets { // NOTE(toby3d): STEP 2: migrate sets
-		set, err := cfg.Bot.GetStickerSet(setName)
-		if err != nil {
-			delete(data.sets, setName)
-			continue
-		}
-
-		for _, setSticker := range set.Stickers {
-			setSticker := setSticker
-			_, _ = cfg.NewStickersStore.GetOrCreate(&model.Sticker{
-				ID:         setSticker.FileID,
-				Emoji:      setSticker.Emoji,
-				Width:      setSticker.Width,
-				Height:     setSticker.Height,
-				IsAnimated: setSticker.IsAnimated,
-				SetName:    setSticker.SetName,
-			})
-		}
+	if data.Backup == nil {
+		data.Backup = new(Backup)
 	}
 
-	for uid, sets := range data.userSets { // NOTE(toby3d): STEP 3: import sets to users
-		for _, setName := range sets {
-			u, err := cfg.NewUsersStore.GetOrCreate(data.users[uid])
-			if err != nil || u == nil {
-				continue
+	data.Records = make([]*Record, 0)
+
+	if err = cfg.OldDB.View(func(tx *bunt.Tx) error {
+		// NOTE(toby3d): read every key in buntdb database
+		return tx.AscendKeys("user:*", func(key, val string) bool {
+			r := new(Record)
+
+			// NOTE(toby3d): split key name on parts
+			parts := strings.Split(key, ":")
+
+			// NOTE(toby3d): this part always contains user/chat id
+			var err error
+			r.UserID, err = strconv.ParseInt(parts[1], 10, 64)
+			if err != nil || r.UserID == 0 || !strings.EqualFold(parts[2], partSet) {
+				return true
 			}
 
-			_ = cfg.NewStore.AddStickersSet(u, setName)
-		}
+			switch parts[2] {
+			case partSet:
+				r.SetName = parts[3]
+				r.FileID = parts[5]
+			case partSticker:
+				r.SetName = common.SetNameUploaded
+				r.FileID = parts[3]
+			default:
+				return true
+			}
+
+			if containsString(data.ImportedSets, r.SetName) || containsString(data.Stickers, r.FileID) {
+				return true
+			}
+
+			if containsString(data.BlockedSets, r.SetName) || r.SetName == uploadedSetName {
+				r.SetName = common.SetNameUploaded
+			}
+
+			r.Emoji = val
+
+			data.Records = append(data.Records, r)
+			return true
+		})
+	}); err != nil {
+		return nil, err
 	}
 
-	count := 0
-	ticker := time.NewTicker(100 * time.Millisecond)
-	h := handler.NewHandler(cfg.NewStore, cfg.NewUsersStore, cfg.NewStickersStore)
+	sort.Slice(data.Records, func(i, j int) bool {
+		return data.Records[i].UserID < data.Records[j].UserID ||
+			data.Records[i].SetName < data.Records[j].SetName ||
+			data.Records[i].FileID < data.Records[j].FileID
+	})
 
-	for uid, fileID := range data.userStickers { // NOTE(toby3d): STEP 4: send uploaded stickers directly to users
-		count++
+	if err = cfg.saveBackup("backup.json", data.Backup); err != nil {
+		return nil, err
+	}
 
-		if count > len(data.userStickers) {
-			ticker.Stop()
-			break
-		}
+	return data, nil
+}
 
-		<-ticker.C
+func (cfg *AutoMigrateConfig) migrateUsers(data *Data) (err error) {
+	if data.Backup, err = cfg.readBackup("backup.json"); err != nil && !os.IsNotExist(err) {
+		return err
+	}
 
-		ctx := new(model.Context)
-		ctx.Update = new(tg.Update)
-
-		ctx.Update.Message, err = cfg.Bot.SendSticker(&tg.SendStickerParameters{
-			ChatID:              int64(uid),
-			Sticker:             fileID,
-			DisableNotification: true,
-		})
-		if err != nil {
+	for i := range data.Records {
+		if containsInt(data.Users, data.Records[i].UserID) {
 			continue
 		}
 
-		ctx.User = cfg.NewUsersStore.Get(uid)
-		ctx.Sticker = &model.Sticker{
-			ID:         ctx.Message.Sticker.FileID,
-			Emoji:      ctx.Message.Sticker.Emoji,
-			Width:      ctx.Message.Sticker.Width,
-			Height:     ctx.Message.Sticker.Height,
-			IsAnimated: ctx.Message.Sticker.IsAnimated,
-			SetName:    ctx.Message.Sticker.SetName,
-			CreatedAt:  ctx.Message.Date,
-			UpdatedAt:  ctx.Message.Date,
-		}
+		cfg.Users.Create(&model.User{
+			UserID:       data.Records[i].UserID,
+			LanguageCode: "en",
+		})
 
-		_ = h.IsSticker(ctx)
+		data.Users = append(data.Users, data.Records[i].UserID)
+		cfg.saveBackup("backup.json", data.Backup)
 	}
 
 	return nil
 }
 
-func importOldData(db *bunt.DB) (*tempData, error) {
-	data := new(tempData)
-	data.users = make(map[int]*model.User)
-	data.sets = make(map[string]struct{})
-	data.userSets = make(map[int][]string)
-	data.userStickers = make(map[int]string)
+func (cfg *AutoMigrateConfig) migrateSets(data *Data) (err error) {
+	if data.Backup, err = cfg.readBackup("backup.json"); err != nil && !os.IsNotExist(err) {
+		return err
+	}
 
-	err := db.View(func(tx *bunt.Tx) error {
-		// NOTE(toby3d): read every key in buntdb database
-		return tx.AscendKeys("user:*", func(k, v string) bool {
-			// NOTE(toby3d): split key name on parts
-			parts := strings.Split(k, ":")
-			// NOTE(toby3d): this part always contains user/chat id
-			uid, err := strconv.Atoi(parts[1])
-			if err != nil || uid == 0 {
-				return true
-			}
-
-			// NOTE(toby3d): we don't modify and force save this data to a new store because keys may be
-			// duplicated
-
-			if _, ok := data.users[uid]; !ok {
-				data.users[uid] = new(model.User)
-				data.users[uid] = &model.User{
-					ID:           uid,
-					LanguageCode: "en",
-				}
-			}
-
-			if strings.EqualFold(parts[2], partSet) {
-				setName := parts[3]
-				if strings.EqualFold(setName, uploadedSetName) {
-					data.userStickers[uid] = parts[5]
-					return true
-				}
-
-				if _, ok := data.sets[setName]; !ok {
-					data.sets[setName] = struct{}{}
-				}
-
-				if !contains(data.userSets[uid], setName) {
-					data.userSets[uid] = append(data.userSets[uid], setName)
-				}
-			}
-
-			return true
-		})
-	})
-
-	return data, err
-}
-
-// contains checks what src array contains find string (or not)
-func contains(src []string, find string) bool {
-	var ok bool
-
-	for i := range src {
-		if !strings.EqualFold(src[i], find) {
+	for i := range data.Records {
+		if data.Records[i].SetName == uploadedSetName || data.Records[i].SetName == common.SetNameUploaded {
+			data.Records[i].SetName = common.SetNameUploaded
 			continue
 		}
 
-		ok = true
+		if containsString(data.ImportedSets, data.Records[i].SetName) {
+			continue
+		}
 
-		break
+		if containsString(data.BlockedSets, data.Records[i].SetName) {
+			data.Records[i].SetName = common.SetNameUploaded
+			continue
+		}
+
+		set, err := cfg.Bot.GetStickerSet(data.Records[i].SetName)
+		if err != nil {
+			data.BlockedSets = append(data.BlockedSets, data.Records[i].SetName)
+			data.Records[i].SetName = common.SetNameUploaded
+			cfg.saveBackup("backup.json", data.Backup)
+			continue
+		}
+
+		for _, setSticker := range set.Stickers {
+			setSticker := setSticker
+			cfg.Stickers.Create(stickerToModel(&setSticker))
+		}
+
+		u := cfg.Users.GetByUserID(data.Records[i].UserID)
+		cfg.UsersStickers.AddSet(u.ID, set.Name)
+		data.ImportedSets = append(data.ImportedSets, set.Name)
+		cfg.saveBackup("backup.json", data.Backup)
 	}
 
-	return ok
+	return nil
+}
+
+func (cfg *AutoMigrateConfig) migrateStickers(data *Data) (err error) {
+	if data.Backup, err = cfg.readBackup("backup.json"); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+
+	for i := range data.Records {
+		if data.Records[i].SetName == uploadedSetName {
+			data.Records[i].SetName = common.SetNameUploaded
+		}
+
+		if data.Records[i].SetName != common.SetNameUploaded {
+			continue
+		}
+
+		if containsString(data.Stickers, data.Records[i].FileID) {
+			continue
+		}
+
+		// NOTE(toby3d): send old sticker ID to get new
+		result, err := cfg.Bot.SendSticker(&tg.SendStickerParameters{
+			ChatID:              cfg.GroupID,
+			DisableNotification: true,
+			Sticker:             data.Records[i].FileID,
+		})
+		if err != nil || !result.IsSticker() {
+			continue
+		}
+
+		s := stickerToModel(result.Sticker)
+		s.SetName = common.SetNameUploaded
+		if s.Emoji == "" {
+			s.Emoji = data.Records[i].Emoji
+		}
+
+		// NOTE(toby3d): store old-new stickers
+		cfg.Stickers.Create(s)
+		u := cfg.Users.GetByUserID(data.Records[i].UserID)
+		s = cfg.Stickers.GetByFileID(s.FileID)
+		cfg.UsersStickers.Add(u.ID, s.ID)
+		data.Stickers = append(data.Stickers, data.Records[i].FileID)
+		cfg.saveBackup("backup.json", data.Backup)
+		cfg.Bot.DeleteMessage(result.Chat.ID, result.ID)
+	}
+
+	return nil
+}
+
+func containsInt(src []int64, find int64) bool {
+	for i := range src {
+		if src[i] != find {
+			continue
+		}
+
+		return true
+	}
+
+	return false
+}
+
+func containsString(src []string, find string) bool {
+	for i := range src {
+		if src[i] != find {
+			continue
+		}
+
+		return true
+	}
+
+	return false
+}
+
+func stickerToModel(s *tg.Sticker) *model.Sticker {
+	sticker := new(model.Sticker)
+	sticker.FileID = s.FileID
+	sticker.Emoji = s.Emoji
+	sticker.Width = s.Width
+	sticker.Height = s.Height
+	sticker.IsAnimated = s.IsAnimated
+	sticker.SetName = s.SetName
+
+	if !sticker.InSet() {
+		sticker.SetName = common.SetNameUploaded
+	}
+
+	return sticker
+}
+
+func (cfg *AutoMigrateConfig) readBackup(filePath string) (bkp *Backup, err error) {
+	bkp = new(Backup)
+	if _, err = os.Stat(filePath); os.IsNotExist(err) {
+		return nil, err
+	}
+
+	src, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = cfg.Marshler.Unmarshal(src, bkp); err != nil {
+		return nil, err
+	}
+
+	return bkp, err
+}
+
+func (cfg *AutoMigrateConfig) saveBackup(filePath string, bkt *Backup) (err error) {
+	src, err := cfg.Marshler.Marshal(bkt)
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(filePath, src, 0644)
 }

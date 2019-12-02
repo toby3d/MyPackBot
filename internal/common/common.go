@@ -3,29 +3,29 @@ package common
 
 import (
 	"github.com/Masterminds/semver"
+	tg "gitlab.com/toby3d/telegram"
 )
 
 const (
-	CommandPing       string = "ping"
-	CommandAddSticker string = DataAdd + DataSticker
-	CommandAddPack    string = DataAdd + "pack"
-	CommandDelSticker string = "del" + DataSticker
-	CommandDelPack    string = "delpack"
-	CommandReset      string = "reset"
+	CommandEdit string = "edit"
+
+	// NOTE(toby3d): DEPRECATED
+	CommandAddPack    string = "addpack"
+	CommandAddSticker string = "add" + tg.TypeSticker
 	CommandCancel     string = "cancel"
+	CommandDelPack    string = "addpack"
+	CommandDelSticker string = "add" + tg.TypeSticker
+	CommandReset      string = "reset"
 )
 
 const (
-	DataAdd           string = "add"
-	DataAddSet        string = DataSet + DataSeparator + DataAdd
-	DataAddSticker    string = DataSticker + DataSeparator + DataAdd
-	DataLanguage      string = "language"
-	DataRemove        string = "remove"
-	DataRemoveSet     string = DataSet + DataSeparator + DataRemove
-	DataRemoveSticker string = DataSticker + DataSeparator + DataRemove
-	DataSeparator     string = "@"
-	DataSet           string = "set"
-	DataSticker       string = "sticker"
+	DataSeparator string = "@"
+	DataAdd       string = "add"
+	DataDel       string = "del"
+	DataSet       string = "set"
+
+	DataAddSet string = DataAdd + DataSeparator + DataSet
+	DataDelSet string = DataDel + DataSeparator + DataSet
 )
 
 const SetNameUploaded string = "uploaded_by_mypackbot"
@@ -33,12 +33,16 @@ const SetNameUploaded string = "uploaded_by_mypackbot"
 var Version = semver.MustParse("2.0.0")
 
 var (
+	BucketPhotos        = []byte("photos")
 	BucketStickers      = []byte("stickers")
 	BucketUsers         = []byte("users")
+	BucketUsersPhotos   = []byte("users_photos")
 	BucketUsersStickers = []byte("users_stickers")
 	Buckets             = [...][]byte{
+		BucketPhotos,
 		BucketStickers,
 		BucketUsers,
+		BucketUsersPhotos,
 		BucketUsersStickers,
 	}
 )

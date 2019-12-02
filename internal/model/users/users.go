@@ -4,8 +4,8 @@ import "gitlab.com/toby3d/mypackbot/internal/model"
 
 type Manager interface {
 	Create(*model.User) error
-	Get(int) *model.User
+	Get(uint64) *model.User
+	GetByUserID(int64) *model.User
 	GetOrCreate(*model.User) (*model.User, error)
-	Remove(int) error
 	Update(*model.User) error
 }

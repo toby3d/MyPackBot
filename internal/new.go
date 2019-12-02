@@ -1,12 +1,15 @@
 package internal
 
 import (
+	json "github.com/json-iterator/go"
 	"github.com/spf13/viper"
 	"gitlab.com/toby3d/mypackbot/internal/config"
 	"gitlab.com/toby3d/mypackbot/internal/db"
+	"gitlab.com/toby3d/mypackbot/internal/model/photos"
 	"gitlab.com/toby3d/mypackbot/internal/model/stickers"
-	storemodel "gitlab.com/toby3d/mypackbot/internal/model/store"
 	"gitlab.com/toby3d/mypackbot/internal/model/users"
+	usersphotos "gitlab.com/toby3d/mypackbot/internal/model/users/photos"
+	usersstickers "gitlab.com/toby3d/mypackbot/internal/model/users/stickers"
 	"gitlab.com/toby3d/mypackbot/internal/store"
 	tg "gitlab.com/toby3d/telegram"
 )
@@ -14,9 +17,11 @@ import (
 type MyPackBot struct {
 	bot           *tg.Bot
 	config        *viper.Viper
-	store         storemodel.Manager
-	usersStore    users.Manager
-	stickersStore stickers.Manager
+	photos        photos.Manager
+	stickers      stickers.Manager
+	users         users.Manager
+	usersPhotos   usersphotos.Manager
+	usersStickers usersstickers.Manager
 }
 
 func New(path string) (mpb *MyPackBot, err error) {
@@ -31,21 +36,16 @@ func New(path string) (mpb *MyPackBot, err error) {
 		return nil, err
 	}
 
-	mpb.store = store.NewStore(conn)
-	mpb.usersStore = store.NewUsersStore(conn)
-	mpb.stickersStore = store.NewStickersStore(conn)
+	marshler := json.ConfigFastest
+	mpb.photos = store.NewPhotosStore(conn, marshler)
+	mpb.stickers = store.NewStickersStore(conn, marshler)
+	mpb.users = store.NewUsersStore(conn, marshler)
+	mpb.usersPhotos = store.NewUsersPhotosStore(conn, mpb.users, mpb.photos, marshler)
+	mpb.usersStickers = store.NewUsersStickersStore(conn, mpb.users, mpb.stickers, marshler)
 
 	if mpb.bot, err = tg.New(mpb.config.GetString("telegram.token")); err != nil {
 		return nil, err
 	}
 
 	return mpb, nil
-}
-
-func (mpb *MyPackBot) Bot() *tg.Bot {
-	return mpb.bot
-}
-
-func (mpb *MyPackBot) Store() storemodel.Manager {
-	return mpb.store
 }

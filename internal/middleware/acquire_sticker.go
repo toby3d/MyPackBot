@@ -9,44 +9,58 @@ import (
 
 func AcquireSticker(store stickers.Manager) Interceptor {
 	return func(ctx *model.Context, next model.UpdateFunc) (err error) {
-		ctx.Sticker = new(model.Sticker)
 		switch {
-		case ctx.IsMessage() && ctx.Message.IsSticker():
-			ctx.Sticker = stickerToModel(ctx.Message.Sticker)
-			ctx.Sticker.CreatedAt = ctx.Message.Date
-			ctx.Sticker.UpdatedAt = ctx.Message.Date
-		case ctx.IsMessage() && ctx.Message.IsReply() && ctx.Message.ReplyToMessage.IsSticker():
-			ctx.Sticker = stickerToModel(ctx.Message.ReplyToMessage.Sticker)
-			ctx.Sticker.CreatedAt = ctx.Message.Date
-			ctx.Sticker.UpdatedAt = ctx.Message.Date
-		case ctx.IsCallbackQuery():
-			if !ctx.CallbackQuery.Message.IsReply() ||
-				!ctx.CallbackQuery.Message.ReplyToMessage.IsSticker() {
+		case ctx.Request.IsMessage():
+			switch {
+			case ctx.Request.Message.IsSticker():
+				ctx.Sticker = stickerToModel(ctx.Request.Message.Sticker)
+				ctx.Sticker.CreatedAt = ctx.Request.Message.Date
+				ctx.Sticker.UpdatedAt = ctx.Request.Message.Date
+			case ctx.Request.Message.IsReply() && ctx.Request.Message.ReplyToMessage.IsSticker():
+				ctx.Sticker = stickerToModel(ctx.Request.Message.ReplyToMessage.Sticker)
+				ctx.Sticker.CreatedAt = ctx.Request.Message.Date
+				ctx.Sticker.UpdatedAt = ctx.Request.Message.Date
+			default:
+				return next(ctx)
+			}
+		case ctx.Request.IsCallbackQuery():
+			if !ctx.Request.CallbackQuery.Message.IsReply() ||
+				!ctx.Request.CallbackQuery.Message.ReplyToMessage.IsSticker() {
 				return next(ctx)
 			}
 
-			ctx.Sticker = stickerToModel(ctx.CallbackQuery.Message.ReplyToMessage.Sticker)
-			ctx.Sticker.CreatedAt = ctx.CallbackQuery.Message.ReplyToMessage.Date
-			ctx.Sticker.UpdatedAt = ctx.CallbackQuery.Message.ReplyToMessage.Date
+			ctx.Sticker = stickerToModel(ctx.Request.CallbackQuery.Message.ReplyToMessage.Sticker)
+			ctx.Sticker.CreatedAt = ctx.Request.CallbackQuery.Message.ReplyToMessage.Date
+			ctx.Sticker.UpdatedAt = ctx.Request.CallbackQuery.Message.ReplyToMessage.Date
 		default:
 			return next(ctx)
 		}
 
 		if ctx.Sticker.InSet() {
-			go func() {
-				set, err := ctx.GetStickerSet(ctx.Sticker.SetName)
-				if err != nil {
-					return
-				}
+			tgSet, err := ctx.GetStickerSet(ctx.Sticker.SetName)
+			if err != nil || tgSet == nil || len(tgSet.Stickers) == 0 {
+				stickers, _ := store.GetSet(ctx.Sticker.SetName)
+				ctx.Sticker.SetName = common.SetNameUploaded
 
-				for _, setSticker := range set.Stickers {
-					setSticker := setSticker
-					sticker := stickerToModel(&setSticker)
-					sticker.CreatedAt = ctx.Sticker.CreatedAt
-					sticker.UpdatedAt = ctx.Sticker.UpdatedAt
-					_ = store.Create(sticker)
+				go func() {
+					for i := range stickers {
+						stickers[i].SetName = ctx.Sticker.SetName
+						stickers[i].UpdatedAt = ctx.Sticker.UpdatedAt
+						_ = store.Update(stickers[i])
+					}
+				}()
+			} else {
+				dbSet, _ := store.GetSet(tgSet.Name)
+				for i := range tgSet.Stickers {
+					for j := range dbSet {
+						if tgSet.Stickers[i].FileID == dbSet[j].FileID {
+							continue
+						}
+
+						_ = store.Create(stickerToModel(&tgSet.Stickers[i]))
+					}
 				}
-			}()
+			}
 		}
 
 		if ctx.Sticker, err = store.GetOrCreate(ctx.Sticker); err != nil {
@@ -59,7 +73,7 @@ func AcquireSticker(store stickers.Manager) Interceptor {
 
 func stickerToModel(s *tg.Sticker) *model.Sticker {
 	sticker := new(model.Sticker)
-	sticker.ID = s.FileID
+	sticker.FileID = s.FileID
 	sticker.Emoji = s.Emoji
 	sticker.Width = s.Width
 	sticker.Height = s.Height

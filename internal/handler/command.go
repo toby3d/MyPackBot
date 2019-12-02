@@ -1,39 +1,46 @@
 package handler
 
 import (
-	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	tg "gitlab.com/toby3d/telegram"
 )
 
 // IsCommand defines actions for commands only
 func (h *Handler) IsCommand(ctx *model.Context) (err error) {
-	switch {
-	case ctx.Message.IsCommandEqual(tg.CommandStart):
+	if !ctx.Request.Message.IsCommand() {
+		return nil
+	}
+
+	switch ctx.Request.Message.Command() {
+	case tg.CommandStart:
 		err = h.CommandStart(ctx)
-	case ctx.Message.IsCommandEqual(tg.CommandHelp):
+	case tg.CommandHelp:
 		err = h.CommandHelp(ctx)
-	case ctx.Message.IsCommandEqual(tg.CommandSettings):
+	case tg.CommandSettings:
 		err = h.CommandSettings(ctx)
-	case ctx.Message.IsCommandEqual(common.CommandPing):
-		err = h.CommandPing(ctx)
-	case ctx.Message.IsCommandEqual(common.CommandDelSticker):
-		err = h.CommandDelSticker(ctx)
-	case ctx.Message.IsCommandEqual(common.CommandDelPack):
-		err = h.CommandDelPack(ctx)
-	case ctx.Message.IsCommandEqual(common.DataAddSticker):
+	case "ping":
+		err = h.sendMessage(ctx, "🏓")
+	case "add":
+		err = h.CommandAdd(ctx)
+	case "del":
+		err = h.CommandDel(ctx)
+	case "edit":
+		err = h.CommandEdit(ctx)
+	case "addsticker":
 		err = h.CommandAddSticker(ctx)
-	case ctx.Message.IsCommandEqual(common.CommandAddPack):
-		err = h.CommandAddPack(ctx)
-	case ctx.Message.IsCommandEqual(common.CommandReset):
-		fallthrough
-	case ctx.Message.IsCommandEqual(common.CommandCancel):
-		fallthrough
-	default:
+	case "addpack":
+		err = h.CommandAddSet(ctx)
+	case "delsticker":
+		err = h.CommandDelSticker(ctx)
+	case "delpack":
+		err = h.CommandDelSet(ctx)
+	case "reset":
+		err = h.CommandUnknown(ctx)
+	case "cancel":
 		err = h.CommandUnknown(ctx)
 	}
 
-	return ctx.Error(err)
+	return err
 }
 
 // CommandPing send common ping message.
@@ -44,13 +51,13 @@ func (h *Handler) CommandPing(ctx *model.Context) (err error) {
 // CommandStart send common welcome message.
 // NOTE(toby3d): REQUIRED by Telegram Bot API platform
 func (h *Handler) CommandStart(ctx *model.Context) (err error) {
-	return h.sendMessage(ctx, ctx.T().Sprintf("start__text", ctx.Message.From.FullName()))
+	return h.sendMessage(ctx, "start__text "+ctx.Request.Message.From.FullName())
 }
 
 // CommandHelp send common message with list of available commands
 // NOTE(toby3d): REQUIRED by Telegram Bot API platform
 func (h *Handler) CommandHelp(ctx *model.Context) (err error) {
-	return h.sendMessage(ctx, ctx.T().Sprintf("help__text"))
+	return h.sendMessage(ctx, "help__text")
 }
 
 // CommandSettings send common message with settings buttons
@@ -59,64 +66,55 @@ func (h *Handler) CommandSettings(ctx *model.Context) (err error) {
 	return h.CommandUnknown(ctx)
 }
 
-// CommandAddSticker import single Sticker by ReplyMessage.
-// NOTE(toby3d): DEPRECATED, used for backward compatibility
-func (h *Handler) CommandAddSticker(ctx *model.Context) (err error) {
-	if !ctx.Message.IsReply() || !ctx.Message.ReplyToMessage.IsSticker() {
-		return nil
-	}
-
-	go h.store.AddSticker(ctx.User, ctx.Sticker)
-
-	return h.sendMessage(ctx, ctx.T().Sprintf("addsticker-command__text"))
-}
-
-// CommandAddPack import whole Sticker pack by ReplyMessage.
-// NOTE(toby3d): DEPRECATED, used for backward compatibility
-func (h *Handler) CommandAddPack(ctx *model.Context) (err error) {
-	if !ctx.Message.IsReply() || !ctx.Message.ReplyToMessage.IsSticker() {
-		return nil
-	}
-
-	go h.store.AddStickersSet(ctx.User, ctx.Sticker.SetName)
-
-	return h.sendMessage(ctx, ctx.T().Sprintf("addpack-command__text"))
-}
-
-// CommandDelSticker remove single Sticker by ReplyMessage.
-// NOTE(toby3d): DEPRECATED, used for backward compatibility
-func (h *Handler) CommandDelSticker(ctx *model.Context) (err error) {
-	if !ctx.Message.IsReply() || !ctx.Message.ReplyToMessage.IsSticker() {
-		return nil
-	}
-
-	go h.store.RemoveSticker(ctx.User, ctx.Sticker)
-
-	return h.sendMessage(ctx, ctx.T().Sprintf("delsticker-command__text"))
-}
-
-// CommandDelPack remove whole Sticker pack by ReplyMessage.
-// NOTE(toby3d): DEPRECATED, used for backward compatibility
-func (h *Handler) CommandDelPack(ctx *model.Context) (err error) {
-	if !ctx.Message.IsReply() || !ctx.Message.ReplyToMessage.IsSticker() {
-		return nil
-	}
-
-	go h.store.RemoveStickersSet(ctx.User, ctx.Sticker.SetName)
-
-	return h.sendMessage(ctx, ctx.T().Sprintf("delpack-command__text"))
-}
-
 // CommandUnknown reply common error message to any unkwnon commands.
 func (h *Handler) CommandUnknown(ctx *model.Context) (err error) {
-	return h.sendMessage(ctx, ctx.T().Sprintf("unknown-command__text"))
+	return h.sendMessage(ctx, "unknown-command__text")
 }
 
 func (h *Handler) sendMessage(ctx *model.Context, text string) (err error) {
-	reply := tg.NewMessage(ctx.Message.Chat.ID, text)
+	reply := tg.NewMessage(ctx.Request.Message.Chat.ID, text)
 	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
-	reply.ReplyToMessageID = ctx.Message.ID
+	reply.ReplyToMessageID = ctx.Request.Message.ID
 	_, err = ctx.SendMessage(reply)
 
-	return ctx.Error(err)
+	return err
+}
+
+func (h *Handler) CommandAdd(ctx *model.Context) (err error) {
+	switch {
+	case ctx.Photo != nil:
+		err = h.CommandAddPhoto(ctx)
+	case ctx.Sticker != nil:
+		err = h.CommandAddSticker(ctx)
+	}
+
+	h.sendMessage(ctx, "added")
+
+	return err
+}
+
+func (h *Handler) CommandEdit(ctx *model.Context) (err error) {
+	switch {
+	case ctx.Photo != nil:
+		err = h.CommandEditPhoto(ctx)
+	case ctx.Sticker != nil:
+		err = h.CommandEditSticker(ctx)
+	}
+
+	h.sendMessage(ctx, "edited")
+
+	return err
+}
+
+func (h *Handler) CommandDel(ctx *model.Context) (err error) {
+	switch {
+	case ctx.Photo != nil:
+		err = h.CommandDelPhoto(ctx)
+	case ctx.Sticker != nil:
+		err = h.CommandDelSticker(ctx)
+	}
+
+	h.sendMessage(ctx, "deleted")
+
+	return err
 }

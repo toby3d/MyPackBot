@@ -7,14 +7,11 @@ import (
 
 func ChatAction() Interceptor {
 	return func(ctx *model.Context, next model.UpdateFunc) (err error) {
-		if !ctx.IsMessage() || !ctx.Message.Chat.IsPrivate() {
+		if !ctx.Request.IsMessage() || !ctx.Request.Message.Chat.IsPrivate() {
 			return next(ctx)
 		}
 
-		if _, err = ctx.SendChatAction(ctx.Message.Chat.ID, tg.ActionTyping); err != nil {
-			return ctx.Error(err)
-		}
-
+		go ctx.SendChatAction(ctx.Request.Message.Chat.ID, tg.ActionTyping)
 		return next(ctx)
 	}
 }

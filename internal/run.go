@@ -46,6 +46,7 @@ func (mpb *MyPackBot) Run() error {
 
 	chain := middleware.Chain{
 		middleware.AcquireUser(mpb.users),
+		middleware.AcquirePrinter(),
 		middleware.ChatAction(),
 		middleware.AcquirePhoto(mpb.photos),
 		middleware.AcquireUserPhoto(mpb.usersPhotos),

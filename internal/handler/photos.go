@@ -1,11 +1,10 @@
 package handler
 
 import (
-	"fmt"
-
 	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	tg "gitlab.com/toby3d/telegram"
+	"golang.org/x/text/message"
 )
 
 func (h *Handler) GetPhotoKeyboard(ctx *model.Context) *tg.InlineKeyboardMarkup {
@@ -13,18 +12,19 @@ func (h *Handler) GetPhotoKeyboard(ctx *model.Context) *tg.InlineKeyboardMarkup 
 		return nil
 	}
 
+	p := ctx.Get("printer").(*message.Printer)
 	ctx.UserPhoto = h.usersPhotos.Get(&model.UserPhoto{
 		UserID:  ctx.User.ID,
 		PhotoID: ctx.Photo.ID,
 	})
 
 	markup := tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow(
-		tg.NewInlineKeyboardButton("add", common.DataAdd),
+		tg.NewInlineKeyboardButton(p.Sprintf("📥 Import this photo"), common.DataAdd),
 	))
 
 	if ctx.UserPhoto != nil {
 		markup = tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow(
-			tg.NewInlineKeyboardButton("del", common.DataDel),
+			tg.NewInlineKeyboardButton(p.Sprintf("🔥 Remove this photo"), common.DataDel),
 		))
 	}
 
@@ -52,12 +52,22 @@ func (h *Handler) CommandEditPhoto(ctx *model.Context) (err error) {
 		return nil
 	}
 
-	if ctx.UserPhoto == nil {
-		return h.CommandAddPhoto(ctx)
+	if !ctx.Request.Message.HasCommandArgument() {
+		p := ctx.Get("printer").(*message.Printer)
+		reply := tg.NewMessage(ctx.User.UserID, p.Sprintf("💡 Add any text and/or emoji(s) as an argument of "+
+			"this command to change its search properties."))
+		reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
+		reply.ParseMode = tg.StyleMarkdown
+		reply.ReplyToMessageID = ctx.Request.Message.ID
+
+		_, err = ctx.SendMessage(reply)
+		return err
 	}
 
-	if !ctx.Request.Message.HasCommandArgument() {
-		return h.sendMessage(ctx, fmt.Sprintln("current query:", ctx.UserPhoto.Query))
+	if ctx.UserPhoto == nil {
+		if err = h.CommandAddPhoto(ctx); err != nil {
+			return err
+		}
 	}
 
 	ctx.UserPhoto.UpdatedAt = ctx.Request.Message.Date

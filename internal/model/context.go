@@ -22,7 +22,7 @@ type (
 		userValues context.Context
 	}
 
-	userKey string
+	contextKey string
 )
 
 func (ctx *Context) Set(key string, val interface{}) {
@@ -30,7 +30,7 @@ func (ctx *Context) Set(key string, val interface{}) {
 		ctx.userValues = context.Background()
 	}
 
-	ctx.userValues = context.WithValue(ctx.userValues, userKey(key), val)
+	ctx.userValues = context.WithValue(ctx.userValues, contextKey(key), val)
 }
 
 func (ctx *Context) Get(key string) interface{} {
@@ -38,5 +38,5 @@ func (ctx *Context) Get(key string) interface{} {
 		ctx.userValues = context.Background()
 	}
 
-	return ctx.userValues.Value(userKey(key))
+	return ctx.userValues.Value(contextKey(key))
 }

@@ -1,4 +1,4 @@
-//go:generate gotext -srclang=en update -out=./i18n_gen.go -lang=en,ru .
+//go:generate gotext -dir=./../../ -srclang=en update -out=./../../internal/catalog/catalog.go -lang=en,ru .
 package main
 
 import (
@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"gitlab.com/toby3d/mypackbot/internal"
+	_ "gitlab.com/toby3d/mypackbot/internal/catalog"
 	"gitlab.com/toby3d/mypackbot/internal/common"
 )
 

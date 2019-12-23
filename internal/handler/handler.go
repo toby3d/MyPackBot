@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"gitlab.com/toby3d/mypackbot/internal/catalog"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	"gitlab.com/toby3d/mypackbot/internal/model/photos"
 	"gitlab.com/toby3d/mypackbot/internal/model/stickers"
@@ -20,6 +21,8 @@ type Handler struct {
 }
 
 func NewHandler(us users.Manager, ss stickers.Manager, ps photos.Manager, uss usersstickers.Manager, ups usersphotos.Manager) *Handler {
+	_ = catalog.RegisterPlurals()
+
 	return &Handler{
 		photos:        ps,
 		stickers:      ss,

@@ -1,0 +1,148 @@
+{
+    "language": "ru",
+    "messages": [
+        {
+            "id": "👋 Hi {FullName}, I'm {FullName_1}!\nThanks to me, you can collect almost any media content in Telegram without any limits, in any chat via inline mode.",
+            "message": "👋 Hi {FullName}, I'm {FullName_1}!\nThanks to me, you can collect almost any media content in Telegram without any limits, in any chat via inline mode.",
+            "translation": "👋 Привет {FullName}, я {FullName_1}!\nБлагодаря мне, ты можешь коллекционировать в inline-режиме практически любой медиа-контент Telegram без ограничений, в любом чате.",
+            "placeholders": [
+                {
+                    "id": "FullName",
+                    "string": "%[1]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "ctx.Request.Message.From.FullName()"
+                },
+                {
+                    "id": "FullName_1",
+                    "string": "%[2]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 2,
+                    "expr": "ctx.FullName()"
+                }
+            ]
+        },
+        {
+            "id": "🤖 Here is a list of commands that I understand, some of them [may] or (should) contain an argument:\n/start - start all over again\n/help [other command] - get a list of available commands or help and a demonstration of a specific command\n/add [query] - add media from reply to your collection [with custom search query]\n/edit (query) - change query to reply media\n/del - remove reply media from your collection",
+            "message": "🤖 Here is a list of commands that I understand, some of them [may] or (should) contain an argument:\n/start - start all over again\n/help [other command] - get a list of available commands or help and a demonstration of a specific command\n/add [query] - add media from reply to your collection [with custom search query]\n/edit (query) - change query to reply media\n/del - remove reply media from your collection",
+            "translation": "🤖 Вот список которые я понимаю, некоторые из них [могут] или (должны) содержать аргументы:\n/start - начать всё заново\n/help [другая команда] - получить список всех доступных команд или справку о конкретной команде\n/add [текст] - добавить медиа из ответа в коллекцию [с указанным поисковым тегом]\n/edit (текст) - изменить поисковый тег медиа из ответа\n/del - удалить медиа из ответа из коллекции"
+        },
+        {
+            "id": "👍 Imported!",
+            "message": "👍 Imported!",
+            "translation": "👍 Импортировано!"
+        },
+        {
+            "id": "👍 Updated!",
+            "message": "👍 Updated!",
+            "translation": "👍 Обновлено!"
+        },
+        {
+            "id": "👍 Removed!",
+            "message": "👍 Removed!",
+            "translation": "👍 Удалено!"
+        },
+        {
+            "id": "‍ Found {Count} result(s)",
+            "message": "‍ Found {Count} result(s)",
+            "translation": "‍ Найдено {Count} результатов",
+            "placeholders": [
+                {
+                    "id": "Count",
+                    "string": "%[1]d",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 1,
+                    "expr": "count"
+                }
+            ]
+        },
+        {
+            "id": "🤔 What to do with this?",
+            "message": "🤔 What to do with this?",
+            "translation": "🤔 Что с этим делать?"
+        },
+        {
+            "id": "📥 Import this photo",
+            "message": "📥 Import this photo",
+            "translation": "📥 Импортировать фото"
+        },
+        {
+            "id": "🔥 Remove this photo",
+            "message": "🔥 Remove this photo",
+            "translation": "🔥 Убрать фото"
+        },
+        {
+            "id": "💡 Add any text and/or emoji(s) as an argument of this command to change its search properties.",
+            "message": "💡 Add any text and/or emoji(s) as an argument of this command to change its search properties.",
+            "translation": "💡 Добавь любой текст и/или эмодзи в качестве аргумента этой команды чтобы изменить поисковые свойства."
+        },
+        {
+            "id": "📥 Import this sticker",
+            "message": "📥 Import this sticker",
+            "translation": "📥 Импортировать стикер"
+        },
+        {
+            "id": "📥 Import {SetName} set",
+            "message": "📥 Import {SetName} set",
+            "translation": "📥 Импортировать {SetName}",
+            "placeholders": [
+                {
+                    "id": "SetName",
+                    "string": "%[1]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "setName"
+                }
+            ]
+        },
+        {
+            "id": "🔥 Remove {SetName} set",
+            "message": "🔥 Remove {SetName} set",
+            "translation": "🔥 Убрать {SetName}",
+            "placeholders": [
+                {
+                    "id": "SetName",
+                    "string": "%[1]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "setName"
+                }
+            ]
+        },
+        {
+            "id": "🥳 4 November? It's a @toby3d birthday!\nIf you like this bot, then why not send him a congratulation along with a small gift? This will make him incredibly happy!",
+            "message": "🥳 4 November? It's a @toby3d birthday!\nIf you like this bot, then why not send him a congratulation along with a small gift? This will make him incredibly happy!",
+            "translation": "🥳 4-е Ноября? Это день рождения @toby3d!\nЕсли тебе нравится этот бот, то почему бы не отправить ему поздравления вместе с небольшим подарком? Это несказанно его осчастливит!"
+        },
+        {
+            "id": "☺️ Oh, you missed @toby3d birthday on November 4th!\nIf you like this bot, why not send him some birthday greetings and a little birthday gift? It is not yet too late to make him happy!",
+            "message": "☺️ Oh, you missed @toby3d birthday on November 4th!\nIf you like this bot, why not send him some birthday greetings and a little birthday gift? It is not yet too late to make him happy!",
+            "translation": "☺️ Ой, ты пропустил день рождения @toby3d 4-го Ноября!\nЕсли тебе нравится этот бот, то почему бы не отправить ему поздравления вместе с небольшим подарком? Ещё не слишком поздно его порадовать!"
+        },
+        {
+            "id": "💸 Make a donation",
+            "message": "💸 Make a donation",
+            "translation": "💸 Сделать пожертвование"
+        },
+        {
+            "id": "🤝 Use referral links",
+            "message": "🤝 Use referral links",
+            "translation": "🤝 Воспользоваться реферальными ссылками"
+        },
+        {
+            "id": "🕺 HacktoberFest is here!\n\nIf you are a beginner or already an experienced golang-developer, now is a great time to help improve the quality of the code of this bot. Choose issue to your taste and offer your PR!",
+            "message": "🕺 HacktoberFest is here!\n\nIf you are a beginner or already an experienced golang-developer, now is a great time to help improve the quality of the code of this bot. Choose issue to your taste and offer your PR!",
+            "translation": "🕺 Хактоберфест уже здесь!\n\nЕсли ты начинающий или уже опытный golang-разработчик, то сейчас хорошее время помочь улучшить качество кода этого бота. Выбери issue на твой вкус и предложи свой PR!"
+        },
+        {
+            "id": "🔧 Let's hack!",
+            "message": "🔧 Let's hack!",
+            "translation": "🔧 Let's hack!"
+        }
+    ]
+}

@@ -50,6 +50,8 @@ func AcquireSticker(store stickers.Manager) Interceptor {
 					}
 				}()
 			} else {
+				ctx.Set("set_name", tgSet.Title)
+
 				dbSet, _ := store.GetSet(tgSet.Name)
 				for i := range tgSet.Stickers {
 					for j := range dbSet {

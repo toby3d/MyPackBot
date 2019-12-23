@@ -17,6 +17,9 @@ func (h *Handler) IsCallbackQuery(ctx *model.Context) (err error) {
 	case common.DataDel, common.DataDelSet:
 		err = h.CallbackDel(ctx)
 	}
+	if err != nil {
+		return err
+	}
 
 	_, err = ctx.AnswerCallbackQuery(&tg.AnswerCallbackQueryParameters{
 		CallbackQueryID: ctx.Request.CallbackQuery.ID,
@@ -95,5 +98,6 @@ func (h *Handler) CallbackDel(ctx *model.Context) (err error) {
 	}
 
 	_, err = ctx.EditMessageReplyMarkup(editMessage)
+
 	return err
 }

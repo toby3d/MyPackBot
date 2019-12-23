@@ -1,11 +1,10 @@
 package handler
 
 import (
-	"fmt"
-
 	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	tg "gitlab.com/toby3d/telegram"
+	"golang.org/x/text/message"
 )
 
 func (h *Handler) GetStickerKeyboard(ctx *model.Context) *tg.InlineKeyboardMarkup {
@@ -13,30 +12,34 @@ func (h *Handler) GetStickerKeyboard(ctx *model.Context) *tg.InlineKeyboardMarku
 		return nil
 	}
 
+	p := ctx.Get("printer").(*message.Printer)
 	ctx.UserSticker = h.usersStickers.Get(&model.UserSticker{
 		UserID:    ctx.User.ID,
 		StickerID: ctx.Sticker.ID,
 	})
 
 	markup := tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow(
-		tg.NewInlineKeyboardButton("del", common.DataDel),
+		tg.NewInlineKeyboardButton("🔥 Remove this sticker", common.DataDel),
 	))
 
 	if (ctx.Request.IsCallbackQuery() && ctx.Request.CallbackQuery.Data == common.DataDelSet) ||
 		ctx.UserSticker == nil {
 		markup = tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow(
-			tg.NewInlineKeyboardButton("add", common.DataAdd),
+			tg.NewInlineKeyboardButton(p.Sprintf("📥 Import this sticker"), common.DataAdd),
 		))
 	}
 
 	if ctx.Sticker.InSet() {
+		setName, _ := ctx.Get("set_name").(string)
 		markup.InlineKeyboard = append(markup.InlineKeyboard, tg.NewInlineKeyboardRow(
-			tg.NewInlineKeyboardButton("add set", common.DataAddSet),
+			tg.NewInlineKeyboardButton(p.Sprintf("📥 Import %s set", setName), common.DataAddSet),
 		))
 
 		if (ctx.Request.IsCallbackQuery() && ctx.Request.CallbackQuery.Data == common.DataAddSet) ||
 			ctx.UserSticker != nil {
-			markup.InlineKeyboard[1][0] = tg.NewInlineKeyboardButton("del set", common.DataDelSet)
+			markup.InlineKeyboard[1][0] = tg.NewInlineKeyboardButton(
+				p.Sprintf("🔥 Remove %s set", setName), common.DataDelSet,
+			)
 		}
 	}
 
@@ -76,17 +79,22 @@ func (h *Handler) CommandEditSticker(ctx *model.Context) (err error) {
 		return nil
 	}
 
-	if ctx.UserSticker == nil {
-		return h.CommandAddSticker(ctx)
+	if !ctx.Request.Message.HasCommandArgument() {
+		p := ctx.Get("printer").(*message.Printer)
+		reply := tg.NewMessage(ctx.User.UserID, p.Sprintf("💡 Add any text and/or emoji(s) as an argument of "+
+			"this command to change its search properties."))
+		reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
+		reply.ParseMode = tg.StyleMarkdown
+		reply.ReplyToMessageID = ctx.Request.Message.ID
+
+		_, err = ctx.SendMessage(reply)
+		return err
 	}
 
-	if !ctx.Request.Message.HasCommandArgument() {
-		query := ctx.UserSticker.Query
-		if query == "" {
-			query = h.stickers.Get(ctx.UserSticker.StickerID).Emoji
+	if ctx.UserSticker == nil {
+		if err = h.CommandAddSticker(ctx); err != nil {
+			return err
 		}
-
-		return h.sendMessage(ctx, fmt.Sprintln("current query:", query))
 	}
 
 	ctx.UserSticker.UpdatedAt = ctx.Request.Message.Date

@@ -61,6 +61,7 @@ func (h *Handler) CommandEditPhoto(ctx *model.Context) (err error) {
 		reply.ReplyToMessageID = ctx.Request.Message.ID
 
 		_, err = ctx.SendMessage(reply)
+
 		return err
 	}
 

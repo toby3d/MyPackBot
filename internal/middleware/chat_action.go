@@ -11,7 +11,7 @@ func ChatAction() Interceptor {
 			return next(ctx)
 		}
 
-		go ctx.SendChatAction(ctx.Request.Message.Chat.ID, tg.ActionTyping)
+		go func() { _, _ = ctx.SendChatAction(ctx.Request.Message.Chat.ID, tg.ActionTyping) }()
 		return next(ctx)
 	}
 }

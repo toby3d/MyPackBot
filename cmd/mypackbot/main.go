@@ -15,12 +15,9 @@ import (
 )
 
 func main() {
-	flagConfig := flag.String(
-		"config", filepath.Join("./", "configs", "config.yaml"), "set specific path to config",
-	)
+	flagConfig := flag.String("config", filepath.Join(".", "config.yaml"), "set specific path to config")
 
 	flag.Parse()
-
 	log.Println("Current build version:", common.Version.String())
 
 	bot, err := internal.New(*flagConfig)

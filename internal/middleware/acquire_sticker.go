@@ -37,32 +37,7 @@ func AcquireSticker(store stickers.Manager) Interceptor {
 		}
 
 		if ctx.Sticker.InSet() {
-			tgSet, err := ctx.GetStickerSet(ctx.Sticker.SetName)
-			if err != nil || tgSet == nil || len(tgSet.Stickers) == 0 {
-				stickers, _ := store.GetSet(ctx.Sticker.SetName)
-				ctx.Sticker.SetName = common.SetNameUploaded
-
-				go func() {
-					for i := range stickers {
-						stickers[i].SetName = ctx.Sticker.SetName
-						stickers[i].UpdatedAt = ctx.Sticker.UpdatedAt
-						_ = store.Update(stickers[i])
-					}
-				}()
-			} else {
-				ctx.Set("set_name", tgSet.Title)
-
-				dbSet, _ := store.GetSet(tgSet.Name)
-				for i := range tgSet.Stickers {
-					for j := range dbSet {
-						if tgSet.Stickers[i].FileID == dbSet[j].FileID {
-							continue
-						}
-
-						_ = store.Create(stickerToModel(&tgSet.Stickers[i]))
-					}
-				}
-			}
+			migrateSet(ctx, store)
 		}
 
 		if ctx.Sticker, err = store.GetOrCreate(ctx.Sticker); err != nil {
@@ -87,4 +62,33 @@ func stickerToModel(s *tg.Sticker) *model.Sticker {
 	}
 
 	return sticker
+}
+
+func migrateSet(ctx *model.Context, store stickers.Manager) {
+	tgSet, err := ctx.GetStickerSet(ctx.Sticker.SetName)
+	if err != nil || tgSet == nil || len(tgSet.Stickers) == 0 {
+		stickers, _ := store.GetSet(ctx.Sticker.SetName)
+		ctx.Sticker.SetName = common.SetNameUploaded
+
+		go func() {
+			for i := range stickers {
+				stickers[i].SetName = ctx.Sticker.SetName
+				stickers[i].UpdatedAt = ctx.Sticker.UpdatedAt
+				_ = store.Update(stickers[i])
+			}
+		}()
+	} else {
+		ctx.Set("set_name", tgSet.Title)
+
+		dbSet, _ := store.GetSet(tgSet.Name)
+		for i := range tgSet.Stickers {
+			for j := range dbSet {
+				if tgSet.Stickers[i].FileID == dbSet[j].FileID {
+					continue
+				}
+
+				_ = store.Create(stickerToModel(&tgSet.Stickers[i]))
+			}
+		}
+	}
 }

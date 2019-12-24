@@ -48,6 +48,7 @@ func (h *Handler) CommandPing(ctx *model.Context) (err error) {
 	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
 	reply.ReplyToMessageID = ctx.Request.Message.ID
 	_, err = ctx.SendMessage(reply)
+
 	return err
 }
 
@@ -61,6 +62,7 @@ func (h *Handler) CommandStart(ctx *model.Context) (err error) {
 	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
 	reply.ReplyToMessageID = ctx.Request.Message.ID
 	_, err = ctx.SendMessage(reply)
+
 	return err
 }
 
@@ -76,6 +78,7 @@ func (h *Handler) CommandHelp(ctx *model.Context) (err error) {
 	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
 	reply.ReplyToMessageID = ctx.Request.Message.ID
 	_, err = ctx.SendMessage(reply)
+
 	return err
 }
 
@@ -99,6 +102,7 @@ func (h *Handler) CommandAdd(ctx *model.Context) (err error) {
 	default:
 		return nil
 	}
+
 	if err != nil {
 		return err
 	}
@@ -125,6 +129,7 @@ func (h *Handler) CommandEdit(ctx *model.Context) (err error) {
 	default:
 		return nil
 	}
+
 	if err != nil {
 		return err
 	}
@@ -151,6 +156,7 @@ func (h *Handler) CommandDel(ctx *model.Context) (err error) {
 	default:
 		return nil
 	}
+
 	if err != nil {
 		return err
 	}

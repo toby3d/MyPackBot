@@ -34,10 +34,10 @@ var (
 	}
 )
 
-func NewUsersStickersStore(conn *bolt.DB, us users.Manager, ss stickers.Manager, marshler json.API) *UsersStickersStore {
+func NewUsersStickersStore(db *bolt.DB, us users.Manager, ss stickers.Manager, m json.API) *UsersStickersStore {
 	return &UsersStickersStore{
-		conn:     conn,
-		marshler: marshler,
+		conn:     db,
+		marshler: m,
 		parser:   fastjson.Parser{},
 		stickers: ss,
 		users:    us,
@@ -55,6 +55,7 @@ func (store *UsersStickersStore) Add(us *model.UserSticker) (err error) {
 	}
 
 	timeStamp := time.Now().UTC().Unix()
+
 	if us.CreatedAt == 0 {
 		us.CreatedAt = timeStamp
 	}
@@ -158,70 +159,57 @@ func (store *UsersStickersStore) Get(us *model.UserSticker) *model.UserSticker {
 	return userSticker
 }
 
-func (store *UsersStickersStore) GetList(uid uint64, offset, limit int, query string) (model.Stickers, int) {
+//nolint: gocognit
+func (store *UsersStickersStore) GetList(uid uint64, offset, limit int, q string) (list model.Stickers, count int) {
 	if limit <= 0 {
 		limit = 0
 	}
 
-	count := 0
-	stickers := make(model.Stickers, 0, limit)
+	list = make(model.Stickers, 0, limit)
 	_ = store.conn.View(func(tx *bolt.Tx) error {
 		bkt := tx.Bucket(common.BucketStickers)
 		return tx.Bucket(common.BucketUsersStickers).ForEach(func(key, val []byte) error {
 			v, err := store.parser.ParseBytes(val)
-			if err != nil {
+			if err != nil || v.GetUint64("user_id") != uid {
 				return err
 			}
 
-			if v.GetUint64("user_id") != uid {
-				return nil
-			}
-
 			src := bkt.Get([]byte(strconv.FormatUint(v.GetUint64("sticker_id"), 10)))
-
-			if query != "" {
+			if q != "" {
 				vQuery := string(v.GetStringBytes("query"))
-
-				if vQuery != "" && !strings.ContainsAny(vQuery, query) {
+				switch {
+				case vQuery != "" && !strings.ContainsAny(vQuery, q):
 					return nil
-				}
-
-				// NOTE(toby3d): if user_sticker not contains query then check query in sticker emoji
-				if vQuery == "" {
-					sv, err := store.parser.ParseBytes(src)
-					if err != nil {
+				case vQuery == "":
+					s, err := store.parser.ParseBytes(src)
+					if err != nil || !strings.ContainsAny(string(s.GetStringBytes("emoji")), q) {
 						return err
 					}
-
-					if !strings.ContainsAny(string(sv.GetStringBytes("emoji")), query) {
-						return nil
-					}
 				}
 			}
-
-			count++
 
 			if (offset != 0 && count <= offset) || (limit > 0 && count > offset+limit) {
 				return nil
 			}
+
+			count++
 
 			s := new(model.Sticker)
 			if err = store.marshler.Unmarshal(src, s); err != nil {
 				return err
 			}
 
-			stickers = append(stickers, s)
+			list = append(list, s)
 
 			return nil
 		})
 	})
 
-	sort.Slice(stickers, func(i, j int) bool {
-		return stickers[i].SetName < stickers[j].SetName ||
-			stickers[i].UpdatedAt < stickers[j].UpdatedAt
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].SetName < list[j].SetName || list[i].UpdatedAt < list[j].UpdatedAt
 	})
 
-	return stickers, count
+	return list, count
 }
 
 func (store *UsersStickersStore) GetSet(uid uint64, offset, limit int, setName string) (model.Stickers, int) {

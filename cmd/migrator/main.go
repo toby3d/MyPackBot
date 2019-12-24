@@ -13,14 +13,14 @@ import (
 	tg "gitlab.com/toby3d/telegram"
 )
 
-var (
-	flagGroup = flag.Int64("group", 0, "proxy group for migration")
-	flagNew   = flag.String("new", filepath.Join(".", "new.db"), "filepath to new database file")
-	flagOld   = flag.String("old", filepath.Join(".", "old.db"), "filepath to old database file")
-	flagToken = flag.String("token", "", "bot token")
-)
-
 func main() {
+	var (
+		flagGroup = flag.Int64("group", 0, "proxy group for migration")
+		flagNew   = flag.String("new", filepath.Join(".", "new.db"), "filepath to new database file")
+		flagOld   = flag.String("old", filepath.Join(".", "old.db"), "filepath to old database file")
+		flagToken = flag.String("token", "", "bot token")
+	)
+
 	flag.Parse()
 
 	bot, err := tg.New(*flagToken)

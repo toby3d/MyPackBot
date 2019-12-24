@@ -6,8 +6,8 @@ import (
 	"gitlab.com/toby3d/mypackbot/internal/model/photos"
 	"gitlab.com/toby3d/mypackbot/internal/model/stickers"
 	"gitlab.com/toby3d/mypackbot/internal/model/users"
-	usersphotos "gitlab.com/toby3d/mypackbot/internal/model/users/photos"
-	usersstickers "gitlab.com/toby3d/mypackbot/internal/model/users/stickers"
+	up "gitlab.com/toby3d/mypackbot/internal/model/users/photos"
+	us "gitlab.com/toby3d/mypackbot/internal/model/users/stickers"
 	"gitlab.com/toby3d/mypackbot/internal/store"
 )
 
@@ -15,12 +15,12 @@ type Handler struct {
 	users         users.Manager
 	stickers      stickers.Manager
 	photos        photos.Manager
-	usersStickers usersstickers.Manager
-	usersPhotos   usersphotos.Manager
+	usersStickers us.Manager
+	usersPhotos   up.Manager
 	store         *store.Store
 }
 
-func NewHandler(us users.Manager, ss stickers.Manager, ps photos.Manager, uss usersstickers.Manager, ups usersphotos.Manager) *Handler {
+func NewHandler(us users.Manager, ss stickers.Manager, ps photos.Manager, uss us.Manager, ups up.Manager) *Handler {
 	_ = catalog.RegisterPlurals()
 
 	return &Handler{

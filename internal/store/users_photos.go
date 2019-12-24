@@ -55,6 +55,7 @@ func (store *UsersPhotosStore) Add(up *model.UserPhoto) (err error) {
 	}
 
 	timeStamp := time.Now().UTC().Unix()
+
 	if up.CreatedAt == 0 {
 		up.CreatedAt = timeStamp
 	}

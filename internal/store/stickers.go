@@ -36,6 +36,7 @@ var (
 
 func NewStickersStore(conn *bolt.DB, marshler json.API) *StickersStore {
 	var parser fastjson.Parser
+
 	return &StickersStore{
 		conn:     conn,
 		marshler: marshler,

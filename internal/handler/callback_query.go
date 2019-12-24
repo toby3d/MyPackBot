@@ -17,6 +17,7 @@ func (h *Handler) IsCallbackQuery(ctx *model.Context) (err error) {
 	case common.DataDel, common.DataDelSet:
 		err = h.CallbackDel(ctx)
 	}
+
 	if err != nil {
 		return err
 	}
@@ -51,6 +52,7 @@ func (h *Handler) CallbackAdd(ctx *model.Context) (err error) {
 		} else {
 			err = h.CommandAddSticker(ctx)
 		}
+
 		if err != nil {
 			return err
 		}
@@ -88,6 +90,7 @@ func (h *Handler) CallbackDel(ctx *model.Context) (err error) {
 		} else {
 			err = h.CommandDelSticker(ctx)
 		}
+
 		if err != nil {
 			return err
 		}

@@ -6,8 +6,6 @@ import (
 	"time"
 
 	"gitlab.com/toby3d/mypackbot/internal/model"
-	"gitlab.com/toby3d/mypackbot/internal/model/photos"
-	"gitlab.com/toby3d/mypackbot/internal/model/stickers"
 	usersphotos "gitlab.com/toby3d/mypackbot/internal/model/users/photos"
 	usersstickers "gitlab.com/toby3d/mypackbot/internal/model/users/stickers"
 	tg "gitlab.com/toby3d/telegram"
@@ -15,10 +13,8 @@ import (
 
 type (
 	Store struct {
-		Stickers      stickers.Manager
-		UsersStickers usersstickers.Manager
-		Photos        photos.Manager
-		UsersPhotos   usersphotos.Manager
+		usersStickers usersstickers.Manager
+		usersPhotos   usersphotos.Manager
 	}
 
 	Filter struct {
@@ -27,28 +23,53 @@ type (
 		Offset       int
 		Limit        int
 		IsPersonal   bool
+		IsAnimated   *bool
+		Width        string
+		Height       string
+		SetName      string
 	}
 )
 
 // ErrForEachStop used in ForEach loops in database for forse stop iterations
 var ErrForEachStop = errors.New("for each stop stop")
 
+func NewStore(us usersstickers.Manager, up usersphotos.Manager) *Store {
+	return &Store{
+		usersStickers: us,
+		usersPhotos:   up,
+	}
+}
+
 func (store *Store) GetList(uid uint64, f *Filter) ([]interface{}, int) {
 	results := make([]interface{}, 0)
 	count := 0
 
+	if len(f.AllowedTypes) == 0 {
+		return results, count
+	}
+
 	for _, t := range f.AllowedTypes {
 		switch t {
 		case tg.TypePhoto:
-			photos, photosCount := store.UsersPhotos.GetList(uid, 0, -1, f.Query)
+			if f.IsAnimated != nil && *f.IsAnimated {
+				continue
+			}
+
+			photos, photosCount := store.usersPhotos.GetList(uid, 0, -1, f.Query)
 			for i := range photos {
 				results = append(results, photos[i])
 			}
 
 			count += photosCount
 		case tg.TypeSticker:
-			stickers, stickersCount := store.UsersStickers.GetList(uid, 0, -1, f.Query)
+			stickers, stickersCount := store.usersStickers.GetList(uid, 0, -1, f.Query)
 			for i := range stickers {
+				if f.IsAnimated != nil && stickers[i].IsAnimated != *f.IsAnimated ||
+					f.SetName != "" && stickers[i].SetName != f.SetName {
+					stickersCount--
+					continue
+				}
+
 				results = append(results, stickers[i])
 			}
 

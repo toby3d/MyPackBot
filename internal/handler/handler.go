@@ -29,12 +29,7 @@ func NewHandler(us users.Manager, ss stickers.Manager, ps photos.Manager, uss us
 		users:         us,
 		usersPhotos:   ups,
 		usersStickers: uss,
-		store: &store.Store{
-			Photos:        ps,
-			Stickers:      ss,
-			UsersPhotos:   ups,
-			UsersStickers: uss,
-		},
+		store:         store.NewStore(uss, ups),
 	}
 }
 

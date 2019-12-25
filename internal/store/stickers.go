@@ -35,12 +35,10 @@ var (
 )
 
 func NewStickersStore(conn *bolt.DB, marshler json.API) *StickersStore {
-	var parser fastjson.Parser
-
 	return &StickersStore{
 		conn:     conn,
 		marshler: marshler,
-		parser:   parser,
+		parser:   fastjson.Parser{},
 	}
 }
 
@@ -128,7 +126,7 @@ func (store *StickersStore) GetByFileID(id string) *model.Sticker {
 	return s
 }
 
-func (store *StickersStore) GetList(offset, limit int, query string) (model.Stickers, int) {
+func (store *StickersStore) GetList(offset, limit int) (model.Stickers, int) {
 	if limit <= 0 {
 		limit = 0
 	}
@@ -136,16 +134,7 @@ func (store *StickersStore) GetList(offset, limit int, query string) (model.Stic
 	count := 0
 	stickers := make(model.Stickers, 0, limit)
 	_ = store.conn.View(func(tx *bolt.Tx) error {
-		return tx.Bucket(common.BucketStickers).ForEach(func(key, val []byte) error {
-			v, err := store.parser.ParseBytes(val)
-			if err != nil {
-				return err
-			}
-
-			if query != "" && !strings.ContainsAny(v.Get("emoji").String(), query) {
-				return nil
-			}
-
+		return tx.Bucket(common.BucketStickers).ForEach(func(key, val []byte) (err error) {
 			count++
 
 			if count <= offset || (limit > 0 && count > offset+limit) {

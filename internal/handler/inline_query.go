@@ -47,6 +47,7 @@ func (h *Handler) IsInlineQuery(ctx *model.Context) (err error) {
 func getFilter(iq *tg.InlineQuery) *store.Filter {
 	f := new(store.Filter)
 	f.Limit = 50
+	f.Offset, _ = strconv.Atoi(iq.Offset)
 
 	if !strings.Contains(iq.Query, "photos:false") {
 		f.AllowedTypes = append(f.AllowedTypes, tg.TypePhoto)
@@ -67,6 +68,11 @@ func getFilter(iq *tg.InlineQuery) *store.Filter {
 		switch {
 		case strings.HasPrefix(field, "offset:"):
 			f.Offset, _ = strconv.Atoi(strings.TrimPrefix(field, "offset:"))
+		case strings.HasPrefix(field, "animated:"):
+			isAnimated, _ := strconv.ParseBool(strings.TrimPrefix(field, "animated:"))
+			f.IsAnimated = &isAnimated
+		case strings.HasPrefix(field, "set:"):
+			f.SetName = strings.TrimPrefix(field, "set:")
 		case strings.HasPrefix(field, "photos:"), strings.HasPrefix(field, "stickers:"):
 		default:
 			continue
@@ -74,6 +80,8 @@ func getFilter(iq *tg.InlineQuery) *store.Filter {
 
 		f.Query = f.Query[:i] + strings.TrimPrefix(f.Query[i:], field)
 	}
+
+	f.Query = strings.ReplaceAll(f.Query, " ", "")
 
 	return f
 }

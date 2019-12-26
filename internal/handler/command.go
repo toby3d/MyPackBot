@@ -17,8 +17,6 @@ func (h *Handler) IsCommand(ctx *model.Context) (err error) {
 		err = h.CommandStart(ctx)
 	case tg.CommandHelp:
 		err = h.CommandHelp(ctx)
-	case tg.CommandSettings:
-		err = h.CommandUnknown(ctx)
 	case "ping":
 		err = h.CommandPing(ctx)
 	case "add":
@@ -35,8 +33,7 @@ func (h *Handler) IsCommand(ctx *model.Context) (err error) {
 		err = h.CommandDelSticker(ctx)
 	case "delpack":
 		err = h.CommandDelSet(ctx)
-	case "reset", "cancel":
-		err = h.CommandUnknown(ctx)
+	case "reset", "cancel", tg.CommandSettings:
 	}
 
 	return err
@@ -70,13 +67,43 @@ func (h *Handler) CommandStart(ctx *model.Context) (err error) {
 // NOTE(toby3d): REQUIRED by Telegram Bot API platform
 func (h *Handler) CommandHelp(ctx *model.Context) (err error) {
 	p := ctx.Get("printer").(*message.Printer)
-	reply := tg.NewMessage(ctx.User.UserID, p.Sprintf("🤖 Here is a list of commands that I understand, some of"+
-		" them [may] or (should) contain an argument:\n/start - start all over again\n/help [other command] "+
-		"- get a list of available commands or help and a demonstration of a specific command\n/add [query] "+
-		"- add media from reply to your collection [with custom search query]\n/edit (query) - change query "+
-		"to reply media\n/del - remove reply media from your collection"))
+	reply := new(tg.SendMessageParameters)
+	reply.ChatID = ctx.User.UserID
+	reply.Text = p.Sprintf("🤖 Here is a list of commands that I understand, some of" +
+		" them [may] or (should) contain an argument:\n/start - start all over again\n/help [other command] " +
+		"- get a list of available commands or help and a demonstration of a specific command\n/add [query] " +
+		"- add media from reply to your collection [with custom search query]\n/edit (query) - change query " +
+		"to reply media\n/del - remove reply media from your collection")
+
+	if !ctx.Request.Message.HasCommandArgument() {
+		reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
+		reply.ReplyToMessageID = ctx.Request.Message.ID
+
+		_, err = ctx.SendMessage(reply)
+
+		return err
+	}
+
+	switch ctx.Request.Message.CommandArgument() {
+	case "add":
+		reply.Text = p.Sprintf("💡 Use the /add command as a reply to the sticker/photo to add this media to " +
+			"your collection feed. Given an argument, the result of this command will be equivalent to " +
+			"the /edit command.")
+	case "edit":
+		reply.Text = p.Sprintf("💡 Use the /edit command with an argument from any character set as a reply " +
+			"to a sticker/photo to change the search query of this media in the feed of your collection." +
+			" If this media is not in the feed, then the result of this command will be equivalent to " +
+			"the /add command with the same argument.")
+	case "del":
+		reply.Text = p.Sprintf("💡 Use /del command as an reply to the sticker/photo to remove it from the " +
+			"feed of your collection.")
+	default: // NOTE(toby3d): do nothing
+		return nil
+	}
+
 	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
 	reply.ReplyToMessageID = ctx.Request.Message.ID
+
 	_, err = ctx.SendMessage(reply)
 
 	return err

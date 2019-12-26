@@ -38,7 +38,7 @@ func (h *Handler) IsInlineQuery(ctx *model.Context) (err error) {
 
 	p := ctx.Get("printer").(*message.Printer)
 	answer.SwitchPrivateMessageParameter = "inline"
-	answer.SwitchPrivateMessageText = p.Sprintf("\u200d Found %d result(s)", count)
+	answer.SwitchPrivateMessageText = p.Sprintf("🕵 Found %d result(s)", count)
 	_, err = ctx.AnswerInlineQuery(answer)
 
 	return err

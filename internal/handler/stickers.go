@@ -81,8 +81,8 @@ func (h *Handler) CommandEditSticker(ctx *model.Context) (err error) {
 
 	if !ctx.Request.Message.HasCommandArgument() {
 		p := ctx.Get("printer").(*message.Printer)
-		reply := tg.NewMessage(ctx.User.UserID, p.Sprintf("💡 Add any text and/or emoji(s) as an argument of "+
-			"this command to change its search properties."))
+		reply := tg.NewMessage(ctx.User.UserID, p.Sprintf("💡 Add any text and/or emoji(s) as an argument "+
+			"of this command to change its search properties."))
 		reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
 		reply.ParseMode = tg.StyleMarkdown
 		reply.ReplyToMessageID = ctx.Request.Message.ID

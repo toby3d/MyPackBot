@@ -43,7 +43,7 @@ func AcquirePhoto(store photos.Manager) Interceptor {
 	}
 }
 
-func photoToModel(photoSize []tg.PhotoSize) *model.Photo {
+func photoToModel(photoSize tg.Photo) *model.Photo {
 	p := photoSize[len(photoSize)-1]
 	photo := new(model.Photo)
 	photo.FileID = p.FileID

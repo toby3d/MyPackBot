@@ -87,7 +87,7 @@ func migrateSet(ctx *model.Context, store stickers.Manager) {
 					continue
 				}
 
-				_ = store.Create(stickerToModel(&tgSet.Stickers[i]))
+				_ = store.Create(stickerToModel(tgSet.Stickers[i]))
 			}
 		}
 	}

@@ -43,7 +43,7 @@ func (h *Handler) GetStickerKeyboard(ctx *model.Context) *tg.InlineKeyboardMarku
 		}
 	}
 
-	return markup
+	return &markup
 }
 
 // CommandAddSticker import single Sticker by ReplyMessage.
@@ -84,7 +84,7 @@ func (h *Handler) CommandEditSticker(ctx *model.Context) (err error) {
 		reply := tg.NewMessage(ctx.User.UserID, p.Sprintf("💡 Add any text and/or emoji(s) as an argument "+
 			"of this command to change its search properties."))
 		reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
-		reply.ParseMode = tg.StyleMarkdown
+		reply.ParseMode = tg.ParseModeMarkdownV2
 		reply.ReplyToMessageID = ctx.Request.Message.ID
 
 		_, err = ctx.SendMessage(reply)

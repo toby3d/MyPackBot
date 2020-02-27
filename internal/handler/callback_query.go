@@ -22,9 +22,7 @@ func (h *Handler) IsCallbackQuery(ctx *model.Context) (err error) {
 		return err
 	}
 
-	_, err = ctx.AnswerCallbackQuery(&tg.AnswerCallbackQueryParameters{
-		CallbackQueryID: ctx.Request.CallbackQuery.ID,
-	})
+	_, err = ctx.AnswerCallbackQuery(tg.NewAnswerCallback(ctx.Request.CallbackQuery.ID))
 
 	return err
 }
@@ -34,10 +32,11 @@ func (h *Handler) CallbackAdd(ctx *model.Context) (err error) {
 		return err
 	}
 
-	editMessage := new(tg.EditMessageReplyMarkupParameters)
-	editMessage.ChatID = ctx.Request.CallbackQuery.Message.Chat.ID
-	editMessage.InlineMessageID = ctx.Request.CallbackQuery.InlineMessageID
-	editMessage.MessageID = ctx.Request.CallbackQuery.Message.ID
+	editMessage := tg.EditMessageReplyMarkup{
+		ChatID:          ctx.Request.CallbackQuery.Message.Chat.ID,
+		InlineMessageID: ctx.Request.CallbackQuery.InlineMessageID,
+		MessageID:       ctx.Request.CallbackQuery.Message.ID,
+	}
 
 	switch {
 	case ctx.Photo != nil:
@@ -72,10 +71,11 @@ func (h *Handler) CallbackDel(ctx *model.Context) (err error) {
 		return err
 	}
 
-	editMessage := new(tg.EditMessageReplyMarkupParameters)
-	editMessage.ChatID = ctx.Request.CallbackQuery.Message.Chat.ID
-	editMessage.InlineMessageID = ctx.Request.CallbackQuery.InlineMessageID
-	editMessage.MessageID = ctx.Request.CallbackQuery.Message.ID
+	editMessage := tg.EditMessageReplyMarkup{
+		ChatID:          ctx.Request.CallbackQuery.Message.Chat.ID,
+		InlineMessageID: ctx.Request.CallbackQuery.InlineMessageID,
+		MessageID:       ctx.Request.CallbackQuery.Message.ID,
+	}
 
 	switch {
 	case ctx.Photo != nil:

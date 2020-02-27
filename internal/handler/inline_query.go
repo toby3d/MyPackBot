@@ -13,7 +13,7 @@ import (
 )
 
 func (h *Handler) IsInlineQuery(ctx *model.Context) (err error) {
-	answer := tg.NewAnswerInlineQuery(ctx.Request.InlineQuery.ID)
+	answer := tg.NewAnswerInline(ctx.Request.InlineQuery.ID)
 	answer.CacheTime = 1 // NOTE(toby3d): add setting for change this
 	answer.IsPersonal = !strings.Contains(ctx.Request.InlineQuery.Query, "personal:false")
 	filter := getFilter(ctx.Request.InlineQuery)

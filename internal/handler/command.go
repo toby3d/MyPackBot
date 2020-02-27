@@ -67,13 +67,11 @@ func (h *Handler) CommandStart(ctx *model.Context) (err error) {
 // NOTE(toby3d): REQUIRED by Telegram Bot API platform
 func (h *Handler) CommandHelp(ctx *model.Context) (err error) {
 	p := ctx.Get("printer").(*message.Printer)
-	reply := new(tg.SendMessageParameters)
-	reply.ChatID = ctx.User.UserID
-	reply.Text = p.Sprintf("🤖 Here is a list of commands that I understand, some of" +
-		" them [may] or (should) contain an argument:\n/start - start all over again\n/help [other command] " +
-		"- get a list of available commands or help and a demonstration of a specific command\n/add [query] " +
-		"- add media from reply to your collection [with custom search query]\n/edit (query) - change query " +
-		"to reply media\n/del - remove reply media from your collection")
+	reply := tg.NewMessage(ctx.User.UserID, p.Sprintf("🤖 Here is a list of commands that I understand, some of"+
+		" them [may] or (should) contain an argument:\n/start - start all over again\n/help [other command] "+
+		"- get a list of available commands or help and a demonstration of a specific command\n/add [query] "+
+		"- add media from reply to your collection [with custom search query]\n/edit (query) - change query "+
+		"to reply media\n/del - remove reply media from your collection"))
 
 	if !ctx.Request.Message.HasCommandArgument() {
 		reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)

@@ -194,7 +194,7 @@ func (cfg *AutoMigrateConfig) migrateSets(data *Data) (err error) {
 
 		for _, setSticker := range set.Stickers {
 			setSticker := setSticker
-			_ = cfg.Stickers.Create(stickerToModel(&setSticker))
+			_ = cfg.Stickers.Create(stickerToModel(setSticker))
 		}
 
 		u := cfg.Users.GetByUserID(data.Records[i].UserID)
@@ -225,10 +225,10 @@ func (cfg *AutoMigrateConfig) migrateStickers(data *Data) (err error) {
 		}
 
 		// NOTE(toby3d): send old sticker ID to get new
-		result, err := cfg.Bot.SendSticker(&tg.SendStickerParameters{
+		result, err := cfg.Bot.SendSticker(tg.SendSticker{
 			ChatID:              cfg.GroupID,
 			DisableNotification: true,
-			Sticker:             data.Records[i].FileID,
+			Sticker:             &tg.InputFile{ID: data.Records[i].FileID},
 		})
 		if err != nil || !result.IsSticker() {
 			continue

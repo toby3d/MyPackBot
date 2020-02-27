@@ -38,7 +38,7 @@ func Birthday(bday time.Time) Interceptor {
 		}
 		reply.DisableNotification = false
 		reply.DisableWebPagePreview = false
-		reply.ParseMode = tg.StyleMarkdown
+		reply.ParseMode = tg.ParseModeMarkdownV2
 		reply.ReplyMarkup = tg.NewInlineKeyboardMarkup(
 			tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonURL(
 				p.Sprintf("💸 Make a donation"), "https://toby3d.me/donate",

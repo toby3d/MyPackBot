@@ -34,7 +34,7 @@ func Hacktober() Interceptor {
 			" the quality of the code of this bot. Choose issue to your taste and offer your PR!"))
 		reply.DisableNotification = false
 		reply.DisableWebPagePreview = false
-		reply.ParseMode = tg.StyleMarkdown
+		reply.ParseMode = tg.ParseModeMarkdownV2
 		reply.ReplyMarkup = tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonURL(
 			p.Sprintf("🔧 Let's hack!"),
 			"https://gitlab.com/toby3d/mypackbot/issues?label_name%5B%5D=hacktoberfest",

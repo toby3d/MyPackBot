@@ -2,13 +2,22 @@ package stickers
 
 import "gitlab.com/toby3d/mypackbot/internal/model"
 
-type Manager interface {
-	Add(*model.UserSticker) error
-	AddSet(uint64, string) error
-	Get(*model.UserSticker) *model.UserSticker
-	GetList(uint64, int, int, string) (model.Stickers, int)
-	GetSet(uint64, int, int, string) (model.Stickers, int)
-	Remove(*model.UserSticker) error
-	RemoveSet(uint64, string) error
-	Update(*model.UserSticker) error
-}
+type (
+	ReadWriter interface {
+		Reader
+		Writer
+	}
+
+	Reader interface {
+		Get(up *model.UserSticker) *model.Sticker
+		GetList(offset int, limit int, filter *model.UserSticker) (model.Stickers, int, error)
+	}
+
+	Writer interface {
+		Add(up *model.UserSticker) error
+		AddSet(uid int, setName string) error
+		Update(up *model.UserSticker) error
+		Remove(up *model.UserSticker) error
+		RemoveSet(uid int, setName string) error
+	}
+)

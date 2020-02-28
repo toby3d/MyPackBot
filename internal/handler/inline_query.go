@@ -12,26 +12,32 @@ import (
 	"golang.org/x/text/message"
 )
 
+const defaultLimit int = 50
+
 func (h *Handler) IsInlineQuery(ctx *model.Context) (err error) {
 	answer := tg.NewAnswerInline(ctx.Request.InlineQuery.ID)
 	answer.CacheTime = 1 // NOTE(toby3d): add setting for change this
-	answer.IsPersonal = !strings.Contains(ctx.Request.InlineQuery.Query, "personal:false")
 	filter := getFilter(ctx.Request.InlineQuery)
-	items, count := h.store.GetList(ctx.User.ID, filter)
 
-	if filter.Offset+50 < count {
-		answer.NextOffset = strconv.Itoa(filter.Offset + 50)
+	if answer.IsPersonal = !strings.Contains(ctx.Request.InlineQuery.Query, "personal:false"); answer.IsPersonal {
+		filter.UserID = ctx.User.ID
 	}
 
-	for i := range items {
-		switch item := items[i].(type) {
-		case *model.Sticker:
+	results, count, _ := h.store.GetList(filter.Offset, filter.Limit, filter)
+
+	if filter.Offset+filter.Limit < count {
+		answer.NextOffset = strconv.Itoa(filter.Offset + filter.Limit)
+	}
+
+	for i := range results {
+		switch results[i].GetType() {
+		case tg.TypeSticker:
 			answer.Results = append(answer.Results, tg.NewInlineQueryResultCachedSticker(
-				tg.TypeSticker+common.DataSeparator+strconv.FormatUint(item.ID, 10), item.FileID,
+				tg.TypeSticker+common.DataSeparator+results[i].GetID(), results[i].GetFileID(),
 			))
-		case *model.Photo:
+		case tg.TypePhoto:
 			answer.Results = append(answer.Results, tg.NewInlineQueryResultCachedPhoto(
-				tg.TypePhoto+common.DataSeparator+strconv.FormatUint(item.ID, 10), item.FileID,
+				tg.TypePhoto+common.DataSeparator+results[i].GetID(), results[i].GetFileID(),
 			))
 		}
 	}
@@ -46,7 +52,7 @@ func (h *Handler) IsInlineQuery(ctx *model.Context) (err error) {
 
 func getFilter(iq *tg.InlineQuery) *store.Filter {
 	f := new(store.Filter)
-	f.Limit = 50
+	f.Limit = defaultLimit
 	f.Offset, _ = strconv.Atoi(iq.Offset)
 
 	if !strings.Contains(iq.Query, "photos:false") {
@@ -62,17 +68,20 @@ func getFilter(iq *tg.InlineQuery) *store.Filter {
 	}
 
 	f.Query, _ = utils.FixEmojiTone(strings.TrimSpace(iq.Query))
+
 	for _, field := range strings.Fields(f.Query) {
 		i := strings.Index(f.Query, field)
 
 		switch {
 		case strings.HasPrefix(field, "offset:"):
 			f.Offset, _ = strconv.Atoi(strings.TrimPrefix(field, "offset:"))
-		case strings.HasPrefix(field, "animated:"):
-			isAnimated, _ := strconv.ParseBool(strings.TrimPrefix(field, "animated:"))
-			f.IsAnimated = &isAnimated
-		case strings.HasPrefix(field, "set:"):
-			f.SetName = strings.TrimPrefix(field, "set:")
+		/*
+			case strings.HasPrefix(field, "animated:"):
+				isAnimated, _ := strconv.ParseBool(strings.TrimPrefix(field, "animated:"))
+				f.IsAnimated = &isAnimated
+			case strings.HasPrefix(field, "set:"):
+				f.SetName = strings.TrimPrefix(field, "set:")
+		*/
 		case strings.HasPrefix(field, "photos:"), strings.HasPrefix(field, "stickers:"):
 		default:
 			continue

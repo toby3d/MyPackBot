@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	json "github.com/json-iterator/go"
 	bunt "github.com/tidwall/buntdb"
@@ -25,7 +26,7 @@ type (
 	}
 
 	Record struct {
-		UserID  int64
+		UserID  int
 		SetName string
 		FileID  string
 		Emoji   string
@@ -34,7 +35,7 @@ type (
 	Records []*Record
 
 	Backup struct {
-		Users        []int64  `json:"users"`
+		Users        []int    `json:"users"`
 		Stickers     []string `json:"stickers"`
 		ImportedSets []string `json:"imported_sets"`
 		BlockedSets  []string `json:"blocked_sets"`
@@ -43,7 +44,7 @@ type (
 	AutoMigrateConfig struct {
 		OldDB         *bunt.DB
 		Stickers      stickers.Manager
-		UsersStickers usersstickers.Manager
+		UsersStickers usersstickers.ReadWriter
 		Users         users.Manager
 		Bot           *tg.Bot
 		GroupID       int64
@@ -95,7 +96,7 @@ func (cfg *AutoMigrateConfig) importOldData() (data *Data, err error) {
 
 			// NOTE(toby3d): this part always contains user/chat id
 			var err error
-			r.UserID, err = strconv.ParseInt(parts[1], 10, 64)
+			r.UserID, err = strconv.Atoi(parts[1])
 			if err != nil || r.UserID == 0 || !strings.EqualFold(parts[2], partSet) {
 				return true
 			}
@@ -151,9 +152,13 @@ func (cfg *AutoMigrateConfig) migrateUsers(data *Data) (err error) {
 			continue
 		}
 
+		now := time.Now().UTC().Unix()
+
 		_ = cfg.Users.Create(&model.User{
-			UserID:       data.Records[i].UserID,
+			ID:           data.Records[i].UserID,
 			LanguageCode: "en",
+			CreatedAt:    now,
+			UpdatedAt:    now,
 		})
 
 		data.Users = append(data.Users, data.Records[i].UserID)
@@ -197,7 +202,7 @@ func (cfg *AutoMigrateConfig) migrateSets(data *Data) (err error) {
 			_ = cfg.Stickers.Create(stickerToModel(setSticker))
 		}
 
-		u := cfg.Users.GetByUserID(data.Records[i].UserID)
+		u := cfg.Users.Get(data.Records[i].UserID)
 		_ = cfg.UsersStickers.AddSet(u.ID, set.Name)
 		data.ImportedSets = append(data.ImportedSets, set.Name)
 		_ = cfg.saveBackup(data.Backup)
@@ -243,8 +248,8 @@ func (cfg *AutoMigrateConfig) migrateStickers(data *Data) (err error) {
 
 		// NOTE(toby3d): store old-new stickers
 		_ = cfg.Stickers.Create(s)
-		u := cfg.Users.GetByUserID(data.Records[i].UserID)
-		s = cfg.Stickers.GetByFileID(s.FileID)
+		u := cfg.Users.Get(data.Records[i].UserID)
+		s = cfg.Stickers.Get(s.FileID)
 		_ = cfg.UsersStickers.Add(&model.UserSticker{
 			UserID:    u.ID,
 			StickerID: s.ID,
@@ -258,7 +263,7 @@ func (cfg *AutoMigrateConfig) migrateStickers(data *Data) (err error) {
 	return nil
 }
 
-func containsInt(src []int64, find int64) bool {
+func containsInt(src []int, find int) bool {
 	for i := range src {
 		if src[i] != find {
 			continue

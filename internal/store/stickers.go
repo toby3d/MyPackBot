@@ -1,271 +1,112 @@
 package store
 
 import (
-	"sort"
-	"strconv"
-	"strings"
-	"time"
-
-	bolt "github.com/etcd-io/bbolt"
-	json "github.com/json-iterator/go"
-	"github.com/valyala/fastjson"
+	"github.com/timshannon/bolthold"
 	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
-	"golang.org/x/xerrors"
+	bolt "go.etcd.io/bbolt"
 )
 
 type StickersStore struct {
-	conn     *bolt.DB
-	marshler json.API
-	parser   fastjson.Parser
+	conn *bolthold.Store
 }
 
-var (
-	ErrStickerInvalid = model.Error{
-		Message: "Invalid sticker",
-	}
-
-	ErrStickerExist = model.Error{
-		Message: "Sticker already exist",
-	}
-
-	ErrStickerNotExist = model.Error{
-		Message: "Sticker not exist",
-	}
-)
-
-func NewStickersStore(conn *bolt.DB, marshler json.API) *StickersStore {
-	return &StickersStore{
-		conn:     conn,
-		marshler: marshler,
-		parser:   fastjson.Parser{},
-	}
+func NewStickersStore(conn *bolthold.Store) *StickersStore {
+	return &StickersStore{conn: conn}
 }
 
 func (store *StickersStore) Create(s *model.Sticker) error {
-	if s == nil || s.FileID == "" {
-		return ErrStickerInvalid
+	if store.Get(s.ID) != nil {
+		return bolthold.ErrKeyExists
 	}
 
-	if store.Get(s.ID) != nil || store.GetByFileID(s.FileID) != nil {
-		return ErrStickerExist
+	return store.conn.Bolt().Update(func(tx *bolt.Tx) error {
+		return store.conn.InsertIntoBucket(tx.Bucket(common.BucketStickers), s.ID, s)
+	})
+}
+
+func (store *StickersStore) Get(id string) *model.Sticker {
+	result := new(model.Sticker)
+
+	if err := store.conn.Bolt().View(func(tx *bolt.Tx) error {
+		return store.conn.GetFromBucket(tx.Bucket(common.BucketStickers), id, result)
+	}); err != nil {
+		return nil
 	}
 
-	now := time.Now().UTC().Unix()
+	return result
+}
 
-	if s.CreatedAt <= 0 {
-		s.CreatedAt = now
+func (store *StickersStore) GetSet(name string) model.Stickers {
+	list, _, _ := store.GetList(0, 0, &model.Sticker{SetName: name})
+	return list
+}
+
+func (store *StickersStore) GetList(offset, limit int, filter *model.Sticker) (list model.Stickers, count int,
+	err error) {
+	q := bolthold.Where("ID").Ne("")
+
+	if offset > 0 {
+		q = q.Skip(offset)
 	}
 
-	if s.UpdatedAt <= 0 {
-		s.UpdatedAt = now
+	if limit > 0 {
+		q = q.Limit(limit)
 	}
 
-	if s.SetName == "" {
-		s.SetName = common.SetNameUploaded
+	if filter != nil {
+		if filter.Emoji != "" {
+			q = q.And("Emoji").ContainsAny(filter.Emoji)
+		}
+
+		if filter.SetName != "" {
+			q = q.And("SetName").Eq(filter.SetName)
+		}
 	}
 
-	return store.conn.Update(func(tx *bolt.Tx) (err error) {
+	list = make(model.Stickers, limit)
+
+	if err := store.conn.Bolt().View(func(tx *bolt.Tx) error {
 		bkt := tx.Bucket(common.BucketStickers)
 
-		if s.ID, err = bkt.NextSequence(); err != nil {
+		if count, err = store.conn.CountInBucket(bkt, &model.Sticker{}, q); err != nil {
 			return err
 		}
 
-		src, err := store.marshler.Marshal(s)
-		if err != nil {
-			return err
-		}
-
-		return bkt.Put([]byte(strconv.FormatUint(s.ID, 10)), src)
-	})
-}
-
-func (store *StickersStore) Get(id uint64) *model.Sticker {
-	s := new(model.Sticker)
-
-	if err := store.conn.View(func(tx *bolt.Tx) error {
-		return store.marshler.Unmarshal(
-			tx.Bucket(common.BucketStickers).Get([]byte(strconv.FormatUint(id, 10))), s,
-		)
-	}); err != nil || s.ID == 0 {
-		return nil
+		return store.conn.FindInBucket(bkt, &list, q)
+	}); err != nil {
+		return list, count, err
 	}
 
-	return s
-}
-
-func (store *StickersStore) GetByFileID(id string) *model.Sticker {
-	s := new(model.Sticker)
-
-	if err := store.conn.View(func(tx *bolt.Tx) error {
-		if err := tx.Bucket(common.BucketStickers).ForEach(func(key, val []byte) error {
-			v, err := store.parser.ParseBytes(val)
-			if err != nil {
-				return err
-			}
-
-			if string(v.GetStringBytes("file_id")) != id {
-				return nil
-			}
-
-			if err = store.marshler.Unmarshal(val, s); err != nil {
-				return err
-			}
-
-			return ErrForEachStop
-		}); err != nil && !xerrors.Is(err, ErrForEachStop) {
-			return err
-		}
-
-		return nil
-	}); err != nil || s.ID == 0 {
-		return nil
-	}
-
-	return s
-}
-
-func (store *StickersStore) GetList(offset, limit int) (model.Stickers, int) {
-	if limit <= 0 {
-		limit = 0
-	}
-
-	count := 0
-	stickers := make(model.Stickers, 0, limit)
-	_ = store.conn.View(func(tx *bolt.Tx) error {
-		return tx.Bucket(common.BucketStickers).ForEach(func(key, val []byte) (err error) {
-			count++
-
-			if count <= offset || (limit > 0 && count > offset+limit) {
-				return nil
-			}
-
-			s := new(model.Sticker)
-			if err = store.marshler.Unmarshal(val, s); err != nil {
-				return err
-			}
-
-			stickers = append(stickers, s)
-
-			return nil
-		})
-	})
-
-	sort.Slice(stickers, func(i, j int) bool {
-		return stickers[i].SetName < stickers[j].SetName || stickers[i].UpdatedAt < stickers[j].UpdatedAt
-	})
-
-	return stickers, count
-}
-
-func (store *StickersStore) GetSet(name string) (model.Stickers, int) {
-	count := 0
-	stickers := make(model.Stickers, 0)
-
-	_ = store.conn.View(func(tx *bolt.Tx) error {
-		return tx.Bucket(common.BucketStickers).ForEach(func(key, val []byte) (err error) {
-			v, err := store.parser.ParseBytes(val)
-			if err != nil {
-				return err
-			}
-
-			if !strings.EqualFold(string(v.GetStringBytes("set_name")), name) {
-				return nil
-			}
-
-			count++
-
-			s := new(model.Sticker)
-			if err = store.marshler.Unmarshal(val, s); err != nil {
-				return err
-			}
-
-			stickers = append(stickers, s)
-
-			return nil
-		})
-	})
-
-	sort.Slice(stickers, func(i, j int) bool {
-		return stickers[i].UpdatedAt < stickers[j].UpdatedAt
-	})
-
-	return stickers, count
+	return list, count, err
 }
 
 func (store *StickersStore) Update(s *model.Sticker) error {
-	if s == nil || s.FileID == "" {
-		return ErrStickerInvalid
-	}
-
-	if store.Get(s.ID) == nil && store.GetByFileID(s.FileID) == nil {
+	if store.Get(s.ID) == nil {
 		return store.Create(s)
 	}
 
-	if s.UpdatedAt <= 0 {
-		s.UpdatedAt = time.Now().UTC().Unix()
-	}
-
-	if s.SetName == "" {
-		s.SetName = common.SetNameUploaded
-	}
-
-	src, err := store.marshler.Marshal(s)
-	if err != nil {
-		return err
-	}
-
-	return store.conn.Update(func(tx *bolt.Tx) error {
-		return tx.Bucket(common.BucketStickers).Put([]byte(strconv.FormatUint(s.ID, 10)), src)
+	return store.conn.Bolt().Update(func(tx *bolt.Tx) error {
+		return store.conn.UpdateBucket(tx.Bucket(common.BucketStickers), s.ID, s)
 	})
 }
 
-func (store *StickersStore) Remove(id uint64) error {
+func (store *StickersStore) Remove(id string) error {
 	if store.Get(id) == nil {
-		return ErrStickerNotExist
+		return bolthold.ErrNotFound
 	}
 
-	return store.conn.Update(func(tx *bolt.Tx) (err error) {
-		if err = tx.Bucket(common.BucketStickers).Delete([]byte(strconv.FormatUint(id, 10))); err != nil {
-			return err
-		}
-
-		bkt := tx.Bucket(common.BucketUsersStickers)
-
-		if err = bkt.ForEach(func(key, val []byte) (err error) {
-			v, err := store.parser.ParseBytes(val)
-			if err != nil {
-				return err
-			}
-
-			if v.GetUint64("sticker_id") != id {
-				return nil
-			}
-
-			if err = bkt.Delete(key); err != nil {
-				return err
-			}
-
-			return ErrForEachStop
-		}); err != nil && !xerrors.Is(err, ErrForEachStop) {
-			return err
-		}
-
-		return nil
+	return store.conn.Bolt().Update(func(tx *bolt.Tx) error {
+		return store.conn.DeleteFromBucket(tx.Bucket(common.BucketStickers), id, &model.Sticker{})
 	})
 }
 
-func (store *StickersStore) GetOrCreate(s *model.Sticker) (sticker *model.Sticker, err error) {
-	if sticker = store.GetByFileID(s.FileID); sticker != nil {
+func (store *StickersStore) GetOrCreate(s *model.Sticker) (*model.Sticker, error) {
+	if sticker := store.Get(s.ID); sticker != nil {
 		return sticker, nil
 	}
 
-	if sticker = store.Get(s.ID); sticker != nil {
-		return sticker, nil
-	}
-
-	if err = store.Create(s); err != nil {
+	if err := store.Create(s); err != nil {
 		return nil, err
 	}
 

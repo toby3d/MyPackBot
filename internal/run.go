@@ -6,6 +6,7 @@ import (
 
 	"github.com/kirillDanshin/dlog"
 	http "github.com/valyala/fasthttp"
+	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/handler"
 	"gitlab.com/toby3d/mypackbot/internal/middleware"
 	"gitlab.com/toby3d/mypackbot/internal/model"
@@ -24,27 +25,41 @@ func (mpb *MyPackBot) Run() error {
 		middleware.AcquireUser(mpb.users),
 		middleware.AcquirePrinter(),
 		middleware.ChatAction(),
-		middleware.AcquirePhoto(mpb.photos),
-		middleware.AcquireUserPhoto(mpb.usersPhotos),
-		middleware.AcquireSticker(mpb.stickers),
-		middleware.AcquireUserSticker(mpb.usersStickers),
-		middleware.Birthday(time.Date(0, time.November, 4, 0, 0, 0, 0, time.UTC)),
-		middleware.Hacktober(),
+		middleware.AcquirePhoto(mpb.photos), middleware.AcquireUserPhoto(mpb.usersPhotos),
+		middleware.AcquireSticker(mpb.stickers), middleware.AcquireUserSticker(mpb.usersStickers),
+		func() middleware.Interceptor {
+			return func(ctx *model.Context, next model.UpdateFunc) error {
+				if ctx.Sticker == nil || ctx.Sticker.SetName == common.SetNameUploaded {
+					return next(ctx)
+				}
+
+				for _, sticker := range mpb.stickers.GetSet(ctx.Sticker.SetName) {
+					if mpb.usersStickers.Get(&model.UserSticker{
+						UserID:    ctx.User.ID,
+						StickerID: sticker.ID,
+					}) == nil {
+						return next(ctx)
+					}
+				}
+
+				ctx.HasSet = true
+
+				return next(ctx)
+			}
+		}(),
+		middleware.Birthday(time.Date(0, time.November, 4, 0, 0, 0, 0, time.UTC)), middleware.Hacktober(),
 		middleware.UpdateLastSeen(mpb.users),
 	}
 	h := chain.UpdateHandler(handler.NewHandler(
-		mpb.users,
-		mpb.stickers,
-		mpb.photos,
-		mpb.usersStickers,
-		mpb.usersPhotos,
+		mpb.users, mpb.stickers, mpb.photos, mpb.usersStickers, mpb.usersPhotos,
 	).UpdateHandler)
 
 	for update := range mpb.bot.Updates {
 		ctx := new(model.Context)
 		ctx.Request = update
 		ctx.Bot = mpb.bot
-		if err := h(ctx); err != nil {
+
+		if err = h(ctx); err != nil {
 			dlog.D(err)
 		}
 	}

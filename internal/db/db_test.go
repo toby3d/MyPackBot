@@ -12,10 +12,7 @@ func TestOpen(t *testing.T) {
 	t.Run("invalid", func(t *testing.T) {
 		db, err := Open(filepath.Join("/", "invalid", "path"))
 		assert.Error(t, err)
-
-		t.Run("automigrate", func(t *testing.T) {
-			assert.Panics(t, func() { _ = AutoMigrate(db) })
-		})
+		assert.Nil(t, db)
 	})
 	t.Run("valid", func(t *testing.T) {
 		rootPath, err := os.Getwd()
@@ -29,9 +26,5 @@ func TestOpen(t *testing.T) {
 			assert.NoError(t, db.Close())
 			assert.NoError(t, os.Remove(testPath))
 		}()
-
-		t.Run("automigrate", func(t *testing.T) {
-			assert.NoError(t, AutoMigrate(db))
-		})
 	})
 }

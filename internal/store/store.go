@@ -1,9 +1,7 @@
 package store
 
 import (
-	"errors"
 	"sort"
-	"time"
 
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	usersphotos "gitlab.com/toby3d/mypackbot/internal/model/users/photos"
@@ -13,97 +11,90 @@ import (
 
 type (
 	Store struct {
-		usersStickers usersstickers.Manager
-		usersPhotos   usersphotos.Manager
+		usersStickers usersstickers.ReadWriter
+		usersPhotos   usersphotos.ReadWriter
 	}
 
 	Filter struct {
+		UserID       int
 		AllowedTypes []string
 		Query        string
 		Offset       int
 		Limit        int
-		IsPersonal   bool
-		IsAnimated   *bool
-		Width        string
-		Height       string
-		SetName      string
 	}
 )
 
-// ErrForEachStop used in ForEach loops in database for forse stop iterations
-var ErrForEachStop = errors.New("for each stop stop")
+func (f *Filter) offset() int {
+	if len(f.AllowedTypes) == 0 || f.Offset <= len(f.AllowedTypes) {
+		return f.Offset
+	}
 
-func NewStore(us usersstickers.Manager, up usersphotos.Manager) *Store {
+	return f.Offset / len(f.AllowedTypes)
+}
+
+func (f *Filter) limit() int {
+	if len(f.AllowedTypes) == 0 || f.Limit <= len(f.AllowedTypes) {
+		return f.Limit
+	}
+
+	return f.Limit / len(f.AllowedTypes)
+}
+
+func NewStore(us usersstickers.ReadWriter, up usersphotos.ReadWriter) *Store {
 	return &Store{
 		usersStickers: us,
 		usersPhotos:   up,
 	}
 }
 
-func (store *Store) GetList(uid uint64, f *Filter) ([]interface{}, int) {
-	results := make([]interface{}, 0)
-	count := 0
-
-	if len(f.AllowedTypes) == 0 {
-		return results, count
+func (store *Store) GetList(offset, limit int, filter *Filter) (list []model.InlineResult, count int, err error) {
+	if filter == nil {
+		filter = new(Filter)
+		filter.AllowedTypes = []string{tg.TypeSticker, tg.TypePhoto}
 	}
 
-	for _, t := range f.AllowedTypes {
+	list = make([]model.InlineResult, 0)
+
+	for _, t := range filter.AllowedTypes {
 		switch t {
-		case tg.TypePhoto:
-			if f.IsAnimated != nil && *f.IsAnimated {
-				continue
-			}
-
-			photos, photosCount := store.usersPhotos.GetList(uid, 0, -1, f.Query)
-			for i := range photos {
-				results = append(results, photos[i])
-			}
-
-			count += photosCount
 		case tg.TypeSticker:
-			stickers, stickersCount := store.usersStickers.GetList(uid, 0, -1, f.Query)
-			for i := range stickers {
-				if f.IsAnimated != nil && stickers[i].IsAnimated != *f.IsAnimated ||
-					f.SetName != "" && stickers[i].SetName != f.SetName {
-					stickersCount--
-					continue
-				}
-
-				results = append(results, stickers[i])
+			l, c, err := store.usersStickers.GetList(
+				filter.offset(), filter.limit(), &model.UserSticker{
+					UserID: filter.UserID,
+					Query:  filter.Query,
+				},
+			)
+			if err != nil {
+				return list, count, err
 			}
 
-			count += stickersCount
+			for i := range l {
+				list = append(list, l[i])
+			}
+
+			count += c
+		case tg.TypePhoto:
+			l, c, err := store.usersPhotos.GetList(
+				filter.offset(), filter.limit(), &model.UserPhoto{
+					UserID: filter.UserID,
+					Query:  filter.Query,
+				},
+			)
+			if err != nil {
+				return list, count, err
+			}
+
+			for i := range l {
+				list = append(list, l[i])
+			}
+
+			count += c
 		}
 	}
 
-	sort.Slice(results, func(i, j int) bool {
-		var a, b time.Time
-
-		switch result := results[i].(type) {
-		case *model.Sticker:
-			a = time.Unix(result.CreatedAt, 0)
-		case *model.Photo:
-			a = time.Unix(result.CreatedAt, 0)
-		}
-
-		switch result := results[j].(type) {
-		case *model.Sticker:
-			b = time.Unix(result.CreatedAt, 0)
-		case *model.Photo:
-			b = time.Unix(result.CreatedAt, 0)
-		}
-
-		return a.Before(b)
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].GetUpdatedAt() < list[j].GetUpdatedAt()
 	})
 
-	if len(results) <= f.Offset {
-		return make([]interface{}, 0), count
-	}
-
-	if tail := len(results[f.Offset:]); tail < f.Limit {
-		return results[f.Offset : f.Offset+tail], count
-	}
-
-	return results[f.Offset : f.Offset+f.Limit-1], count
+	return list, count, err
 }

@@ -6,7 +6,7 @@ import (
 	tg "gitlab.com/toby3d/telegram"
 )
 
-func AcquirePhoto(store photos.Manager) Interceptor {
+func AcquirePhoto(store photos.ReadWriter) Interceptor {
 	return func(ctx *model.Context, next model.UpdateFunc) (err error) {
 		switch {
 		case ctx.Request.IsMessage():
@@ -46,9 +46,10 @@ func AcquirePhoto(store photos.Manager) Interceptor {
 func photoToModel(photoSize tg.Photo) *model.Photo {
 	p := photoSize[len(photoSize)-1]
 	photo := new(model.Photo)
-	photo.FileID = p.FileID
+	photo.ID = p.FileUniqueID
 	photo.Width = p.Width
 	photo.Height = p.Height
+	photo.FileID = p.FileID
 
 	return photo
 }

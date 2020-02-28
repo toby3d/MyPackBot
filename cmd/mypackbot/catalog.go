@@ -36,90 +36,81 @@ func init() {
 }
 
 var messageKeyToIndex = map[string]int{
-	"☺️ Oh, you missed @toby3d birthday on November 4th!\nIf you like this bot, why not send him some birthday greetings and a little birthday gift? It is not yet too late to make him happy!": 1,
-	"👋 Hi %s, I'm %s!\nThanks to me, you can collect almost any media content in Telegram without any limits, in any chat via inline mode.":                                                     6,
-	"👍 Imported!": 11,
-	"👍 Removed!":  13,
-	"👍 Updated!":  12,
-	"💡 Add any text and/or emoji(s) as an argument of this command to change its search properties.":                                                                                                                                                                                                          18,
-	"💡 Use /del command as an reply to the sticker/photo to remove it from the feed of your collection.":                                                                                                                                                                                                      10,
-	"💡 Use the /add command as a reply to the sticker/photo to add this media to your collection feed. Given an argument, the result of this command will be equivalent to the /edit command.":                                                                                                                8,
-	"💡 Use the /edit command with an argument from any character set as a reply to a sticker/photo to change the search query of this media in the feed of your collection. If this media is not in the feed, then the result of this command will be equivalent to the /add command with the same argument.": 9,
-	"💸 Make a donation":     2,
-	"📥 Import %s set":       20,
-	"📥 Import this photo":   16,
-	"📥 Import this sticker": 19,
-	"🔥 Remove %s set":       21,
-	"🔥 Remove this photo":   17,
-	"🔧 Let's hack!":         5,
-	"🕵 Found %d result(s)":  14,
-	"🕺 HacktoberFest is here!\n\nIf you are a beginner or already an experienced golang-developer, now is a great time to help improve the quality of the code of this bot. Choose issue to your taste and offer your PR!": 4,
-	"🤔 What to do with this?": 15,
-	"🤖 Here is a list of commands that I understand, some of them [may] or (should) contain an argument:\n/start - start all over again\n/help [other command] - get a list of available commands or help and a demonstration of a specific command\n/add [query] - add media from reply to your collection [with custom search query]\n/edit (query) - change query to reply media\n/del - remove reply media from your collection": 7,
-	"🤝 Use referral links": 3,
-	"🥳 4 November? It's a @toby3d birthday!\nIf you like this bot, then why not send him a congratulation along with a small gift? This will make him incredibly happy!": 0,
+	"☺️ Oh, you missed @toby3d birthday on November 4th!\nIf you like this bot, why not send him some birthday greetings and a little birthday gift? It is not yet too late to make him happy!": 17,
+	"👋 Hi %s, I'm %s!\nThanks to me, you can collect almost any media content in Telegram without any limits, in any chat via inline mode.":                                                     0,
+	"👍 Imported!": 5,
+	"👍 Removed!":  7,
+	"👍 Updated!":  6,
+	"💡 Add any text and/or emoji(s) as an argument of this command to change its search properties.":                                                                                                                                                                                                          12,
+	"💡 Use /del command as an reply to the sticker/photo to remove it from the feed of your collection.":                                                                                                                                                                                                      4,
+	"💡 Use the /add command as a reply to the sticker/photo to add this media to your collection feed. Given an argument, the result of this command will be equivalent to the /edit command.":                                                                                                                2,
+	"💡 Use the /edit command with an argument from any character set as a reply to a sticker/photo to change the search query of this media in the feed of your collection. If this media is not in the feed, then the result of this command will be equivalent to the /add command with the same argument.": 3,
+	"💸 Make a donation":     18,
+	"📥 Import %s set":       14,
+	"📥 Import this photo":   10,
+	"📥 Import this sticker": 13,
+	"🔥 Remove %s set":       15,
+	"🔥 Remove this photo":   11,
+	"🔧 Let's hack!":         21,
+	"🕵 Found %d result(s)":  8,
+	"🕺 HacktoberFest is here!\n\nIf you are a beginner or already an experienced golang-developer, now is a great time to help improve the quality of the code of this bot. Choose issue to your taste and offer your PR!": 20,
+	"🤔 What to do with this?": 9,
+	"🤖 Here is a list of commands that I understand, some of them [may] or (should) contain an argument:\n/start - start all over again\n/help [other command] - get a list of available commands or help and a demonstration of a specific command\n/add [query] - add media from reply to your collection [with custom search query]\n/edit (query) - change query to reply media\n/del - remove reply media from your collection": 1,
+	"🤝 Use referral links": 19,
+	"🥳 4 November? It's a @toby3d birthday!\nIf you like this bot, then why not send him a congratulation along with a small gift? This will make him incredibly happy!": 16,
 }
 
 var enIndex = []uint32{ // 23 elements
-	0x00000000, 0x000000a5, 0x00000162, 0x00000177,
-	0x0000018f, 0x00000265, 0x00000276, 0x00000304,
-	0x000004a1, 0x0000055d, 0x00000688, 0x000006ee,
-	0x000006fd, 0x0000070b, 0x00000719, 0x00000734,
-	0x0000074f, 0x00000766, 0x0000077d, 0x000007df,
-	0x000007f8, 0x0000080e, 0x00000824,
+	0x00000000, 0x0000008e, 0x0000022b, 0x000002e7,
+	0x00000412, 0x00000478, 0x00000487, 0x00000495,
+	0x000004a3, 0x000004be, 0x000004d9, 0x000004f0,
+	0x00000507, 0x00000569, 0x00000582, 0x00000598,
+	0x000005ae, 0x00000653, 0x00000710, 0x00000725,
+	0x0000073d, 0x00000813, 0x00000824,
 } // Size: 116 bytes
 
 const enData string = "" + // Size: 2084 bytes
-	"\x02🥳 4 November? It's a @toby3d birthday!\x0aIf you like this bot, then" +
-	" why not send him a congratulation along with a small gift? This will ma" +
-	"ke him incredibly happy!\x02☺️ Oh, you missed @toby3d birthday on Novemb" +
-	"er 4th!\x0aIf you like this bot, why not send him some birthday greeting" +
-	"s and a little birthday gift? It is not yet too late to make him happy!" +
-	"\x02💸 Make a donation\x02🤝 Use referral links\x02🕺 HacktoberFest is here" +
-	"!\x0a\x0aIf you are a beginner or already an experienced golang-develope" +
-	"r, now is a great time to help improve the quality of the code of this b" +
-	"ot. Choose issue to your taste and offer your PR!\x02🔧 Let's hack!\x02👋 " +
-	"Hi %[1]s, I'm %[2]s!\x0aThanks to me, you can collect almost any media c" +
-	"ontent in Telegram without any limits, in any chat via inline mode.\x02🤖" +
-	" Here is a list of commands that I understand, some of them [may] or (sh" +
-	"ould) contain an argument:\x0a/start - start all over again\x0a/help [ot" +
-	"her command] - get a list of available commands or help and a demonstrat" +
-	"ion of a specific command\x0a/add [query] - add media from reply to your" +
-	" collection [with custom search query]\x0a/edit (query) - change query t" +
-	"o reply media\x0a/del - remove reply media from your collection\x02💡 Use" +
-	" the /add command as a reply to the sticker/photo to add this media to y" +
-	"our collection feed. Given an argument, the result of this command will " +
-	"be equivalent to the /edit command.\x02💡 Use the /edit command with an a" +
-	"rgument from any character set as a reply to a sticker/photo to change t" +
-	"he search query of this media in the feed of your collection. If this me" +
-	"dia is not in the feed, then the result of this command will be equivale" +
-	"nt to the /add command with the same argument.\x02💡 Use /del command as " +
-	"an reply to the sticker/photo to remove it from the feed of your collect" +
-	"ion.\x02👍 Imported!\x02👍 Updated!\x02👍 Removed!\x02🕵 Found %[1]d result(" +
-	"s)\x02🤔 What to do with this?\x02📥 Import this photo\x02🔥 Remove this ph" +
-	"oto\x02💡 Add any text and/or emoji(s) as an argument of this command to " +
-	"change its search properties.\x02📥 Import this sticker\x02📥 Import %[1]s" +
-	" set\x02🔥 Remove %[1]s set"
+	"\x02👋 Hi %[1]s, I'm %[2]s!\x0aThanks to me, you can collect almost any m" +
+	"edia content in Telegram without any limits, in any chat via inline mode" +
+	".\x02🤖 Here is a list of commands that I understand, some of them [may] " +
+	"or (should) contain an argument:\x0a/start - start all over again\x0a/he" +
+	"lp [other command] - get a list of available commands or help and a demo" +
+	"nstration of a specific command\x0a/add [query] - add media from reply t" +
+	"o your collection [with custom search query]\x0a/edit (query) - change q" +
+	"uery to reply media\x0a/del - remove reply media from your collection" +
+	"\x02💡 Use the /add command as a reply to the sticker/photo to add this m" +
+	"edia to your collection feed. Given an argument, the result of this comm" +
+	"and will be equivalent to the /edit command.\x02💡 Use the /edit command " +
+	"with an argument from any character set as a reply to a sticker/photo to" +
+	" change the search query of this media in the feed of your collection. I" +
+	"f this media is not in the feed, then the result of this command will be" +
+	" equivalent to the /add command with the same argument.\x02💡 Use /del co" +
+	"mmand as an reply to the sticker/photo to remove it from the feed of you" +
+	"r collection.\x02👍 Imported!\x02👍 Updated!\x02👍 Removed!\x02🕵 Found %[1]" +
+	"d result(s)\x02🤔 What to do with this?\x02📥 Import this photo\x02🔥 Remov" +
+	"e this photo\x02💡 Add any text and/or emoji(s) as an argument of this co" +
+	"mmand to change its search properties.\x02📥 Import this sticker\x02📥 Imp" +
+	"ort %[1]s set\x02🔥 Remove %[1]s set\x02🥳 4 November? It's a @toby3d birt" +
+	"hday!\x0aIf you like this bot, then why not send him a congratulation al" +
+	"ong with a small gift? This will make him incredibly happy!\x02☺️ Oh, yo" +
+	"u missed @toby3d birthday on November 4th!\x0aIf you like this bot, why " +
+	"not send him some birthday greetings and a little birthday gift? It is n" +
+	"ot yet too late to make him happy!\x02💸 Make a donation\x02🤝 Use referra" +
+	"l links\x02🕺 HacktoberFest is here!\x0a\x0aIf you are a beginner or alre" +
+	"ady an experienced golang-developer, now is a great time to help improve" +
+	" the quality of the code of this bot. Choose issue to your taste and off" +
+	"er your PR!\x02🔧 Let's hack!"
 
 var ruIndex = []uint32{ // 23 elements
-	0x00000000, 0x00000135, 0x0000028e, 0x000002ae,
-	0x000002d7, 0x00000423, 0x00000434, 0x0000053a,
-	0x000007f5, 0x00000948, 0x00000b48, 0x00000bfa,
-	0x00000c1b, 0x00000c34, 0x00000c49, 0x00000c7a,
-	0x00000ca0, 0x00000cc9, 0x00000ce4, 0x00000da3,
-	0x00000dd0, 0x00000df6, 0x00000e0e,
+	0x00000000, 0x00000106, 0x000003c1, 0x00000514,
+	0x00000714, 0x000007c6, 0x000007e7, 0x00000800,
+	0x00000815, 0x00000846, 0x0000086c, 0x00000895,
+	0x000008b0, 0x0000096f, 0x0000099c, 0x000009c2,
+	0x000009da, 0x00000b0f, 0x00000c68, 0x00000c88,
+	0x00000cb1, 0x00000dfd, 0x00000e0e,
 } // Size: 116 bytes
 
 const ruData string = "" + // Size: 3598 bytes
-	"\x02🥳 4-е Ноября? Это день рождения @toby3d!\x0aЕсли тебе нравится этот " +
-	"бот, то почему бы не отправить ему поздравления вместе с небольшим пода" +
-	"рком? Это несказанно его осчастливит!\x02☺️ Ой, ты пропустил день рожде" +
-	"ния @toby3d 4-го Ноября!\x0aЕсли тебе нравится этот бот, то почему бы н" +
-	"е отправить ему поздравления вместе с небольшим подарком? Ещё не слишко" +
-	"м поздно его порадовать!\x02💸 Пожертвование\x02🤝 Реферальные ссылки\x02" +
-	"🕺 Хактоберфест уже здесь!\x0a\x0aЕсли ты начинающий или уже опытный g" +
-	"olang-разработчик, то сейчас хорошее время помочь улучшить качество кода" +
-	" этого бота. Выбери issue на свой вкус и предложи PR!\x02🔧 Let's hack!" +
 	"\x02👋 Привет %[1]s, я %[2]s!\x0aБлагодаря мне, ты можешь коллекционирова" +
 	"ть в inline-режиме практически любой медиа-контент Telegram без огранич" +
 	"ений, в любом чате.\x02🤖 Вот список команд которые я понимаю, некоторые" +
@@ -140,6 +131,15 @@ const ruData string = "" + // Size: 3598 bytes
 	"!\x02🕵 Найдено %[1]d результатов\x02🤔 Что с этим делать?\x02📥 Импортиров" +
 	"ать фото\x02🔥 Убрать фото\x02💡 Добавь любой текст и/или эмодзи в качест" +
 	"ве аргумента этой команды чтобы изменить поисковые свойства.\x02📥 Импор" +
-	"тировать стикер\x02📥 Импортировать %[1]s\x02🔥 Убрать %[1]s"
+	"тировать стикер\x02📥 Импортировать %[1]s\x02🔥 Убрать %[1]s\x02🥳 4-е Ноя" +
+	"бря? Это день рождения @toby3d!\x0aЕсли тебе нравится этот бот, то поче" +
+	"му бы не отправить ему поздравления вместе с небольшим подарком? Это не" +
+	"сказанно его осчастливит!\x02☺️ Ой, ты пропустил день рождения @toby3d " +
+	"4-го Ноября!\x0aЕсли тебе нравится этот бот, то почему бы не отправить е" +
+	"му поздравления вместе с небольшим подарком? Ещё не слишком поздно его " +
+	"порадовать!\x02💸 Пожертвование\x02🤝 Реферальные ссылки\x02🕺 Хактоберфес" +
+	"т уже здесь!\x0a\x0aЕсли ты начинающий или уже опытный golang-разработч" +
+	"ик, то сейчас хорошее время помочь улучшить качество кода этого бота. В" +
+	"ыбери issue на свой вкус и предложи PR!\x02🔧 Let's hack!"
 
-	// Total table size 5914 bytes (5KiB); checksum: 7091C75C
+	// Total table size 5914 bytes (5KiB); checksum: 490F86A

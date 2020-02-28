@@ -11,15 +11,16 @@ import (
 )
 
 type Handler struct {
-	users         users.Manager
-	stickers      stickers.Manager
-	photos        photos.Manager
-	usersStickers us.Manager
-	usersPhotos   up.Manager
+	users         users.ReadWriter
+	stickers      stickers.ReadWriter
+	photos        photos.ReadWriter
+	usersStickers us.ReadWriter
+	usersPhotos   up.ReadWriter
 	store         *store.Store
 }
 
-func NewHandler(us users.Manager, ss stickers.Manager, ps photos.Manager, uss us.Manager, ups up.Manager) *Handler {
+func NewHandler(us users.ReadWriter, ss stickers.ReadWriter, ps photos.ReadWriter, uss us.ReadWriter,
+	ups up.ReadWriter) *Handler {
 	return &Handler{
 		photos:        ps,
 		stickers:      ss,

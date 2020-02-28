@@ -41,7 +41,7 @@ func (h *Handler) IsCommand(ctx *model.Context) (err error) {
 
 // CommandPing send common ping message.
 func (h *Handler) CommandPing(ctx *model.Context) (err error) {
-	reply := tg.NewMessage(ctx.User.UserID, "🏓")
+	reply := tg.NewMessage(int64(ctx.User.ID), "🏓")
 	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
 	reply.ReplyToMessageID = ctx.Request.Message.ID
 	_, err = ctx.SendMessage(reply)
@@ -53,7 +53,7 @@ func (h *Handler) CommandPing(ctx *model.Context) (err error) {
 // NOTE(toby3d): REQUIRED by Telegram Bot API platform
 func (h *Handler) CommandStart(ctx *model.Context) (err error) {
 	p := ctx.Get("printer").(*message.Printer)
-	reply := tg.NewMessage(ctx.User.UserID, p.Sprintf("👋 Hi %s, I'm %s!\nThanks to me, you can collect almost any"+
+	reply := tg.NewMessage(int64(ctx.User.ID), p.Sprintf("👋 Hi %s, I'm %s!\nThanks to me, you can collect almost any"+
 		" media content in Telegram without any limits, in any chat via inline mode.",
 		ctx.Request.Message.From.FullName(), ctx.FullName()))
 	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
@@ -67,7 +67,7 @@ func (h *Handler) CommandStart(ctx *model.Context) (err error) {
 // NOTE(toby3d): REQUIRED by Telegram Bot API platform
 func (h *Handler) CommandHelp(ctx *model.Context) (err error) {
 	p := ctx.Get("printer").(*message.Printer)
-	reply := tg.NewMessage(ctx.User.UserID, p.Sprintf("🤖 Here is a list of commands that I understand, some of"+
+	reply := tg.NewMessage(int64(ctx.User.ID), p.Sprintf("🤖 Here is a list of commands that I understand, some of"+
 		" them [may] or (should) contain an argument:\n/start - start all over again\n/help [other command] "+
 		"- get a list of available commands or help and a demonstration of a specific command\n/add [query] "+
 		"- add media from reply to your collection [with custom search query]\n/edit (query) - change query "+
@@ -137,7 +137,7 @@ func (h *Handler) CommandAdd(ctx *model.Context) (err error) {
 	}
 
 	p := ctx.Get("printer").(*message.Printer)
-	reply := tg.NewMessage(ctx.User.UserID, p.Sprintf("👍 Imported!"))
+	reply := tg.NewMessage(int64(ctx.User.ID), p.Sprintf("👍 Imported!"))
 	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
 	reply.ReplyToMessageID = ctx.Request.Message.ID
 	_, err = ctx.SendMessage(reply)
@@ -164,7 +164,7 @@ func (h *Handler) CommandEdit(ctx *model.Context) (err error) {
 	}
 
 	p := ctx.Get("printer").(*message.Printer)
-	reply := tg.NewMessage(ctx.User.UserID, p.Sprintf("👍 Updated!"))
+	reply := tg.NewMessage(int64(ctx.User.ID), p.Sprintf("👍 Updated!"))
 	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
 	reply.ReplyToMessageID = ctx.Request.Message.ID
 	_, err = ctx.SendMessage(reply)
@@ -191,7 +191,7 @@ func (h *Handler) CommandDel(ctx *model.Context) (err error) {
 	}
 
 	p := ctx.Get("printer").(*message.Printer)
-	reply := tg.NewMessage(ctx.User.UserID, p.Sprintf("👍 Removed!"))
+	reply := tg.NewMessage(int64(ctx.User.ID), p.Sprintf("👍 Removed!"))
 	reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
 	reply.ReplyToMessageID = ctx.Request.Message.ID
 	_, err = ctx.SendMessage(reply)

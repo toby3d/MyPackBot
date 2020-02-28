@@ -48,6 +48,7 @@ func (h *Handler) CallbackAdd(ctx *model.Context) (err error) {
 	case ctx.Sticker != nil:
 		if ctx.Request.CallbackQuery.Data == common.DataAddSet {
 			err = h.CommandAddSet(ctx)
+			ctx.HasSet = true
 		} else {
 			err = h.CommandAddSticker(ctx)
 		}
@@ -56,6 +57,7 @@ func (h *Handler) CallbackAdd(ctx *model.Context) (err error) {
 			return err
 		}
 
+		ctx.HasSticker = true
 		editMessage.ReplyMarkup = h.GetStickerKeyboard(ctx)
 	default:
 		return err
@@ -87,6 +89,7 @@ func (h *Handler) CallbackDel(ctx *model.Context) (err error) {
 	case ctx.Sticker != nil:
 		if ctx.Request.CallbackQuery.Data == common.DataDelSet {
 			err = h.CommandDelSet(ctx)
+			ctx.HasSet = false
 		} else {
 			err = h.CommandDelSticker(ctx)
 		}
@@ -95,6 +98,7 @@ func (h *Handler) CallbackDel(ctx *model.Context) (err error) {
 			return err
 		}
 
+		ctx.HasSticker = false
 		editMessage.ReplyMarkup = h.GetStickerKeyboard(ctx)
 	default:
 		return err

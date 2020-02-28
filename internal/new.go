@@ -1,7 +1,6 @@
 package internal
 
 import (
-	json "github.com/json-iterator/go"
 	"github.com/spf13/viper"
 	"gitlab.com/toby3d/mypackbot/internal/config"
 	"gitlab.com/toby3d/mypackbot/internal/db"
@@ -20,8 +19,8 @@ type MyPackBot struct {
 	photos        photos.Manager
 	stickers      stickers.Manager
 	users         users.Manager
-	usersPhotos   usersphotos.Manager
-	usersStickers usersstickers.Manager
+	usersPhotos   usersphotos.ReadWriter
+	usersStickers usersstickers.ReadWriter
 }
 
 func New(path string) (mpb *MyPackBot, err error) {
@@ -36,12 +35,11 @@ func New(path string) (mpb *MyPackBot, err error) {
 		return nil, err
 	}
 
-	marshler := json.ConfigFastest
-	mpb.photos = store.NewPhotosStore(conn, marshler)
-	mpb.stickers = store.NewStickersStore(conn, marshler)
-	mpb.users = store.NewUsersStore(conn, marshler)
-	mpb.usersPhotos = store.NewUsersPhotosStore(conn, mpb.users, mpb.photos, marshler)
-	mpb.usersStickers = store.NewUsersStickersStore(conn, mpb.users, mpb.stickers, marshler)
+	mpb.photos = store.NewPhotosStore(conn)
+	mpb.stickers = store.NewStickersStore(conn)
+	mpb.users = store.NewUsersStore(conn)
+	mpb.usersPhotos = store.NewUsersPhotosStore(conn, mpb.users, mpb.photos)
+	mpb.usersStickers = store.NewUsersStickersStore(conn, mpb.users, mpb.stickers)
 
 	if mpb.bot, err = tg.New(mpb.config.GetString("telegram.token")); err != nil {
 		return nil, err

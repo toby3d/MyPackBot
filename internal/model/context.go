@@ -13,11 +13,12 @@ type (
 		*tg.Bot
 		Request *tg.Update
 
-		User        *User
-		Sticker     *Sticker
-		Photo       *Photo
-		UserPhoto   *UserPhoto
-		UserSticker *UserSticker
+		User       *User
+		Sticker    *Sticker
+		HasSticker bool
+		HasSet     bool
+		Photo      *Photo
+		HasPhoto   bool
 
 		userValues context.Context
 	}

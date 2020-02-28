@@ -5,7 +5,6 @@ import (
 	"log"
 	"path/filepath"
 
-	json "github.com/json-iterator/go"
 	bunt "github.com/tidwall/buntdb"
 	"gitlab.com/toby3d/mypackbot/internal/db"
 	"gitlab.com/toby3d/mypackbot/internal/migrator"
@@ -40,10 +39,9 @@ func main() {
 	}
 	defer newDB.Close()
 
-	marshler := json.ConfigFastest
-	users := store.NewUsersStore(newDB, marshler)
-	stickers := store.NewStickersStore(newDB, marshler)
-	usersStickers := store.NewUsersStickersStore(newDB, users, stickers, marshler)
+	users := store.NewUsersStore(newDB)
+	stickers := store.NewStickersStore(newDB)
+	usersStickers := store.NewUsersStickersStore(newDB, users, stickers)
 
 	if err = migrator.AutoMigrate(migrator.AutoMigrateConfig{
 		Bot:           bot,
@@ -52,7 +50,6 @@ func main() {
 		UsersStickers: usersStickers,
 		Users:         users,
 		OldDB:         oldDB,
-		Marshler:      marshler,
 	}); err != nil {
 		log.Fatalln("ERROR:", err.Error())
 	}

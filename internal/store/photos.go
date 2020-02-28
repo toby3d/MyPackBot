@@ -1,226 +1,97 @@
 package store
 
 import (
-	"sort"
-	"strconv"
-	"time"
-
-	bolt "github.com/etcd-io/bbolt"
-	json "github.com/json-iterator/go"
-	"github.com/valyala/fastjson"
+	"github.com/timshannon/bolthold"
 	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
-	"golang.org/x/xerrors"
+	bolt "go.etcd.io/bbolt"
 )
 
 type PhotosStore struct {
-	conn     *bolt.DB
-	marshler json.API
-	parser   fastjson.Parser
+	conn *bolthold.Store
 }
 
-var (
-	ErrPhotoInvalid = model.Error{
-		Message: "Invalid photo",
-	}
-
-	ErrPhotoExist = model.Error{
-		Message: "Photo already exist",
-	}
-
-	ErrPhotoNotExist = model.Error{
-		Message: "Photo not exist",
-	}
-)
-
-func NewPhotosStore(conn *bolt.DB, marshler json.API) *PhotosStore {
-	return &PhotosStore{
-		conn:     conn,
-		marshler: marshler,
-		parser:   fastjson.Parser{},
-	}
+func NewPhotosStore(conn *bolthold.Store) *PhotosStore {
+	return &PhotosStore{conn: conn}
 }
 
 func (store *PhotosStore) Create(p *model.Photo) error {
-	if p == nil || p.FileID == "" {
-		return ErrPhotoInvalid
+	if store.Get(p.ID) != nil {
+		return bolthold.ErrKeyExists
 	}
 
-	if store.Get(p.ID) != nil || store.GetByFileID(p.FileID) != nil {
-		return ErrPhotoExist
+	return store.conn.Bolt().Update(func(tx *bolt.Tx) error {
+		return store.conn.InsertIntoBucket(tx.Bucket(common.BucketPhotos), p.ID, p)
+	})
+}
+
+func (store *PhotosStore) Get(id string) *model.Photo {
+	result := new(model.Photo)
+
+	if err := store.conn.Bolt().View(func(tx *bolt.Tx) error {
+		return store.conn.GetFromBucket(tx.Bucket(common.BucketPhotos), id, result)
+	}); err != nil {
+		return nil
 	}
 
-	now := time.Now().UTC().Unix()
+	return result
+}
 
-	if p.CreatedAt <= 0 {
-		p.CreatedAt = now
+func (store *PhotosStore) GetList(offset, limit int, filter *model.Photo) (list model.Photos, count int, err error) {
+	q := bolthold.Where("ID").Ne("")
+
+	if offset > 0 {
+		q = q.Skip(offset)
 	}
 
-	if p.UpdatedAt <= 0 {
-		p.UpdatedAt = now
+	if limit > 0 {
+		q = q.Limit(limit)
 	}
 
-	return store.conn.Update(func(tx *bolt.Tx) (err error) {
+	// TODO(toby3d): implement filter here
+	list = make(model.Photos, limit)
+
+	if err := store.conn.Bolt().View(func(tx *bolt.Tx) error {
 		bkt := tx.Bucket(common.BucketPhotos)
 
-		if p.ID, err = bkt.NextSequence(); err != nil {
+		if count, err = store.conn.CountInBucket(bkt, &model.Photo{}, q); err != nil {
 			return err
 		}
 
-		src, err := store.marshler.Marshal(p)
-		if err != nil {
-			return err
-		}
-
-		return bkt.Put([]byte(strconv.FormatUint(p.ID, 10)), src)
-	})
-}
-
-func (store *PhotosStore) Get(id uint64) *model.Photo {
-	p := new(model.Photo)
-
-	if err := store.conn.View(func(tx *bolt.Tx) error {
-		return store.marshler.Unmarshal(
-			tx.Bucket(common.BucketPhotos).Get([]byte(strconv.FormatUint(id, 10))), p,
-		)
-	}); err != nil || p.ID == 0 {
-		return nil
+		return store.conn.FindInBucket(bkt, &list, q)
+	}); err != nil {
+		return list, count, err
 	}
 
-	return p
-}
-
-func (store *PhotosStore) GetByFileID(id string) *model.Photo {
-	p := new(model.Photo)
-
-	if err := store.conn.View(func(tx *bolt.Tx) error {
-		if err := tx.Bucket(common.BucketPhotos).ForEach(func(key, val []byte) error {
-			v, err := store.parser.ParseBytes(val)
-			if err != nil {
-				return err
-			}
-
-			if string(v.GetStringBytes("file_id")) != id {
-				return nil
-			}
-
-			if err = store.marshler.Unmarshal(val, p); err != nil {
-				return err
-			}
-
-			return ErrForEachStop
-		}); err != nil && !xerrors.Is(err, ErrForEachStop) {
-			return err
-		}
-
-		return nil
-	}); err != nil || p.ID == 0 {
-		return nil
-	}
-
-	return p
-}
-
-func (store *PhotosStore) GetList(offset, limit int) (model.Photos, int) {
-	if limit <= 0 {
-		limit = 0
-	}
-
-	count := 0
-	photos := make(model.Photos, 0, limit)
-	_ = store.conn.View(func(tx *bolt.Tx) error {
-		return tx.Bucket(common.BucketPhotos).ForEach(func(key, val []byte) (err error) {
-			count++
-
-			if count <= offset || (limit > 0 && count > offset+limit) {
-				return nil
-			}
-
-			p := new(model.Photo)
-			if err = store.marshler.Unmarshal(val, p); err != nil {
-				return err
-			}
-
-			photos = append(photos, p)
-
-			return nil
-		})
-	})
-
-	sort.Slice(photos, func(i, j int) bool {
-		return photos[i].UpdatedAt < photos[j].UpdatedAt
-	})
-
-	return photos, count
+	return list, count, err
 }
 
 func (store *PhotosStore) Update(p *model.Photo) error {
-	if p == nil || p.FileID == "" {
-		return ErrPhotoInvalid
-	}
-
-	if store.Get(p.ID) == nil && store.GetByFileID(p.FileID) == nil {
+	if store.Get(p.ID) == nil {
 		return store.Create(p)
 	}
 
-	if p.UpdatedAt <= 0 {
-		p.UpdatedAt = time.Now().UTC().Unix()
-	}
-
-	src, err := store.marshler.Marshal(p)
-	if err != nil {
-		return err
-	}
-
-	return store.conn.Update(func(tx *bolt.Tx) error {
-		return tx.Bucket(common.BucketPhotos).Put([]byte(strconv.FormatUint(p.ID, 10)), src)
+	return store.conn.Bolt().Update(func(tx *bolt.Tx) error {
+		return store.conn.UpdateBucket(tx.Bucket(common.BucketPhotos), p.ID, p)
 	})
 }
 
-func (store *PhotosStore) Remove(id uint64) error {
+func (store *PhotosStore) Remove(id string) error {
 	if store.Get(id) == nil {
-		return ErrPhotoNotExist
+		return bolthold.ErrNotFound
 	}
 
-	return store.conn.Update(func(tx *bolt.Tx) (err error) {
-		if err = tx.Bucket(common.BucketPhotos).Delete([]byte(strconv.FormatUint(id, 10))); err != nil {
-			return err
-		}
-
-		bkt := tx.Bucket(common.BucketUsersPhotos)
-		if err = bkt.ForEach(func(key, val []byte) (err error) {
-			v, err := store.parser.ParseBytes(val)
-			if err != nil {
-				return err
-			}
-
-			if v.GetUint64("photo_id") != id {
-				return nil
-			}
-
-			if err = bkt.Delete(key); err != nil {
-				return err
-			}
-
-			return ErrForEachStop
-		}); err != nil && !xerrors.Is(err, ErrForEachStop) {
-			return err
-		}
-
-		return nil
+	return store.conn.Bolt().Update(func(tx *bolt.Tx) error {
+		return store.conn.DeleteFromBucket(tx.Bucket(common.BucketPhotos), id, &model.Photo{})
 	})
 }
 
-func (store *PhotosStore) GetOrCreate(p *model.Photo) (photo *model.Photo, err error) {
-	if photo = store.GetByFileID(p.FileID); photo != nil {
+func (store *PhotosStore) GetOrCreate(p *model.Photo) (*model.Photo, error) {
+	if photo := store.Get(p.ID); photo != nil {
 		return photo, nil
 	}
 
-	if photo = store.Get(p.ID); photo != nil {
-		return photo, nil
-	}
-
-	if err = store.Create(p); err != nil {
+	if err := store.Create(p); err != nil {
 		return nil, err
 	}
 

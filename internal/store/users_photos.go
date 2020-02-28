@@ -1,228 +1,133 @@
 package store
 
 import (
-	"sort"
-	"strconv"
 	"strings"
-	"time"
 
-	bolt "github.com/etcd-io/bbolt"
-	json "github.com/json-iterator/go"
-	"github.com/valyala/fastjson"
+	"github.com/timshannon/bolthold"
 	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	"gitlab.com/toby3d/mypackbot/internal/model/photos"
 	"gitlab.com/toby3d/mypackbot/internal/model/users"
+	bolt "go.etcd.io/bbolt"
 	"golang.org/x/xerrors"
 )
 
 type UsersPhotosStore struct {
-	conn     *bolt.DB
-	marshler json.API
-	parser   fastjson.Parser
-	photos   photos.Manager
-	users    users.Manager
+	conn   *bolthold.Store
+	photos photos.Reader
+	users  users.Reader
 }
 
-var (
-	ErrUserPhotoExist = model.Error{
-		Message: "Photo already imported",
-	}
-
-	ErrUserPhotoNotExist = model.Error{
-		Message: "Photo already removed",
-	}
-)
-
-func NewUsersPhotosStore(conn *bolt.DB, us users.Manager, ps photos.Manager, marshler json.API) *UsersPhotosStore {
+func NewUsersPhotosStore(conn *bolthold.Store, us users.Reader, ps photos.Reader) *UsersPhotosStore {
 	return &UsersPhotosStore{
-		conn:     conn,
-		marshler: marshler,
-		parser:   fastjson.Parser{},
-		photos:   ps,
-		users:    us,
+		conn:   conn,
+		photos: ps,
+		users:  us,
 	}
 }
 
 func (store *UsersPhotosStore) Add(up *model.UserPhoto) (err error) {
-	if up == nil || up.UserID == 0 || up.PhotoID == 0 {
-		return nil
+	if store.users.Get(up.UserID) == nil || store.photos.Get(up.PhotoID) == nil {
+		return bolthold.ErrNotFound
 	}
 
-	userPhoto := store.Get(up)
-	if userPhoto != nil {
-		return ErrUserPhotoExist
-	}
-
-	timeStamp := time.Now().UTC().Unix()
-
-	if up.CreatedAt == 0 {
-		up.CreatedAt = timeStamp
-	}
-
-	if up.UpdatedAt == 0 {
-		up.UpdatedAt = timeStamp
-	}
-
-	return store.conn.Update(func(tx *bolt.Tx) (err error) {
-		bkt := tx.Bucket(common.BucketUsersPhotos)
-
-		up.ID, err = bkt.NextSequence()
-		if err != nil {
-			return err
-		}
-
-		src, err := store.marshler.Marshal(up)
-		if err != nil {
-			return err
-		}
-
-		return bkt.Put([]byte(strconv.FormatUint(up.ID, 10)), src)
+	return store.conn.Bolt().Update(func(tx *bolt.Tx) error {
+		return store.conn.InsertIntoBucket(tx.Bucket(common.BucketUsersPhotos), bolthold.NextSequence(), up)
 	})
 }
 
 func (store *UsersPhotosStore) Update(up *model.UserPhoto) (err error) {
-	if up == nil || up.UserID == 0 || up.PhotoID == 0 {
-		return nil
-	}
+	return store.conn.Bolt().Update(func(tx *bolt.Tx) error {
+		return store.conn.UpdateMatchingInBucket(
+			tx.Bucket(common.BucketUsersPhotos), &model.UserPhoto{},
+			bolthold.Where("UserID").Eq(up.UserID).And("PhotoID").Eq(up.PhotoID),
+			func(record interface{}) error {
+				result, ok := record.(*model.UserPhoto) // record will always be a pointer
+				if !ok {
+					return xerrors.New("invalid type")
+				}
 
-	userPhoto := store.Get(up)
-	if userPhoto == nil {
-		return store.Add(up)
-	}
+				result.Query, result.UpdatedAt = up.Query, up.UpdatedAt
 
-	if up.ID == 0 {
-		up.ID = userPhoto.ID
-	}
-
-	if up.CreatedAt == 0 {
-		up.CreatedAt = userPhoto.CreatedAt
-	}
-
-	if up.UpdatedAt <= userPhoto.UpdatedAt {
-		up.UpdatedAt = time.Now().UTC().Unix()
-	}
-
-	src, err := store.marshler.Marshal(up)
-	if err != nil {
-		return err
-	}
-
-	return store.conn.Update(func(tx *bolt.Tx) error {
-		return tx.Bucket(common.BucketUsersPhotos).Put([]byte(strconv.FormatUint(up.ID, 10)), src)
+				return nil
+			})
 	})
+
 }
 
-func (store *UsersPhotosStore) Get(up *model.UserPhoto) *model.UserPhoto {
-	if up == nil || up.UserID == 0 || up.PhotoID == 0 {
+func (store *UsersPhotosStore) Get(up *model.UserPhoto) *model.Photo {
+	result := new(model.UserPhoto)
+
+	if err := store.conn.Bolt().View(func(tx *bolt.Tx) error {
+		return store.conn.FindOneInBucket(
+			tx.Bucket(common.BucketUsersPhotos), result,
+			bolthold.Where("UserID").Eq(up.UserID).And("PhotoID").Eq(up.PhotoID),
+		)
+	}); err != nil {
 		return nil
 	}
 
-	userPhoto := new(model.UserPhoto)
-	if err := store.conn.View(func(tx *bolt.Tx) (err error) {
-		if err = tx.Bucket(common.BucketUsersPhotos).ForEach(func(key, val []byte) (err error) {
-			v, err := store.parser.ParseBytes(val)
-			if err != nil {
-				return err
-			}
+	return store.photos.Get(result.PhotoID)
+}
 
-			if v.GetUint64("user_id") != up.UserID || v.GetUint64("photo_id") != up.PhotoID {
-				return nil
-			}
+func (store *UsersPhotosStore) GetList(offset, limit int, filter *model.UserPhoto) (list model.Photos, count int,
+	err error) {
 
-			if err = store.marshler.Unmarshal(val, userPhoto); err != nil {
-				return err
-			}
+	q := bolthold.Where("UserID").Ne(0).And("PhotoID").Ne("")
+	qCount := bolthold.Where("UserID").Ne(0).And("PhotoID").Ne("")
 
-			return ErrForEachStop
-		}); err != nil && !xerrors.Is(err, ErrForEachStop) {
+	if offset != 0 {
+		q = q.Skip(offset)
+	}
+
+	if limit != 0 {
+		q = q.Limit(limit)
+	}
+
+	if filter != nil {
+		if filter.UserID != 0 {
+			q = q.And("UserID").Eq(filter.UserID)
+			qCount.And("UserID").Eq(filter.UserID)
+		}
+
+		if filter.Query != "" {
+			q = q.And("Query").MatchFunc(func(field string) (bool, error) {
+				return strings.ContainsAny(field, filter.Query), nil
+			})
+			qCount.And("Query").MatchFunc(func(field string) (bool, error) {
+				return strings.ContainsAny(field, filter.Query), nil
+			})
+		}
+	}
+
+	results := make(model.UserPhotos, 0)
+
+	if err = store.conn.Bolt().View(func(tx *bolt.Tx) (err error) {
+		bkt := tx.Bucket(common.BucketUsersPhotos)
+
+		if count, err = store.conn.CountInBucket(bkt, &model.UserPhoto{}, qCount); err != nil {
 			return err
 		}
 
-		return nil
-	}); err != nil || userPhoto.PhotoID == 0 || userPhoto.UserID == 0 {
-		return nil
+		return store.conn.FindInBucket(bkt, &results, q)
+	}); err != nil {
+		return nil, 0, err
 	}
 
-	return userPhoto
-}
+	list = make(model.Photos, 0)
 
-func (store *UsersPhotosStore) GetList(uid uint64, offset, limit int, query string) (model.Photos, int) {
-	if limit <= 0 {
-		limit = 0
+	for i := range results {
+		list = append(list, store.photos.Get(results[i].PhotoID))
 	}
 
-	count := 0
-	photos := make(model.Photos, 0, limit)
-	_ = store.conn.View(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket(common.BucketPhotos)
-		return tx.Bucket(common.BucketUsersPhotos).ForEach(func(key, val []byte) error {
-			v, err := store.parser.ParseBytes(val)
-			if err != nil {
-				return err
-			}
-
-			if v.GetUint64("user_id") != uid {
-				return nil
-			}
-
-			if query != "" && !strings.ContainsAny(string(v.GetStringBytes("query")), query) {
-				return nil
-			}
-
-			count++
-
-			if (offset != 0 && count <= offset) || (limit > 0 && count > offset+limit) {
-				return nil
-			}
-
-			p := new(model.Photo)
-			if err = store.marshler.Unmarshal(
-				bkt.Get([]byte(strconv.FormatUint(v.GetUint64("photo_id"), 10))), p,
-			); err != nil {
-				return err
-			}
-
-			photos = append(photos, p)
-
-			return nil
-		})
-	})
-
-	sort.Slice(photos, func(i, j int) bool {
-		return photos[i].UpdatedAt < photos[j].UpdatedAt
-	})
-
-	return photos, count
+	return list, count, err
 }
 
 func (store *UsersPhotosStore) Remove(up *model.UserPhoto) (err error) {
-	userPhoto := store.Get(up)
-	if userPhoto == nil {
-		return ErrUserPhotoNotExist
-	}
-
-	return store.conn.Update(func(tx *bolt.Tx) (err error) {
-		bkt := tx.Bucket(common.BucketUsersPhotos)
-		if err = bkt.ForEach(func(key, val []byte) (err error) {
-			v, err := store.parser.ParseBytes(val)
-			if err != nil {
-				return err
-			}
-
-			if v.GetUint64("user_id") != up.UserID || v.GetUint64("photo_id") != up.PhotoID {
-				return nil
-			}
-
-			if err = bkt.Delete(key); err != nil {
-				return err
-			}
-
-			return ErrForEachStop
-		}); err != nil && !xerrors.Is(err, ErrForEachStop) {
-			return err
-		}
-
-		return nil
+	return store.conn.Bolt().Update(func(tx *bolt.Tx) error {
+		return store.conn.DeleteMatchingFromBucket(
+			tx.Bucket(common.BucketUsersPhotos), &model.UserPhoto{},
+			bolthold.Where("UserID").Eq(up.UserID).And("PhotoID").Eq(up.PhotoID),
+		)
 	})
 }

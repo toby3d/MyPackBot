@@ -5,16 +5,16 @@ import (
 	"gitlab.com/toby3d/mypackbot/internal/model/users/stickers"
 )
 
-func AcquireUserSticker(store stickers.Manager) Interceptor {
+func AcquireUserSticker(store stickers.Reader) Interceptor {
 	return func(ctx *model.Context, next model.UpdateFunc) error {
 		if ctx.Sticker == nil {
 			return next(ctx)
 		}
 
-		ctx.UserSticker = store.Get(&model.UserSticker{
+		ctx.HasSticker = store.Get(&model.UserSticker{
 			UserID:    ctx.User.ID,
 			StickerID: ctx.Sticker.ID,
-		})
+		}) != nil
 
 		return next(ctx)
 	}

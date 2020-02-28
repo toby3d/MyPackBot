@@ -4,64 +4,91 @@ import (
 	"strings"
 
 	"gitlab.com/toby3d/mypackbot/internal/common"
+	tg "gitlab.com/toby3d/telegram"
 )
 
 type (
-	Model struct {
-		ID        uint64 `json:"id"`
-		CreatedAt int64  `json:"created_at"`
-		UpdatedAt int64  `json:"updated_at"`
-	}
-
 	User struct {
-		Model
-		UserID       int64  `json:"user_id"`
-		LanguageCode string `json:"language_code"`
-		LastSeen     int64  `json:"last_seen"`
+		ID           int `boltholdKey:"ID"`
+		CreatedAt    int64
+		UpdatedAt    int64
+		LanguageCode string
+		LastSeen     int64
 	}
 
 	Users []*User
 
 	Sticker struct {
-		Model
-		FileID     string `json:"file_id"`
-		Width      int    `json:"width"`
-		Height     int    `json:"height"`
-		IsAnimated bool   `json:"is_animated"`
-		SetName    string `json:"set_name"`
-		Emoji      string `json:"emoji"`
+		ID         string `boltholdKey:"ID"`
+		CreatedAt  int64
+		UpdatedAt  int64
+		FileID     string
+		Width      int
+		Height     int
+		IsAnimated bool
+		SetName    string
+		Emoji      string
 	}
 
 	Stickers []*Sticker
 
-	UserSticker struct {
-		Model
-		StickerID uint64 `json:"sticker_id"`
-		UserID    uint64 `json:"user_id"`
-		Query     string `json:"query"`
-	}
-
-	UserStickers []*UserSticker
-
 	Photo struct {
-		Model
-		FileID string `json:"file_id"`
-		Width  int    `json:"width"`
-		Height int    `json:"height"`
+		ID        string `boltholdKey:"ID"`
+		CreatedAt int64
+		UpdatedAt int64
+		FileID    string
+		Width     int
+		Height    int
 	}
 
 	Photos []*Photo
 
+	UserSticker struct {
+		ID        uint64 `boltholdKey:"ID"`
+		CreatedAt int64
+		UpdatedAt int64
+		UserID    int
+		StickerID string
+		Query     string
+	}
+
+	UserStickers []*UserSticker
+
 	UserPhoto struct {
-		Model
-		PhotoID uint64 `json:"photo_id"`
-		UserID  uint64 `json:"user_id"`
-		Query   string `json:"query"`
+		ID        uint64 `boltholdKey:"ID"`
+		CreatedAt int64
+		UpdatedAt int64
+		UserID    int
+		PhotoID   string
+		Query     string
 	}
 
 	UserPhotos []*UserPhoto
+
+	InlineResult interface {
+		GetType() string
+		GetID() string
+		GetFileID() string
+		GetUpdatedAt() int64
+	}
 )
 
 func (s *Sticker) InSet() bool {
 	return s.SetName != "" && !strings.EqualFold(s.SetName, common.SetNameUploaded)
 }
+
+func (Sticker) GetType() string { return tg.TypeSticker }
+
+func (s Sticker) GetID() string { return s.ID }
+
+func (s Sticker) GetFileID() string { return s.FileID }
+
+func (s Sticker) GetUpdatedAt() int64 { return s.UpdatedAt }
+
+func (Photo) GetType() string { return tg.TypePhoto }
+
+func (p Photo) GetID() string { return p.ID }
+
+func (p Photo) GetFileID() string { return p.FileID }
+
+func (p Photo) GetUpdatedAt() int64 { return p.UpdatedAt }

@@ -2,48 +2,6 @@
     "language": "en",
     "messages": [
         {
-            "id": "🥳 4 November? It's a @toby3d birthday!\nIf you like this bot, then why not send him a congratulation along with a small gift? This will make him incredibly happy!",
-            "message": "🥳 4 November? It's a @toby3d birthday!\nIf you like this bot, then why not send him a congratulation along with a small gift? This will make him incredibly happy!",
-            "translation": "🥳 4 November? It's a @toby3d birthday!\nIf you like this bot, then why not send him a congratulation along with a small gift? This will make him incredibly happy!",
-            "translatorComment": "Copied from source.",
-            "fuzzy": true
-        },
-        {
-            "id": "☺️ Oh, you missed @toby3d birthday on November 4th!\nIf you like this bot, why not send him some birthday greetings and a little birthday gift? It is not yet too late to make him happy!",
-            "message": "☺️ Oh, you missed @toby3d birthday on November 4th!\nIf you like this bot, why not send him some birthday greetings and a little birthday gift? It is not yet too late to make him happy!",
-            "translation": "☺️ Oh, you missed @toby3d birthday on November 4th!\nIf you like this bot, why not send him some birthday greetings and a little birthday gift? It is not yet too late to make him happy!",
-            "translatorComment": "Copied from source.",
-            "fuzzy": true
-        },
-        {
-            "id": "💸 Make a donation",
-            "message": "💸 Make a donation",
-            "translation": "💸 Make a donation",
-            "translatorComment": "Copied from source.",
-            "fuzzy": true
-        },
-        {
-            "id": "🤝 Use referral links",
-            "message": "🤝 Use referral links",
-            "translation": "🤝 Use referral links",
-            "translatorComment": "Copied from source.",
-            "fuzzy": true
-        },
-        {
-            "id": "🕺 HacktoberFest is here!\n\nIf you are a beginner or already an experienced golang-developer, now is a great time to help improve the quality of the code of this bot. Choose issue to your taste and offer your PR!",
-            "message": "🕺 HacktoberFest is here!\n\nIf you are a beginner or already an experienced golang-developer, now is a great time to help improve the quality of the code of this bot. Choose issue to your taste and offer your PR!",
-            "translation": "🕺 HacktoberFest is here!\n\nIf you are a beginner or already an experienced golang-developer, now is a great time to help improve the quality of the code of this bot. Choose issue to your taste and offer your PR!",
-            "translatorComment": "Copied from source.",
-            "fuzzy": true
-        },
-        {
-            "id": "🔧 Let's hack!",
-            "message": "🔧 Let's hack!",
-            "translation": "🔧 Let's hack!",
-            "translatorComment": "Copied from source.",
-            "fuzzy": true
-        },
-        {
             "id": "👋 Hi {FullName}, I'm {FullName_1}!\nThanks to me, you can collect almost any media content in Telegram without any limits, in any chat via inline mode.",
             "message": "👋 Hi {FullName}, I'm {FullName_1}!\nThanks to me, you can collect almost any media content in Telegram without any limits, in any chat via inline mode.",
             "translation": "👋 Hi {FullName}, I'm {FullName_1}!\nThanks to me, you can collect almost any media content in Telegram without any limits, in any chat via inline mode.",
@@ -201,6 +159,48 @@
                     "expr": "setName"
                 }
             ],
+            "fuzzy": true
+        },
+        {
+            "id": "🥳 4 November? It's a @toby3d birthday!\nIf you like this bot, then why not send him a congratulation along with a small gift? This will make him incredibly happy!",
+            "message": "🥳 4 November? It's a @toby3d birthday!\nIf you like this bot, then why not send him a congratulation along with a small gift? This will make him incredibly happy!",
+            "translation": "🥳 4 November? It's a @toby3d birthday!\nIf you like this bot, then why not send him a congratulation along with a small gift? This will make him incredibly happy!",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "☺️ Oh, you missed @toby3d birthday on November 4th!\nIf you like this bot, why not send him some birthday greetings and a little birthday gift? It is not yet too late to make him happy!",
+            "message": "☺️ Oh, you missed @toby3d birthday on November 4th!\nIf you like this bot, why not send him some birthday greetings and a little birthday gift? It is not yet too late to make him happy!",
+            "translation": "☺️ Oh, you missed @toby3d birthday on November 4th!\nIf you like this bot, why not send him some birthday greetings and a little birthday gift? It is not yet too late to make him happy!",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "💸 Make a donation",
+            "message": "💸 Make a donation",
+            "translation": "💸 Make a donation",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "🤝 Use referral links",
+            "message": "🤝 Use referral links",
+            "translation": "🤝 Use referral links",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "🕺 HacktoberFest is here!\n\nIf you are a beginner or already an experienced golang-developer, now is a great time to help improve the quality of the code of this bot. Choose issue to your taste and offer your PR!",
+            "message": "🕺 HacktoberFest is here!\n\nIf you are a beginner or already an experienced golang-developer, now is a great time to help improve the quality of the code of this bot. Choose issue to your taste and offer your PR!",
+            "translation": "🕺 HacktoberFest is here!\n\nIf you are a beginner or already an experienced golang-developer, now is a great time to help improve the quality of the code of this bot. Choose issue to your taste and offer your PR!",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "🔧 Let's hack!",
+            "message": "🔧 Let's hack!",
+            "translation": "🔧 Let's hack!",
+            "translatorComment": "Copied from source.",
             "fuzzy": true
         }
     ]

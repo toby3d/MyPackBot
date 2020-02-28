@@ -3,31 +3,28 @@ package db
 import (
 	"os"
 
-	bolt "github.com/etcd-io/bbolt"
+	"github.com/timshannon/bolthold"
 	"gitlab.com/toby3d/mypackbot/internal/common"
+	bolt "go.etcd.io/bbolt"
 )
 
-func Open(path string) (*bolt.DB, error) {
-	db, err := bolt.Open(path, os.ModePerm, nil)
+func Open(path string) (*bolthold.Store, error) {
+	db, err := bolthold.Open(path, os.ModePerm, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = AutoMigrate(db); err != nil {
-		_ = db.Close()
-	}
-
-	return db, err
-}
-
-func AutoMigrate(db *bolt.DB) error {
-	return db.Update(func(tx *bolt.Tx) (err error) {
-		for _, bkt := range common.Buckets {
-			if _, err = tx.CreateBucketIfNotExists(bkt); err != nil {
-				return err
+	err = db.Bolt().Update(func(tx *bolt.Tx) error {
+		for i := range common.Buckets {
+			if _, err := tx.CreateBucketIfNotExists(common.Buckets[i]); err == nil {
+				continue
 			}
+
+			return err
 		}
 
 		return nil
 	})
+
+	return db, err
 }

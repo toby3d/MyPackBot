@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"time"
+
 	"gitlab.com/toby3d/mypackbot/internal/common"
 	"gitlab.com/toby3d/mypackbot/internal/model"
 	tg "gitlab.com/toby3d/telegram"
@@ -13,16 +15,15 @@ func (h *Handler) GetPhotoKeyboard(ctx *model.Context) *tg.InlineKeyboardMarkup 
 	}
 
 	p := ctx.Get("printer").(*message.Printer)
-	ctx.UserPhoto = h.usersPhotos.Get(&model.UserPhoto{
+	userPhoto := h.usersPhotos.Get(&model.UserPhoto{
 		UserID:  ctx.User.ID,
 		PhotoID: ctx.Photo.ID,
 	})
-
 	markup := tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow(
 		tg.NewInlineKeyboardButton(p.Sprintf("📥 Import this photo"), common.DataAdd),
 	))
 
-	if ctx.UserPhoto != nil {
+	if userPhoto != nil {
 		markup = tg.NewInlineKeyboardMarkup(tg.NewInlineKeyboardRow(
 			tg.NewInlineKeyboardButton(p.Sprintf("🔥 Remove this photo"), common.DataDel),
 		))
@@ -32,11 +33,13 @@ func (h *Handler) GetPhotoKeyboard(ctx *model.Context) *tg.InlineKeyboardMarkup 
 }
 
 func (h *Handler) CommandAddPhoto(ctx *model.Context) (err error) {
-	if ctx.Photo == nil || ctx.UserPhoto != nil {
+	if ctx.Photo == nil || ctx.HasPhoto {
 		return nil
 	}
 
+	now := time.Now().UTC().Unix()
 	userPhoto := new(model.UserPhoto)
+	userPhoto.CreatedAt, userPhoto.UpdatedAt = now, now
 	userPhoto.UserID = ctx.User.ID
 	userPhoto.PhotoID = ctx.Photo.ID
 
@@ -54,7 +57,7 @@ func (h *Handler) CommandEditPhoto(ctx *model.Context) (err error) {
 
 	if !ctx.Request.Message.HasCommandArgument() {
 		p := ctx.Get("printer").(*message.Printer)
-		reply := tg.NewMessage(ctx.User.UserID, p.Sprintf("💡 Add any text and/or emoji(s) as an argument "+
+		reply := tg.NewMessage(int64(ctx.User.ID), p.Sprintf("💡 Add any text and/or emoji(s) as an argument "+
 			"of this command to change its search properties."))
 		reply.ReplyMarkup = tg.NewReplyKeyboardRemove(false)
 		reply.ParseMode = tg.ParseModeMarkdownV2
@@ -65,22 +68,27 @@ func (h *Handler) CommandEditPhoto(ctx *model.Context) (err error) {
 		return err
 	}
 
-	if ctx.UserPhoto == nil {
+	if !ctx.HasPhoto {
 		if err = h.CommandAddPhoto(ctx); err != nil {
 			return err
 		}
 	}
 
-	ctx.UserPhoto.UpdatedAt = ctx.Request.Message.Date
-	ctx.UserPhoto.Query = ctx.Request.Message.CommandArgument()
-
-	return h.usersPhotos.Update(ctx.UserPhoto)
+	return h.usersPhotos.Update(&model.UserPhoto{
+		UserID:    ctx.User.ID,
+		PhotoID:   ctx.Photo.ID,
+		UpdatedAt: ctx.Request.Message.Date,
+		Query:     ctx.Request.Message.CommandArgument(),
+	})
 }
 
 func (h *Handler) CommandDelPhoto(ctx *model.Context) (err error) {
-	if ctx.Photo == nil || ctx.UserPhoto == nil {
+	if ctx.Photo == nil || !ctx.HasPhoto {
 		return nil
 	}
 
-	return h.usersPhotos.Remove(ctx.UserPhoto)
+	return h.usersPhotos.Remove(&model.UserPhoto{
+		UserID:  ctx.User.ID,
+		PhotoID: ctx.Photo.ID,
+	})
 }
